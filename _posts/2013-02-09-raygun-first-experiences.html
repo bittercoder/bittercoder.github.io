@@ -22,16 +22,16 @@ tags:
 - enterprisetester
 comments: []
 ---
-<p>So I had a spare half-hour this weekend, and thought I would take the time to finally plug in <a href="http:&#47;&#47;raygun.io&#47;">Mindscape's Raygun<&#47;a> service to <a href="http:&#47;&#47;www.enterprisetester.com&#47;">Enterprise Tester<&#47;a>.<br />
-<br&#47;><br />
-<img src="http:&#47;&#47;blog.bittercoder.com&#47;wp-content&#47;uploads&#47;2013&#47;02&#47;RaygunPlusEnterpriseTester.png" alt="" title="RaygunPlusEnterpriseTester" class="aligncenter size-full wp-image-83490265" &#47;><br />
-<br&#47;><br />
+<p>So I had a spare half-hour this weekend, and thought I would take the time to finally plug in <a href="http://raygun.io/">Mindscape's Raygun</a> service to <a href="http://www.enterprisetester.com/">Enterprise Tester</a>.<br />
+<br/><br />
+<img src="http://blog.bittercoder.com/wp-content/uploads/2013/02/RaygunPlusEnterpriseTester.png" alt="" title="RaygunPlusEnterpriseTester" class="aligncenter size-full wp-image-83490265" /><br />
+<br/><br />
 For this I decided to implement it as a plugin to Enterprise Tester, as it doesn't really make sense as a core feature for an application which is deployed both on-premise and hosted.</p>
 <p>For Enterprise Tester, many of the exceptions within the application are not unhandled, but logged as ERROR level events in log4net with an associated exception object (especially on background threads), So for the plugin implementation I ended up:</p>
 <ul>
-<li>Building a simple log4net appender that then logs to Raygun for ERROR and greater level events when an exception is present.<&#47;li>
-<li>Building a simple listener for the app-specific "UnahandledException" event (this is where failures to start ET up, or fatal errors causing the shutdown of ET would crop-up, if the log4net configuration etc. has yet to be loaded).<&#47;li>
-<li>Building a wrapper for the raygun message builder, that encapsulates adding some user custom data to the message being built - in this case containing details of the current user and their license entitlement (making it easy to identify the customer associated with the exception).<&#47;li><br />
-<&#47;ul></p>
-<p>The whole process was incredibly simple, using the <a href="https:&#47;&#47;github.com&#47;MindscapeHQ&#47;raygun4net&#47;blob&#47;master&#47;Mindscape.Raygun4Net&#47;RaygunMessageBuilder.cs">RaygunMessageBuilder class<&#47;a> really simplifies the process of building up a suitable raygun message to fire at the service, and is a great starting point for creating a more application-specific message builder.</p>
-<p>As I mentioned, this is built as a stand-alone plugin (not bundled with Enterprise Tester) - so if you want to get it, the source is available on the <a href="https:&#47;&#47;github.com&#47;catch-software&#47;EnterpriseTester-API-Examples&#47;tree&#47;master&#47;CSharp&#47;RaygunPlugin">Enterprise Tester API examples project on github<&#47;a>, and if you have any questions about it, please log them as issues on the github project.</p>
+<li>Building a simple log4net appender that then logs to Raygun for ERROR and greater level events when an exception is present.</li>
+<li>Building a simple listener for the app-specific "UnahandledException" event (this is where failures to start ET up, or fatal errors causing the shutdown of ET would crop-up, if the log4net configuration etc. has yet to be loaded).</li>
+<li>Building a wrapper for the raygun message builder, that encapsulates adding some user custom data to the message being built - in this case containing details of the current user and their license entitlement (making it easy to identify the customer associated with the exception).</li><br />
+</ul></p>
+<p>The whole process was incredibly simple, using the <a href="https://github.com/MindscapeHQ/raygun4net/blob/master/Mindscape.Raygun4Net/RaygunMessageBuilder.cs">RaygunMessageBuilder class</a> really simplifies the process of building up a suitable raygun message to fire at the service, and is a great starting point for creating a more application-specific message builder.</p>
+<p>As I mentioned, this is built as a stand-alone plugin (not bundled with Enterprise Tester) - so if you want to get it, the source is available on the <a href="https://github.com/catch-software/EnterpriseTester-API-Examples/tree/master/CSharp/RaygunPlugin">Enterprise Tester API examples project on github</a>, and if you have any questions about it, please log them as issues on the github project.</p>

@@ -20,47 +20,47 @@ categories:
 tags: []
 comments: []
 ---
-<p><a href="http:&#47;&#47;www.enterprisetester.com"><img src="http:&#47;&#47;blog.bittercoder.com&#47;wp-content&#47;uploads&#47;2012&#47;08&#47;et_logo_small.png" alt="" title="et_logo_small" class="alignnone size-full wp-image-83489837" &#47;><&#47;a></p>
-<p><br&#47;></p>
-<p>For the past 2+ years, a great deal of my energy has been spent on an application called <a href="http:&#47;&#47;www.enterprisetester.com">Enterprise Tester<&#47;a>.</p>
-<p>Enterprise Tester is a Quality Management tool developed by <a href="http:&#47;&#47;www.catchsoftware.com">Catch Software<&#47;a> here in Auckland, New Zealand - but used around the world from small to very large QA teams.  </p>
-<h2>Codebase<&#47;h2></p>
+<p><a href="http://www.enterprisetester.com"><img src="http://blog.bittercoder.com/wp-content/uploads/2012/08/et_logo_small.png" alt="" title="et_logo_small" class="alignnone size-full wp-image-83489837" /></a></p>
+<p><br/></p>
+<p>For the past 2+ years, a great deal of my energy has been spent on an application called <a href="http://www.enterprisetester.com">Enterprise Tester</a>.</p>
+<p>Enterprise Tester is a Quality Management tool developed by <a href="http://www.catchsoftware.com">Catch Software</a> here in Auckland, New Zealand - but used around the world from small to very large QA teams.  </p>
+<h2>Codebase</h2></p>
 <p>The application is developed in .Net and currently consists of 4,865 source files and 491,809 lines of code (including tests, comments and blank lines) - and currently targets the .Net Framework 4.0.</p>
 <p>The client-side code is mostly JavaScript, and weighs in at 257 files and 174,785 lines of application-specific code (excluding 3rd party libraries such as jquery).</p>
-<h2>What is it?<&#47;h2></p>
-<p>Quality Management Tools (more traditionally known as Test Management Tools) are applications or suites of applications used by QA teams to ensure a level of quality in a product (often software). Using a combination of manual testing and automated testing (to determine the level of quality&#47;maintain a level of quality) and then relating those tests etc. back to features (requirements&#47;user stories&#47;epics&#47;use cases) to then establish the level of both coverage and impact&#47;risk associated with a change.</p>
-<p>Probably the most familiar tool in this category to many people, especially if you have been around for a while is <a href="http:&#47;&#47;en.wikipedia.org&#47;wiki&#47;HP_Quality_Center">HP Quality Center<&#47;a> (Originally Mercury Quality Center).</p>
-<h2>What's next<&#47;h2></p>
+<h2>What is it?</h2></p>
+<p>Quality Management Tools (more traditionally known as Test Management Tools) are applications or suites of applications used by QA teams to ensure a level of quality in a product (often software). Using a combination of manual testing and automated testing (to determine the level of quality/maintain a level of quality) and then relating those tests etc. back to features (requirements/user stories/epics/use cases) to then establish the level of both coverage and impact/risk associated with a change.</p>
+<p>Probably the most familiar tool in this category to many people, especially if you have been around for a while is <a href="http://en.wikipedia.org/wiki/HP_Quality_Center">HP Quality Center</a> (Originally Mercury Quality Center).</p>
+<h2>What's next</h2></p>
 <p>Over the next few weeks I'm going to looking at some of the more Interesting features of Enterprise Tester (from a technical perspective) that I have been involved in implementing, and taking a bit of deep dive on their implementation "under the hood".</p>
-<p>This first thing I plan to review is the recent introduction of <a href="http:&#47;&#47;www.asp.net&#47;web-api">ASP.Net WebAPI<&#47;a> to implement our REST API, which hopefully should be interesting to anyone working with long-lived codebases &#47; brown-field applications where they are looking to retro-fit an API.</p>
+<p>This first thing I plan to review is the recent introduction of <a href="http://www.asp.net/web-api">ASP.Net WebAPI</a> to implement our REST API, which hopefully should be interesting to anyone working with long-lived codebases / brown-field applications where they are looking to retro-fit an API.</p>
 <p>But before diving into implementation I thought it might be worth providing some context around the products overall structure.</p>
-<h2>Structure<&#47;h2></p>
+<h2>Structure</h2></p>
 <p>Currently the implementation consists of a:</p>
 <ul>
-<li>Core Web Project<&#47;li>
-<li>2 Core Assemblies (EnterpriseTester.Common and EnterpriseTester.Core)<&#47;li>
-<li>A set of plugins, which have&nbsp;inter-dependencies&nbsp;between each other (generally each plugin is a single assembly).<&#47;li>
-<li>Everything is wired together by an IoC container (Castle Windsor) + MEF (for discovery and loading of the "plugin installers" that exist in each plugin assembly).<&#47;li>
-<li>We make heavy use of a concept called modules, which predates MEF (did I mention brown fields?) - A module is an interface which inherits from this Interface:<&#47;li><br />
-<&#47;ul></p>
+<li>Core Web Project</li>
+<li>2 Core Assemblies (EnterpriseTester.Common and EnterpriseTester.Core)</li>
+<li>A set of plugins, which have&nbsp;inter-dependencies&nbsp;between each other (generally each plugin is a single assembly).</li>
+<li>Everything is wired together by an IoC container (Castle Windsor) + MEF (for discovery and loading of the "plugin installers" that exist in each plugin assembly).</li>
+<li>We make heavy use of a concept called modules, which predates MEF (did I mention brown fields?) - A module is an interface which inherits from this Interface:</li><br />
+</ul></p>
 <pre>public interface IModule<br />
 {<br />
     bool IsEnabled { get; }<br />
     void SetEnabled(bool isEnabled);<br />
-}<&#47;pre></p>
+}</pre></p>
 <p>There is then a matching interface that components can implement which allows them be "aware" of modules being registered, or unregistered.</p>
 <pre>public interface IModuleAware<br />
 {<br />
     void ModuleRegistered(TService instance);<br />
     void ModuleUnregistered(TService instance);<br />
-}<&#47;pre></p>
+}</pre></p>
 <p>This basic mechanism is then used to compose the features of the application - so for example we have an interface that toolbar items implement in the application:</p>
 <pre>public interface IToolbarItemDefinition : IModule<br />
 {<br />
     int Order { get; }<br />
     bool Supports(IQueryContext context);<br />
     IToolbarItemPresenter GetPresenter();<br />
-}<&#47;pre></p>
+}</pre></p>
 <p>And we then have a class which implements a registry for these toolbar "modules" which collects them, and provides in this case a way to get back the toolbar items that a relevant to a kind of query being executed (these are toolbar items that belong to a grid of search results).</p>
 <pre>public class ToolbarItemDefinitionRegistry : IModuleAware, IToolbarItemDefinitionRegistry<br />
 {<br />
@@ -81,26 +81,26 @@ comments: []
     {<br />
         return _definitions.Where(def => def.Supports(context)).OrderBy(def => def.Order).ToList();<br />
     }<br />
-}<&#47;pre></p>
+}</pre></p>
 <p>This approach to modules is generally how individual bits of functionality have been kept insulated and allowed for feature switching at run time as well.  A Facility within our IoC container then takes care of detecting when a module has all it's dependencies satisfied and can be created and added to the module aware component.</p>
-<p>This should be familiar to anyone working with MEF Today where you can use ImportMany to achieve something similar - the only difference in this case is that our implementation allows for control over if a module can be loaded (so we can store enabled&#47;disabled state permanently for each module across application restarts, or prevent a module from loading if some requirement is not met i.e. Licensing).</p>
+<p>This should be familiar to anyone working with MEF Today where you can use ImportMany to achieve something similar - the only difference in this case is that our implementation allows for control over if a module can be loaded (so we can store enabled/disabled state permanently for each module across application restarts, or prevent a module from loading if some requirement is not met i.e. Licensing).</p>
 <p>So here we can see a list of all the plugins which are currently loaded - at the plugin level we manage both dependencies between plugins (so for example we have an Automated testing plugin, that then provides the framework for automated test tool adapter plugins to load, such as Selenium, XUnit etc.) and Licensing concerns (so not loading plugins, if a valid license for that plugin does not exist or has expired).</p>
-<p><br&#47;></p>
-<p><a href="http:&#47;&#47;blog.bittercoder.com&#47;wp-content&#47;uploads&#47;2012&#47;08&#47;Plugins.png"><img src="http:&#47;&#47;blog.bittercoder.com&#47;wp-content&#47;uploads&#47;2012&#47;08&#47;Plugins.png" alt="" title="Plugins" class="alignnone size-full wp-image-83489828" &#47;><&#47;a></p>
-<p><br&#47;></p>
-<p>And you can also manage which individual modules are enabled&#47;disabled - which is useful if you want to soft-launch new features in the product, or provide a mechanism for Administrators to remove functionality from within the application.</p>
-<p><br&#47;></p>
-<p><a href="http:&#47;&#47;blog.bittercoder.com&#47;wp-content&#47;uploads&#47;2012&#47;08&#47;Modules.png"><img src="http:&#47;&#47;blog.bittercoder.com&#47;wp-content&#47;uploads&#47;2012&#47;08&#47;Modules.png" alt="" title="Modules" class="alignnone size-full wp-image-83489829" &#47;><&#47;a></p>
-<p><br&#47;></p>
-<h2>Storage<&#47;h2></p>
+<p><br/></p>
+<p><a href="http://blog.bittercoder.com/wp-content/uploads/2012/08/Plugins.png"><img src="http://blog.bittercoder.com/wp-content/uploads/2012/08/Plugins.png" alt="" title="Plugins" class="alignnone size-full wp-image-83489828" /></a></p>
+<p><br/></p>
+<p>And you can also manage which individual modules are enabled/disabled - which is useful if you want to soft-launch new features in the product, or provide a mechanism for Administrators to remove functionality from within the application.</p>
+<p><br/></p>
+<p><a href="http://blog.bittercoder.com/wp-content/uploads/2012/08/Modules.png"><img src="http://blog.bittercoder.com/wp-content/uploads/2012/08/Modules.png" alt="" title="Modules" class="alignnone size-full wp-image-83489829" /></a></p>
+<p><br/></p>
+<h2>Storage</h2></p>
 <p>The application is fairly traditional with data storage being to Sql Server, MySql, PostgreSql or Oracle - the application uses an ORM - Castle Active Record (NHibernate) - to handle persistence of data to the database.</p>
 <p>Searching of data within the application is handled via an application-specific search and query implementation built on top of Lucene.</p>
 <p>I'll hopefully also cover some of the implementation specifics there in a future post.</p>
-<h2>Front-end<&#47;h2></p>
-<p>The front-end of the application is built using <a href="http:&#47;&#47;www.sencha.com&#47;products&#47;extjs&#47;">Sencha's ExtJS<&#47;a> and is for the most part implemented as a single page application - there is a plugin implementation for the front-end UI as well, and a simple pub&#47;sub implementation is used to allow different parts of the application to respond to various events.  </p>
+<h2>Front-end</h2></p>
+<p>The front-end of the application is built using <a href="http://www.sencha.com/products/extjs/">Sencha's ExtJS</a> and is for the most part implemented as a single page application - there is a plugin implementation for the front-end UI as well, and a simple pub/sub implementation is used to allow different parts of the application to respond to various events.  </p>
 <p>Communication of the client-side to the server is almost exclusively performed via JSON.</p>
-<h2>Disclaimer<&#47;h2></p>
-<p>Though I work for Catch Software, I'm publishing this series on my personal blog - so any opinions expressed here are strictly my own and not those of Catch Limited New Zealand (and certainly are likely to fall out of date after publishing this series) - for the official word on Enterprise Tester, please instead check out the company blogs - <a href="http:&#47;&#47;blogs.catchsoftware.com">http:&#47;&#47;blogs.catchsoftware.com<&#47;a> or the website <a href="http:&#47;&#47;www.enterprisetester.com">http&#47;&#47;www.enterprisetester.com<&#47;a></p>
-<h2>Catch Software is hiring<&#47;h2></p>
-<p><a href="http:&#47;&#47;www.catchsoftware.com&#47;">Catch Software<&#47;a> is needing to expand the development team and are looking for a passionate senior developer, or highly motivated intermediate developer looking to move into a senior position.</p>
-<p>You would be working on the Enterprise Tester application (as well as other existing and new products Catch Software are developing) alongside myself and the rest of the great Catch Software team - <a href="http:&#47;&#47;bit.ly&#47;catchdeveloperjob">you can find more about the job offer here<&#47;a>.</p>
+<h2>Disclaimer</h2></p>
+<p>Though I work for Catch Software, I'm publishing this series on my personal blog - so any opinions expressed here are strictly my own and not those of Catch Limited New Zealand (and certainly are likely to fall out of date after publishing this series) - for the official word on Enterprise Tester, please instead check out the company blogs - <a href="http://blogs.catchsoftware.com">http://blogs.catchsoftware.com</a> or the website <a href="http://www.enterprisetester.com">http//www.enterprisetester.com</a></p>
+<h2>Catch Software is hiring</h2></p>
+<p><a href="http://www.catchsoftware.com/">Catch Software</a> is needing to expand the development team and are looking for a passionate senior developer, or highly motivated intermediate developer looking to move into a senior position.</p>
+<p>You would be working on the Enterprise Tester application (as well as other existing and new products Catch Software are developing) alongside myself and the rest of the great Catch Software team - <a href="http://bit.ly/catchdeveloperjob">you can find more about the job offer here</a>.</p>

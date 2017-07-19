@@ -22,17 +22,17 @@ comments: []
 ---
 <p>Eventually most applications develop some mechanism for launching and tracking the progress of a task running asynchronously.</p>
 <p>In Enterprise Tester this is normally seen ss a progress dialog:</p>
-<p><img src="http:&#47;&#47;blog.bittercoder.com&#47;wp-content&#47;uploads&#47;2012&#47;08&#47;ProgressDialog.png" alt="" title="ProgressDialog" class="alignnone size-full wp-image-83489967" &#47;></p>
+<p><img src="http://blog.bittercoder.com/wp-content/uploads/2012/08/ProgressDialog.png" alt="" title="ProgressDialog" class="alignnone size-full wp-image-83489967" /></p>
 <p>In the application this was handled in more then one way, by different parts of the application, but through the API we saw an opportunity to unite these different methods.</p>
-<h2>API as plaster (spackle for Americans)<&#47;h2></p>
+<h2>API as plaster (spackle for Americans)</h2></p>
 <p>Applications over time grow and morph in often unforeseen ways, heading in directions you never originally imagined (an incidentally this is part of the reason why our jobs as developers is so much fun).</p>
 <p>The result of this is that you can often end up with multiple features over time, that at first seem very different, but at some point a perception-shift occurs and you realize in fact they are variations on the same feature.</p>
 <p>At this point there's a strong desire to try and rectify the issue - but your faced with some problems:</p>
 <ul>
-<li>It's going to involve lots of work to align everything together.<&#47;li>
-<li>Unless you plan to build further on this feature, it's difficult to justify any increase in value to the business.<&#47;li>
-<li>If you are somewhat pragmatic, you may struggle to justify it internally as well.<&#47;li><br />
-<&#47;ul></p>
+<li>It's going to involve lots of work to align everything together.</li>
+<li>Unless you plan to build further on this feature, it's difficult to justify any increase in value to the business.</li>
+<li>If you are somewhat pragmatic, you may struggle to justify it internally as well.</li><br />
+</ul></p>
 <p>But as an alternative to addressing the problem from the bottom up, when adding an API to your product, you also have the option of addressing it an API level - and having the API take care of then delegating to find the appropriate implementation.</p>
 <p>This is where the API then behaves as plaster, smoothing over the cracks and small imperfections in your implementation as it is exposed to the world of potential 3rd party developers.</p>
 <p>But enough of the hypothetical - let's take a look at what we did for background tasks.</p>
@@ -46,7 +46,7 @@ public interface IJobHandler : IModule<br />
     ProgressReportDTO GetProgressReport(string jobId);<br />
     bool CanHandle(string jobId);<br />
 }<br />
-<&#47;pre></p>
+</pre></p>
 <p>This allowed a thin adapter to be created over the top of each background task implementation.</p>
 <p>Next - in each implementation of this interface we created a composite key (under the hood most of the task implementations used a GUID Identifier for tracking the progress of the job) which could be used to differentiate the ID of the job from other handlers:</p>
 <pre>
@@ -62,15 +62,15 @@ public bool CanHandle(string jobId)<br />
     }</p>
 <p>    return true;<br />
 }<br />
-<&#47;pre></p>
+</pre></p>
 <p>The key prefix also has the bonus of allowing our background tasks to be identified by something a little more meaningful then a GUID i.e. "reindex_task_B55C4A97-9731-4907-AF8F-13BB10A01C3A" - a small change, but a pleasant one.</p>
 <p>Last of all, each job implementation wraps the progress results from the underlying implementation , mapping them into the a common DTO.</p>
 <pre>
 IDictionary<string, object> AdditionalProperties { get; }<br />
 IList<LinkModel> Links { get; }<br />
-<&#47;pre></p>
+</pre></p>
 <p>Like we do with other models returned from the API, we leverage dictionaries and JSON rewriting to handle adding additional information to the progress results.</p>
-<h2>Controller<&#47;h2></p>
+<h2>Controller</h2></p>
 <p>Just for the sake of completeness, here is the controller action we now use for creating a task:</p>
 <pre>
 public HttpResponseMessage Post(CreateBackgroundTask dto)<br />
@@ -80,10 +80,10 @@ public HttpResponseMessage Post(CreateBackgroundTask dto)<br />
 <p>    ProgressReportDTO reportDto = handler.GetProgressReport(jobId);</p>
 <p>    ViewBackgroundTaskModel wrapped = _viewModelMapper.Map<ProgressReportDTO, ViewBackgroundTaskModel>(reportDto, Expands);</p>
 <p>    HttpResponseMessage response = Request.CreateResponse(HttpStatusCode.Created, wrapped);</p>
-<p>    response.Headers.Location = new Uri(_urlTransformer.ToAbsolute(string.Format("~&#47;api&#47;backgroundtask&#47;{0}", jobId)));</p>
+<p>    response.Headers.Location = new Uri(_urlTransformer.ToAbsolute(string.Format("~/api/backgroundtask/{0}", jobId)));</p>
 <p>    return response;<br />
 }<br />
-<&#47;pre></p>
+</pre></p>
 <p>When creating a new background task, we might get a result like this for example:</p>
 <pre>
 {<br />
@@ -94,9 +94,9 @@ public HttpResponseMessage Post(CreateBackgroundTask dto)<br />
   "ProgressInPercent": 0.0,<br />
   "Id": "ticketlinking_cba3035a-bf63-4006-89b1-b291aaac0460",<br />
   "Message": null,<br />
-  "Self": "http:&#47;&#47;localhost&#47;api&#47;backgroundtask&#47;ticketlinking_cba3035a-bf63-4006-89b1-b291aaac0460"<br />
+  "Self": "http://localhost/api/backgroundtask/ticketlinking_cba3035a-bf63-4006-89b1-b291aaac0460"<br />
 }<br />
-<&#47;pre></p>
+</pre></p>
 <p>We can make additional GET requests to the Self URI to get progress updates, upon completion the response contains additional information (including in this case a link to a new resource that was created as part of the execution of this background task).</p>
 <pre>
 {<br />
@@ -107,22 +107,22 @@ public HttpResponseMessage Post(CreateBackgroundTask dto)<br />
   "Id": "ticketlinking_9b01796c-a9ae-40cb-a6ad-a802346c0c33",<br />
   "Message": "Completed",<br />
   "IncidentId": "029b2c43-38be-4c94-b547-a0a50185fb9e",<br />
-  "Self": "http:&#47;&#47;localhost&#47;api&#47;backgroundtask&#47;ticketlinking_9b01796c-a9ae-40cb-a6ad-a802346c0c33",<br />
+  "Self": "http://localhost/api/backgroundtask/ticketlinking_9b01796c-a9ae-40cb-a6ad-a802346c0c33",<br />
   "Links": [<br />
     {<br />
-      "Href": "http:&#47;&#47;localhost&#47;api&#47;incident&#47;029b2c43-38be-4c94-b547-a0a50185fb9e",<br />
+      "Href": "http://localhost/api/incident/029b2c43-38be-4c94-b547-a0a50185fb9e",<br />
       "Rel": "Incident"<br />
     }<br />
   ]<br />
 }<br />
-<&#47;pre></p>
-<h2>What about SignalR<&#47;h2></p>
-<p>Currently getting progress for a background task is done by polling the resource URL - we did investigate leveraging <a href="http:&#47;&#47;signalr.net&#47;">SignalR <&#47;a>to make this work in a more real-time fashion, but struck a few issues:</p>
+</pre></p>
+<h2>What about SignalR</h2></p>
+<p>Currently getting progress for a background task is done by polling the resource URL - we did investigate leveraging <a href="http://signalr.net/">SignalR </a>to make this work in a more real-time fashion, but struck a few issues:</p>
 <ul>
-<li>Internally the underlying sources of the progress information didn't support progress change events - so we would still be having to poll internally.<&#47;li>
-<li>Many of our clients would still end up polling because it's simpler to implement<&#47;li>
-<li>The SignalR + WebAPI story wasn't very well developed - we did review the <a href="https:&#47;&#47;github.com&#47;thinktecture&#47;SignalR.WebApi&#47;blob&#47;master&#47;SignalR.AspNetWebApi&#47;SignalRMessageHandler.cs">SignalR.AspNetWebApi project on github<&#47;a>, but it wasn't being updated at the same pace as the ASP.Net Web API preview releases were hitting github.<&#47;li><br />
-<&#47;ul></p>
-<p>We also investigated some other ideas - including <a href="http:&#47;&#47;www.strathweb.com&#47;2012&#47;05&#47;native-html5-push-notifications-with-asp-net-web-api-and-knockout-js&#47;" target="_blank">PushStreamContent<&#47;a> Which is now really easy to implement in the RTM build of WebAPI<&#47;a> or trying to leverage <a href="https:&#47;&#47;github.com&#47;NuGet&#47;WebBackgrounder" target="_blank">WebBackgrounder<&#47;a> (but that didn't really fit our needs).</p>
-<h2>Next<&#47;h2></p>
-<p><a href="&#47;?p=83489985">Next in part 7 we are going to take a look at the approach we took to testing our API (including end-to-end testing and Approval Tests).<&#47;a></p>
+<li>Internally the underlying sources of the progress information didn't support progress change events - so we would still be having to poll internally.</li>
+<li>Many of our clients would still end up polling because it's simpler to implement</li>
+<li>The SignalR + WebAPI story wasn't very well developed - we did review the <a href="https://github.com/thinktecture/SignalR.WebApi/blob/master/SignalR.AspNetWebApi/SignalRMessageHandler.cs">SignalR.AspNetWebApi project on github</a>, but it wasn't being updated at the same pace as the ASP.Net Web API preview releases were hitting github.</li><br />
+</ul></p>
+<p>We also investigated some other ideas - including <a href="http://www.strathweb.com/2012/05/native-html5-push-notifications-with-asp-net-web-api-and-knockout-js/" target="_blank">PushStreamContent</a> Which is now really easy to implement in the RTM build of WebAPI</a> or trying to leverage <a href="https://github.com/NuGet/WebBackgrounder" target="_blank">WebBackgrounder</a> (but that didn't really fit our needs).</p>
+<h2>Next</h2></p>
+<p><a href="/?p=83489985">Next in part 7 we are going to take a look at the approach we took to testing our API (including end-to-end testing and Approval Tests).</a></p>

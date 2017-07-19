@@ -22,105 +22,105 @@ tags:
 - api
 comments: []
 ---
-<h2>Demonstrate all the things!<&#47;h2><br />
+<h2>Demonstrate all the things!</h2><br />
 As you might have noticed, I have been doing a bit of work on API's in the past couple of months - and one of the things that has evolved out of this work, is my approach to demonstrating an API to an audience of developers and non-developers alike, for example during meetings to discuss progress etc.</p>
 <p>I have tried a few things, including cURL, Fiddler, Javascript (with CORS) etc. in the past - but have settled on the combination of google chrome + a chrome browser add-in called "Advanced REST client", available from the chrome store for free:</p>
-<p style="text-align: center;"><a href="https:&#47;&#47;chrome.google.com&#47;webstore&#47;detail&#47;hgmloofddffdnphfgcellkdfbfbjeloo" target="_blank"><img class="size-full wp-image-83490130 aligncenter" style="border: 1px solid black;" title="AdvancedRestClient" src="http:&#47;&#47;blog.bittercoder.com&#47;wp-content&#47;uploads&#47;2012&#47;09&#47;AdvancedRestClient1.png" alt="" width="182" height="151" &#47;><&#47;a><&#47;p></p>
-<h2>Quick Tour<&#47;h2></p>
+<p style="text-align: center;"><a href="https://chrome.google.com/webstore/detail/hgmloofddffdnphfgcellkdfbfbjeloo" target="_blank"><img class="size-full wp-image-83490130 aligncenter" style="border: 1px solid black;" title="AdvancedRestClient" src="http://blog.bittercoder.com/wp-content/uploads/2012/09/AdvancedRestClient1.png" alt="" width="182" height="151" /></a></p></p>
+<h2>Quick Tour</h2></p>
 <p>It's a pretty basic tool (also why I like it..)</p>
 <p>The main interface is geared towards sending requests:</p>
-<p><a href="http:&#47;&#47;blog.bittercoder.com&#47;wp-content&#47;uploads&#47;2012&#47;09&#47;Client.png"><img class="aligncenter size-full wp-image-83490141" title="Client" src="http:&#47;&#47;blog.bittercoder.com&#47;wp-content&#47;uploads&#47;2012&#47;09&#47;Client.png" style="border: 1px solid black;margin-bottom: 5px;" alt="" &#47;><&#47;a></p>
+<p><a href="http://blog.bittercoder.com/wp-content/uploads/2012/09/Client.png"><img class="aligncenter size-full wp-image-83490141" title="Client" src="http://blog.bittercoder.com/wp-content/uploads/2012/09/Client.png" style="border: 1px solid black;margin-bottom: 5px;" alt="" /></a></p>
 <p>And here we can see the list of previously saved request (this will include the raw request body, headers etc.)</p>
-<p><a href="http:&#47;&#47;blog.bittercoder.com&#47;wp-content&#47;uploads&#47;2012&#47;09&#47;SavedRequests.png"><img src="http:&#47;&#47;blog.bittercoder.com&#47;wp-content&#47;uploads&#47;2012&#47;09&#47;SavedRequests-1024x302.png" alt="" title="SavedRequests" class="aligncenter size-large wp-image-83490143" style="border: 1px solid black;margin-bottom: 5px;" &#47;><&#47;a></p>
+<p><a href="http://blog.bittercoder.com/wp-content/uploads/2012/09/SavedRequests.png"><img src="http://blog.bittercoder.com/wp-content/uploads/2012/09/SavedRequests-1024x302.png" alt="" title="SavedRequests" class="aligncenter size-large wp-image-83490143" style="border: 1px solid black;margin-bottom: 5px;" /></a></p>
 <p>And here an example of a POST request, with a JSON body:</p>
-<p><a href="http:&#47;&#47;blog.bittercoder.com&#47;wp-content&#47;uploads&#47;2012&#47;09&#47;PostRequest.png"><img src="http:&#47;&#47;blog.bittercoder.com&#47;wp-content&#47;uploads&#47;2012&#47;09&#47;PostRequest-1024x482.png" alt="" title="PostRequest" class="aligncenter size-large wp-image-83490144" style="border: 1px solid black;margin-bottom: 5px;"  &#47;><&#47;a></p>
+<p><a href="http://blog.bittercoder.com/wp-content/uploads/2012/09/PostRequest.png"><img src="http://blog.bittercoder.com/wp-content/uploads/2012/09/PostRequest-1024x482.png" alt="" title="PostRequest" class="aligncenter size-large wp-image-83490144" style="border: 1px solid black;margin-bottom: 5px;"  /></a></p>
 <p>So to recap, advantages this tool has over some of the alternatives I have tried:</p>
 <ul>
-<li>Simple<&#47;li>
-<li>Does not require admin access, or a specific Operating System (like say Fiddler) - though still no support for the chrome store on iPad unfortunately.<&#47;li>
-<li>Pretty-printing of JSON results (but still being able to access the raw response)<&#47;li>
-<li>History of requests (persisted between sessions transparently)<&#47;li>
-<li>"linkifying" hyperlinks in responses<&#47;li>
-<li>Ability to save requests (and keyboard shortcuts for features like Save)<&#47;li>
-<li>Handles form encoding and mixed&#47;multipart file uploads<&#47;li><br />
-<&#47;ul></p>
+<li>Simple</li>
+<li>Does not require admin access, or a specific Operating System (like say Fiddler) - though still no support for the chrome store on iPad unfortunately.</li>
+<li>Pretty-printing of JSON results (but still being able to access the raw response)</li>
+<li>History of requests (persisted between sessions transparently)</li>
+<li>"linkifying" hyperlinks in responses</li>
+<li>Ability to save requests (and keyboard shortcuts for features like Save)</li>
+<li>Handles form encoding and mixed/multipart file uploads</li><br />
+</ul></p>
 <p>And of course, like any tool, it's not perfect - in particular:</p>
 <ul>
-<li>Sometimes automatic hyperlinking in responses does not work<&#47;li>
-<li>It would be nice if you could click on a link in a response, and have it update the URL text field<&#47;li>
-<li>Basic auth doesn't work using Username:password in URL most of the time, you need to assign a header (which requires manually base64 encoding the username&#47;password pair).<&#47;li><br />
-<&#47;ul></p>
+<li>Sometimes automatic hyperlinking in responses does not work</li>
+<li>It would be nice if you could click on a link in a response, and have it update the URL text field</li>
+<li>Basic auth doesn't work using Username:password in URL most of the time, you need to assign a header (which requires manually base64 encoding the username/password pair).</li><br />
+</ul></p>
 <p>But overall I'm pretty happy with it.</p>
-<h2>So, Are demo's important?<&#47;h2><br />
-<strong>Yes!<&#47;strong></p>
+<h2>So, Are demo's important?</h2><br />
+<strong>Yes!</strong></p>
 <p>Obviously a demo is great to get buy in and upskill your whole team internally, or for getting customers up to speed on what's possible with your particular API.&nbsp; But even more so an API is feature that provides very little value unless people use it, even less so then the 80% of the features in your App that are seldom used, as the cost of maintaining an API is high (it becomes part of the work you do for every release of your product once incorporated into your product).</p>
 <p>Beyond the obvious though, the thing I have found most interesting is how demonstrating an API really focuses your attention on what's missing in your API from a usability perspective (especially with consideration to hypermedia) - I would rate this activity almost as high as attempting to develop a client for your API (another great way of finding missing features).</p>
 <p>Give it a try, I think you will find it a really effective way to shake out bugs, oversights and general "cruftyness" issues in your API design.</p>
-<h2>Tell a Story<&#47;h2><br />
+<h2>Tell a Story</h2><br />
 In demonstrating an API, the approach I use is to first whip up a quick narrative or story for the parts of the API I want to demonstrate (thanks sublime text distraction-free mode!)... </p>
 <p>One approach to use when trying the pique the interest of a mixed audience is choosing a story which demonstrates things you can do via the API which are not possible or easy to achieve via the user interface - Focus on points of difference, as opposed to what's similar, or appeal to past pain that an API might be able to resolve for them.</p>
 <p>If you want to know after your demo if you got the narrative right, just observe your audience... far-away looks in peoples eyes and lack of questions == story they don't care about.</p>
-<p><strong>When doing this I try to avoid:<&#47;strong></p>
+<p><strong>When doing this I try to avoid:</strong></p>
 <ul>
-<li>"Given When Then" - <em>Given you want to create a widget, when the widget does not exist, then you POST to widgets collection resource<&#47;em>. It's not engaging or fun for people to listen to..<&#47;li>
-<li>Skipping the steps to finding the resource you are going to work on - so for example if I'm going to update the groups a user belongs to, performing a GET request directly on a &#47;user&#47;{id}&#47;groups collection resource is guaranteed to loose parts of your audience. Performing a search on &#47;users (by name), then retrieving the individual user, and then traversing the rel=groups link from the user to fetch the groups, will be more familiar.<&#47;li><br />
-<&#47;ul><br />
-<strong>And I also try to incorporate:<&#47;strong></p>
+<li>"Given When Then" - <em>Given you want to create a widget, when the widget does not exist, then you POST to widgets collection resource</em>. It's not engaging or fun for people to listen to..</li>
+<li>Skipping the steps to finding the resource you are going to work on - so for example if I'm going to update the groups a user belongs to, performing a GET request directly on a /user/{id}/groups collection resource is guaranteed to loose parts of your audience. Performing a search on /users (by name), then retrieving the individual user, and then traversing the rel=groups link from the user to fetch the groups, will be more familiar.</li><br />
+</ul><br />
+<strong>And I also try to incorporate:</strong></p>
 <ul>
-<li>Switching back to the User Interface regularly (if applicable) - as you fetch resources, relating that back to the equivalent UI (if one exists) can keep people on-track, it also leads to useful observations i.e. I can see this field in the UI, but I can't see it in the representation returned.<&#47;li>
-<li>Selecting parts of a response (using your mouse to hilight) for example what might have changed as the result of a PUT request - especially for people who don't speak "JSON".<&#47;li>
-<li>JOSN lessons - People are familiar with XML, but don't assume the same of JSON. Take some time to explain how a value relates to a key, or what an array is. The pretty printing of JSON in the REST client helps here as well, because you can easily collapse parts of the JSON response, showing that all the items belong to an array etc.<&#47;li>
-<li>HTTP Method refreshers - Keep explaining what PUT, POST and if you support it, PATCH do... it's not enough to just explain this once.<&#47;li>
-<li>Relate what you are doing back to any API documentation you have (so for each request you end up flipping to the API help, then issue the request, review response, flip back to API help, look at response example, and then back into the UI).<&#47;li>
-<li>Failed requests are important too i.e. accessing a resource with missing&#47;invalid query parameters, or missing parts in the request JSON - make these part of the story, and relate them back to your API documentation as well. And take a critical eye to anywhere you turn up a 500 general exception error - is it truly exceptional, or a common failure case that deserves a response guiding API users towards the pit of success, if so, fix it and also demonstrate it so API users are encouraged to explore.<&#47;li><br />
-<&#47;ul></p>
-<h2>Dry-run<&#47;h2><br />
+<li>Switching back to the User Interface regularly (if applicable) - as you fetch resources, relating that back to the equivalent UI (if one exists) can keep people on-track, it also leads to useful observations i.e. I can see this field in the UI, but I can't see it in the representation returned.</li>
+<li>Selecting parts of a response (using your mouse to hilight) for example what might have changed as the result of a PUT request - especially for people who don't speak "JSON".</li>
+<li>JOSN lessons - People are familiar with XML, but don't assume the same of JSON. Take some time to explain how a value relates to a key, or what an array is. The pretty printing of JSON in the REST client helps here as well, because you can easily collapse parts of the JSON response, showing that all the items belong to an array etc.</li>
+<li>HTTP Method refreshers - Keep explaining what PUT, POST and if you support it, PATCH do... it's not enough to just explain this once.</li>
+<li>Relate what you are doing back to any API documentation you have (so for each request you end up flipping to the API help, then issue the request, review response, flip back to API help, look at response example, and then back into the UI).</li>
+<li>Failed requests are important too i.e. accessing a resource with missing/invalid query parameters, or missing parts in the request JSON - make these part of the story, and relate them back to your API documentation as well. And take a critical eye to anywhere you turn up a 500 general exception error - is it truly exceptional, or a common failure case that deserves a response guiding API users towards the pit of success, if so, fix it and also demonstrate it so API users are encouraged to explore.</li><br />
+</ul></p>
+<h2>Dry-run</h2><br />
 Once I have my narrative sorted out (and have included some queues in the story to remind me about things like switching to UI etc.) then I'm ready for a dry run.</p>
 <p>At this point I work through each step of the narrative - this is normally where you become immediately aware of usability issues in your API:</p>
-<h3>Inability to navigate:<&#47;h3><br />
+<h3>Inability to navigate:</h3><br />
 These normally turn up as "smells" as opposed to outright bugs:</p>
 <ul>
 <li>Having to copy an ID from the current request to then construct your next request URI.
 <ul>
-<li><strong>Action<&#47;strong>: Add a link to your response, or consider an Expand if applicable (favour links over expands though I think).<&#47;li><br />
-<&#47;ul><br />
-<&#47;li></p>
+<li><strong>Action</strong>: Add a link to your response, or consider an Expand if applicable (favour links over expands though I think).</li><br />
+</ul><br />
+</li></p>
 <li>Moving to next page of a page collection resource requires you to change the URI.
 <ul>
-<li><strong>Action<&#47;strong>: Add the standard prev&#47;next etc. links (see my <a href="&#47;?p=83489868">API series for info on how we approached this using ASP.Net Web API<&#47;a>).<&#47;li><br />
-<&#47;ul><br />
-<&#47;li></p>
+<li><strong>Action</strong>: Add the standard prev/next etc. links (see my <a href="/?p=83489868">API series for info on how we approached this using ASP.Net Web API</a>).</li><br />
+</ul><br />
+</li></p>
 <li>Navigating to a link, and getting an exception message back due a missing parameter.
 <ul>
-<li><strong>Action<&#47;strong>: return a human friendly message explaining how the resource needs to be used.<&#47;li><br />
-<&#47;ul><br />
-<&#47;li></p>
+<li><strong>Action</strong>: return a human friendly message explaining how the resource needs to be used.</li><br />
+</ul><br />
+</li></p>
 <li>404 not found.
 <ul>
-<li><strong>Action<&#47;strong>: Fix it, probably an issue with routing, or a resource you have forgotten to implement, doh!<&#47;li><br />
-<&#47;ul><br />
-<&#47;li><br />
-<&#47;ul></p>
-<h3>Errors when reusing responses as the body of requests:<&#47;h3><br />
+<li><strong>Action</strong>: Fix it, probably an issue with routing, or a resource you have forgotten to implement, doh!</li><br />
+</ul><br />
+</li><br />
+</ul></p>
+<h3>Errors when reusing responses as the body of requests:</h3><br />
 This is a death move when demonstrating API's, but often not an issue when writing a client. If you make a GET request, you should be able to use the response in a PUT request without changing anything, even if some of the content is ignored.</p>
-<p>Failures here indicate problems with adhering to the <a href="http:&#47;&#47;en.wikipedia.org&#47;wiki&#47;Robustness_principle" target="_blank">Robustness Principle (Be conservative in what you send, liberal in what you accept)<&#47;a>. Common causes for this failure are things like expanded properties and links, which adorn but don't necessarily make up part of the DTO underlying the API implementation, which might be rejected if you have an "error on missing member policy" in your JSON deserializer (normally only applies to an API written in a statically typed language).</p>
-<h3>Unable to locate&#47;display the results in the UI<&#47;h3><br />
+<p>Failures here indicate problems with adhering to the <a href="http://en.wikipedia.org/wiki/Robustness_principle" target="_blank">Robustness Principle (Be conservative in what you send, liberal in what you accept)</a>. Common causes for this failure are things like expanded properties and links, which adorn but don't necessarily make up part of the DTO underlying the API implementation, which might be rejected if you have an "error on missing member policy" in your JSON deserializer (normally only applies to an API written in a statically typed language).</p>
+<h3>Unable to locate/display the results in the UI</h3><br />
 This is another common issue - normally because you have too much data in your sample set, or don't have features in your UI to navigate directly to an item by ID or Name.</p>
 <p>There are a couple of ways to make this easier - either make it really easy to locate an entity by some kind of unique ID also present in your resource representations (In a thick client App I normally like to do this via a bespoke "go to' dialog, activated via CTRL+G).</p>
 <p>Or (my preferred approach for a web app) include an "Edit" absolute URI as a link associated with your API resource, which can be used to navigate to the equivalent UI screen in your application - as an added bonus, the Advanced REST client will "linkify" these hyperlinks in your response - so you can just right-click, open in new window, and be taken directly to the equivalent item in the UI, making your demo very seamless.</p>
-<p><a href="http:&#47;&#47;blog.bittercoder.com&#47;wp-content&#47;uploads&#47;2012&#47;09&#47;EditLink.png"><img class="aligncenter size-full wp-image-83490137" style="border: 1px solid black;" title="EditLink" src="http:&#47;&#47;blog.bittercoder.com&#47;wp-content&#47;uploads&#47;2012&#47;09&#47;EditLink.png" alt="" &#47;><&#47;a></p>
-<h3>General Tips<&#47;h3><br />
+<p><a href="http://blog.bittercoder.com/wp-content/uploads/2012/09/EditLink.png"><img class="aligncenter size-full wp-image-83490137" style="border: 1px solid black;" title="EditLink" src="http://blog.bittercoder.com/wp-content/uploads/2012/09/EditLink.png" alt="" /></a></p>
+<h3>General Tips</h3><br />
 Demonstrating from a data set that you can revert back to is also important, especially if you want to create a screen cast, where multiple takes may be required.&nbsp; Any demo you do should be easily repeatable.</p>
 <p>Also, for each request where you are making a request with a body or complex URI (i.e. maybe containing a search query) then use CTRL+S to save your request as well, this can be helpful in cases where you are having trouble during your Demo and need to get a known good response (requests are also saved in history, but this is limited to last 60 or so requests by default).</p>
-<p>Also, remember to always use the Raw input &#47; Raw output tabs in the REST client when copying a response for use in a new request - and explain this when demonstrating the API to people who might want to go and try your demo for themselves, as copy&#47;pasting from the pretty-printed response tab, when not understanding JSON structure, can lead to people getting frustrated quickly.</p>
-<h2>Live demo<&#47;h2><br />
+<p>Also, remember to always use the Raw input / Raw output tabs in the REST client when copying a response for use in a new request - and explain this when demonstrating the API to people who might want to go and try your demo for themselves, as copy/pasting from the pretty-printed response tab, when not understanding JSON structure, can lead to people getting frustrated quickly.</p>
+<h2>Live demo</h2><br />
 At this point your live demo should go smoothly, but there are certainly some things to check off your list before starting:</p>
 <ul>
-<li>Reverting to your known good data set, if possible<&#47;li>
-<li>Having a couple of displays attached, so you can have your narrative+support data on one screen, and the demo of another.<&#47;li>
-<li>Pre-load pages for the help content you will need (if your API documentation is too large to quickly navigate).<&#47;li>
-<li>Check all your automated integration tests still pass before demoing off a W.I.P codebase.. nothing worse then having to fix bugs&#47;routing issues mid-demo<&#47;li><br />
-<&#47;ul></p>
-<h2>Side note - Authentication<&#47;h2><br />
+<li>Reverting to your known good data set, if possible</li>
+<li>Having a couple of displays attached, so you can have your narrative+support data on one screen, and the demo of another.</li>
+<li>Pre-load pages for the help content you will need (if your API documentation is too large to quickly navigate).</li>
+<li>Check all your automated integration tests still pass before demoing off a W.I.P codebase.. nothing worse then having to fix bugs/routing issues mid-demo</li><br />
+</ul></p>
+<h2>Side note - Authentication</h2><br />
 Thought not strictly necessary - I think supporting session based authentication for web application API's really helps with the demonstration process - though security is important, and session is not a common use case for programmatic access to the API, as a learning aid it's very useful.</p>
-<p>This advice only applies to API's in the small (what I have been working on mostly i.e. API exposed as part of an on-premise&#47;hosted application) - For large public web properties and multi-tenanted applications, this is probably not a wise decision, depending on how the API is deployed, and I would revert to using Basic Auth for demonstration purposes, and probably use a different tool to the Advanced rest client plugin as well (say fiddler).</p>
+<p>This advice only applies to API's in the small (what I have been working on mostly i.e. API exposed as part of an on-premise/hosted application) - For large public web properties and multi-tenanted applications, this is probably not a wise decision, depending on how the API is deployed, and I would revert to using Basic Auth for demonstration purposes, and probably use a different tool to the Advanced rest client plugin as well (say fiddler).</p>

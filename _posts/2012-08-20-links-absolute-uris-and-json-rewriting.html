@@ -20,13 +20,13 @@ categories:
 tags: []
 comments: []
 ---
-<h2>Serialization<&#47;h2><br />
+<h2>Serialization</h2><br />
 As part of the design for the resources being returned from our API we wanted to ensure they included some useful information:</p>
 <ul>
-<li>An absolute link to themselves<&#47;li>
-<li>Links to other entities<&#47;li>
-<li>List of available expansions, and expanded properties (<a href="&#47;?p=83489876">covered in the next part of this series<&#47;a>)<&#47;li><br />
-<&#47;ul><br />
+<li>An absolute link to themselves</li>
+<li>Links to other entities</li>
+<li>List of available expansions, and expanded properties (<a href="/?p=83489876">covered in the next part of this series</a>)</li><br />
+</ul><br />
 So we are looking to return entities that look like this:</p>
 <pre>{<br />
   "Id": "5b2b0ad0-5371-4abf-a661-9f410088925f",<br />
@@ -37,15 +37,15 @@ So we are looking to return entities that look like this:</p>
   "Expands": [<br />
     "Groups"<br />
   ],<br />
-  "Self": "http:&#47;&#47;localhost:29840&#47;api&#47;user&#47;5b2b0ad0-5371-4abf-a661-9f410088925f",<br />
+  "Self": "http://localhost:29840/api/user/5b2b0ad0-5371-4abf-a661-9f410088925f",<br />
   "Links": [<br />
     {<br />
       "Title": "Group Memberships",<br />
-      "Href": "http:&#47;&#47;localhost:29840&#47;api&#47;user&#47;5b2b0ad0-5371-4abf-a661-9f410088925f&#47;groups",<br />
+      "Href": "http://localhost:29840/api/user/5b2b0ad0-5371-4abf-a661-9f410088925f/groups",<br />
       "Rel": "Groups"<br />
     }<br />
   ]<br />
-}<&#47;pre><br />
+}</pre><br />
 This inevitably means creating some kind of view model that you return from your API as the representation of the underlying resource (entity, aggregate etc.)</p>
 <p>After some experimentation we landed on the idea of leveraging the capabilities of JSON.Net to perform on-the-fly JSON rewriting of our serialized entities.</p>
 <p>This meant deriving our view models from this base class, and implementing the abstract "Self" property (to return a link to the entity itself) as well as supporting the links and expansions.</p>
@@ -67,7 +67,7 @@ This inevitably means creating some kind of view model that you return from your
     public IDictionary Expansions { get; set; }</p>
 <p>    [JsonProperty(LinksProperty, NullValueHandling = NullValueHandling.Ignore)]<br />
     public IList Links { get; set; }<br />
-}<&#47;pre><br />
+}</pre><br />
 Each link, was then also represented by a LinkModel, which was a very simple class:</p>
 <pre>public class LinkModel<br />
 {<br />
@@ -76,7 +76,7 @@ Each link, was then also represented by a LinkModel, which was a very simple cla
     public bool Inline { get; set; }<br />
     public string Href { get; set; }<br />
     public string Rel { get; set; }<br />
-}<&#47;pre><br />
+}</pre><br />
 If you look closely at the abstract model class above you will see the properties use the names __expansions__, __self__ and __links__ - so initially when JSON.Net is used to serialize the entity, that's the name we get.</p>
 <p>We then extend the existing JsonMediaTypeFormatter to perform serialization to JToken and then rewrite the token. This is an abstract class:</p>
 <pre>public abstract class AbstractRewritingJsonMediaTypeFormatter : JsonMediaTypeFormatter<br />
@@ -111,7 +111,7 @@ If you look closely at the abstract model class above you will see the propertie
                 }<br />
             });<br />
     }<br />
-}<&#47;pre><br />
+}</pre><br />
 Which we then have a concrete implementation of:</p>
 <pre>public class JsonNetFormatter : AbstractRewritingJsonMediaTypeFormatter<br />
 {<br />
@@ -134,24 +134,24 @@ Which we then have a concrete implementation of:</p>
 <p>        _linksRewriter.Rewrite(token);</p>
 <p>        return token;<br />
     }<br />
-}<&#47;pre><br />
+}</pre><br />
 By doing this we can then implement simple visitors which can rewrite the JSON on the fly looking for those special token names - so for example, in our links above we have a property </p>
-<p><code>public bool Inline { get; set; }<&#47;code></p>
+<p><code>public bool Inline { get; set; }</code></p>
 <p>If Inline is true, we actually "in-line" the link into the body of the representation (using Rel as the name of the property), but if the link is not inline, we include in the set of links.</p>
 <p>This rewriting process also takes care of rewriting relative API URL's to be absolute, so controllers largely don't need to care about resolving absolute URLs within representations themselves.</p>
 <p>JSON Rewriting does bring a cost with it, but so far we have found the cost to be very low (as we are not transforming JSON strings, but just serializing directly to tokens first, then converting the tokens to a string - this avoids the need to delve into reflection to achieve the same results.</p>
-<h2>Links<&#47;h2><br />
-Our linking implementation is largely bespoke, but mirror's that of a hyperlink within a web page. Initially we just had a Rel and Href property, but after a while adopted a Title as well (<a href="http:&#47;&#47;developer.netflix.com&#47;docs&#47;REST_API_Conventions">So similar to The netflix links representation in XML<&#47;a>).</p>
-<p>Though REST as a term is used to describe the "type" of API that is implemented, in fact the API (like most) falls into the camp of "REST'ish" as opposed to RESTful - though personally a fan of <a href="http:&#47;&#47;en.wikipedia.org&#47;wiki&#47;HATEOAS">HATEOAS<&#47;a>, in this case it's a trait we would like to move closer towards, but is certainly not a constraint our API must fulfill before we make it available for consumption.</p>
-<p>There are some standards&#47;proposals out there for links within JSON responses, but largely the impact would have been mostly negative to the consumption of the API, by making the representations more internally inconsistent in naming style etc. and for little gain, as the proposed standards don't make implementing the client any simpler at this stage.</p>
+<h2>Links</h2><br />
+Our linking implementation is largely bespoke, but mirror's that of a hyperlink within a web page. Initially we just had a Rel and Href property, but after a while adopted a Title as well (<a href="http://developer.netflix.com/docs/REST_API_Conventions">So similar to The netflix links representation in XML</a>).</p>
+<p>Though REST as a term is used to describe the "type" of API that is implemented, in fact the API (like most) falls into the camp of "REST'ish" as opposed to RESTful - though personally a fan of <a href="http://en.wikipedia.org/wiki/HATEOAS">HATEOAS</a>, in this case it's a trait we would like to move closer towards, but is certainly not a constraint our API must fulfill before we make it available for consumption.</p>
+<p>There are some standards/proposals out there for links within JSON responses, but largely the impact would have been mostly negative to the consumption of the API, by making the representations more internally inconsistent in naming style etc. and for little gain, as the proposed standards don't make implementing the client any simpler at this stage.</p>
 <p>The Links collection can be populated by external resources, but largely we have the the model itself populate the set of available links upon construct.</p>
-<h2>Collection results<&#47;h2></p>
-<p>When returning collection results, if a collection was page (more on paging in a future post we we look at querying&#47;OData) we also aimed to return the following links as part of the response:</p>
+<h2>Collection results</h2></p>
+<p>When returning collection results, if a collection was page (more on paging in a future post we we look at querying/OData) we also aimed to return the following links as part of the response:</p>
 <p>* First page<br />
 * Last page<br />
 * Next page<br />
 * Previous page</p>
-<p>The <a href="http:&#47;&#47;www.iana.org&#47;assignments&#47;link-relations&#47;link-relations.xml">IANA provides a list of well-known link relationships<&#47;a> including "first", "next", "last" and "prev" - so we adopted those values for the links in the API.</p>
+<p>The <a href="http://www.iana.org/assignments/link-relations/link-relations.xml">IANA provides a list of well-known link relationships</a> including "first", "next", "last" and "prev" - so we adopted those values for the links in the API.</p>
 <pre>
 public class QueryResults<T> : AbstractModel<br />
 {<br />
@@ -176,7 +176,7 @@ public class QueryResults<T> : AbstractModel<br />
         ..<br />
     }<br />
 }<br />
-<&#47;pre></p>
+</pre></p>
 <p>Notice we have a method for setting the Self URL in this case - this is because in the case of a query result the code returning the set of query results may be decoupled from the controller where knowledge of the current request URI exists.</p>
 <p>Within the call to SetSelfAndGenerateLinks we have this code for adding the links, based on where we are at in the set of results.</p>
 <pre>
@@ -190,7 +190,7 @@ if (inMiddle || atStart)<br />
     AddLink(StandardRelations.Previous, uri, Math.Max(0, Skip.Value - Top.Value));<br />
     AddLink(StandardRelations.First, uri, 0);<br />
 }<br />
-<&#47;pre></p>
+</pre></p>
 <p>And then when the request is rendered we might end up with a response that looks like this:</p>
 <pre>
 {<br />
@@ -200,19 +200,19 @@ if (inMiddle || atStart)<br />
   "Items": [<br />
     ...<br />
   ],<br />
-  "Self": "http:&#47;&#47;localhost:29840&#47;api&#47;search?tql=Name+~+test&$skip=20&$top=25",<br />
+  "Self": "http://localhost:29840/api/search?tql=Name+~+test&$skip=20&$top=25",<br />
   "Links": [<br />
     {<br />
-      "Href": "http:&#47;&#47;localhost:29840&#47;api&#47;search?tql=Name+~+test&$skip=0&$top=25",<br />
+      "Href": "http://localhost:29840/api/search?tql=Name+~+test&$skip=0&$top=25",<br />
       "Rel": "prev"<br />
     },<br />
     {<br />
-      "Href": "http:&#47;&#47;localhost:29840&#47;api&#47;search?tql=Name+~+test&$skip=0&$top=25",<br />
+      "Href": "http://localhost:29840/api/search?tql=Name+~+test&$skip=0&$top=25",<br />
       "Rel": "first"<br />
     }<br />
   ]<br />
 }<br />
-<&#47;pre></p>
+</pre></p>
 <p>Providing links like this can really simplify the implementation of clients and allows us to potentially change URI structure without causing as many headaches for API consumers.</p>
-<h2>Next<&#47;h2></p>
-<p><a href="&#47;?p=83489876">Next, in part 2 of this series we take a look at the implementation of <b>Expand<&#47;b><&#47;a> in the API<&#47;a>, and how we mapped our entities to View models for the API.</p>
+<h2>Next</h2></p>
+<p><a href="/?p=83489876">Next, in part 2 of this series we take a look at the implementation of <b>Expand</b></a> in the API</a>, and how we mapped our entities to View models for the API.</p>

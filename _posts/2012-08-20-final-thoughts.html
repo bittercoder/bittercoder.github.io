@@ -20,60 +20,60 @@ categories:
 tags: []
 comments: []
 ---
-<h2>Ease of development<&#47;h2></p>
+<h2>Ease of development</h2></p>
 <p>Moving to ASP.Net Web API over all has been a very pleasant experience, working in the framework for us has been pretty painless.</p>
 <p>That said, moving from release to release has been quite a chore:</p>
 <ul>
-<li>The move from WCF to ASP.Net MVC was quite jarring.<&#47;li>
-<li>The move through various beta builds was also painful, the removal of OData caused us quite a lot of rework (but ultimately for the best I think).<&#47;li>
-<li>The move to RTM though, almost completely without issue (<a href="http:&#47;&#47;www.strathweb.com&#47;2012&#47;08&#47;asp-net-web-api-is-released-whats-new-in-web-api-rtm-and-how-to-use-it&#47;">even though the list of changes was quite long<&#47;a> - they were largely additive, not really breaking anything we already had in place).<&#47;li><br />
-<&#47;ul></p>
-<h2>Ease of integration<&#47;h2></p>
+<li>The move from WCF to ASP.Net MVC was quite jarring.</li>
+<li>The move through various beta builds was also painful, the removal of OData caused us quite a lot of rework (but ultimately for the best I think).</li>
+<li>The move to RTM though, almost completely without issue (<a href="http://www.strathweb.com/2012/08/asp-net-web-api-is-released-whats-new-in-web-api-rtm-and-how-to-use-it/">even though the list of changes was quite long</a> - they were largely additive, not really breaking anything we already had in place).</li><br />
+</ul></p>
+<h2>Ease of integration</h2></p>
 <p>We found it pretty easy to integrate the Web API parts into our plugin infrastructure - one area we did struggle with a little was getting the Monorail routing engine to dispatch the API requests correctly - I didn't bother covering that in this series as it's a fairly niche issue.</p>
 <p>Also keep in mind that as I write this, the RTM of ASP.Net Web API has been available for less then a week though - so we were certainly early adopters - I think now that the API is stable for the RTM, and as progress continues on out-of-band support for OData, people starting new API projects will have a much easier time of it then some of the people adopting this technology earlier on in the release cycle.</p>
 <p>Total development effort for the API has been in the order of 2 developer months, which resulted in 92 controllers (at last count), automatically generated documention, good test coverage and some simple extension points for 3rd party developers to use when extending the API to include features for their own plugins - I'm pretty pleased with that overall!</p>
-<h2>What's Next<&#47;h2></p>
+<h2>What's Next</h2></p>
 <p>Nothing is ever done, and we have plenty of ideas for features we want to add to the API in the future:</p>
-<h3>PATCH support<&#47;h3></p>
-<p><a href="http:&#47;&#47;www.odata.org&#47;blog&#47;2010&#47;10&#47;18&#47;support-for-http-patch">PATCH<&#47;a> support - I have been looking with interest at the latest OData WebAPI support previews approach to PATCH via a lightweight dynamic object representing the Delta, we are also very interested in <a href="http:&#47;&#47;ayende.com&#47;blog&#47;157185&#47;awesome-ravendb-feature-of-the-day-evil-patching" target="_blank">Matt Warren's Eval based patching feature in RavenDB<&#47;a>, which combined with our TQL and OData based filtering could provide a very powerful (though certainly not particularly RESTful) approach to updating application in Enterprise Tester in bulk.</p>
-<h3>Activity Stream API<&#47;h3></p>
-<p>Activity Streams - we have an activity stream implementation, which does support plugins posting events for a user or set of users activity streams within the application - next steps would be to expose this via an API (likely via the the <a href="http:&#47;&#47;activitystrea.ms">http:&#47;&#47;activitystrea.ms specification<a&#47;>).</p>
-<h3>Webhooks<&#47;h3></p>
-<p><a href="http:&#47;&#47;www.webhooks.org&#47;" target="_blank">Webhooks<&#47;a> - Webhooks would support a number of useful scenarios for people integrating with the API - And also thinking about ways we could make it possible for people to compose multiple applications together via webhooks (<a href="http:&#47;&#47;blog.stateless.co&#47;post&#47;19198936039&#47;upgrading-webhooks-to-be-more-useful#disqus_thread">there is a brief discussion on this topic here, with some good comments<&#47;a>).</p>
-<h3>Custom Media Types<&#47;h3></p>
-<p>Embracing custom media types - so far we have been using <b>application&#47;json<&#47;b>, which in effect is enacting the anti-pattern of tunneling the real media type, relying on consumers of our API's to refer to human-readable document (albeit nice human readable documentation!) to determine the schema for those representations.</p>
-<p>Shifting to custom media types would be a good move in this case - <a href="http:&#47;&#47;blog.programmableweb.com&#47;2011&#47;11&#47;18&#47;rest-api-design-putting-the-type-in-content-type&#47;">programmable web had a good post on this a while back<&#47;a> - but is likely not something we would do until we feel the API is stable.</p>
-<h3>Granular OAuth security<&#47;h3></p>
-<p>Currently the OAuth implementation is at a user level - but why give a consumer of an API access to features&#47;data they don't need.</p>
+<h3>PATCH support</h3></p>
+<p><a href="http://www.odata.org/blog/2010/10/18/support-for-http-patch">PATCH</a> support - I have been looking with interest at the latest OData WebAPI support previews approach to PATCH via a lightweight dynamic object representing the Delta, we are also very interested in <a href="http://ayende.com/blog/157185/awesome-ravendb-feature-of-the-day-evil-patching" target="_blank">Matt Warren's Eval based patching feature in RavenDB</a>, which combined with our TQL and OData based filtering could provide a very powerful (though certainly not particularly RESTful) approach to updating application in Enterprise Tester in bulk.</p>
+<h3>Activity Stream API</h3></p>
+<p>Activity Streams - we have an activity stream implementation, which does support plugins posting events for a user or set of users activity streams within the application - next steps would be to expose this via an API (likely via the the <a href="http://activitystrea.ms">http://activitystrea.ms specification<a/>).</p>
+<h3>Webhooks</h3></p>
+<p><a href="http://www.webhooks.org/" target="_blank">Webhooks</a> - Webhooks would support a number of useful scenarios for people integrating with the API - And also thinking about ways we could make it possible for people to compose multiple applications together via webhooks (<a href="http://blog.stateless.co/post/19198936039/upgrading-webhooks-to-be-more-useful#disqus_thread">there is a brief discussion on this topic here, with some good comments</a>).</p>
+<h3>Custom Media Types</h3></p>
+<p>Embracing custom media types - so far we have been using <b>application/json</b>, which in effect is enacting the anti-pattern of tunneling the real media type, relying on consumers of our API's to refer to human-readable document (albeit nice human readable documentation!) to determine the schema for those representations.</p>
+<p>Shifting to custom media types would be a good move in this case - <a href="http://blog.programmableweb.com/2011/11/18/rest-api-design-putting-the-type-in-content-type/">programmable web had a good post on this a while back</a> - but is likely not something we would do until we feel the API is stable.</p>
+<h3>Granular OAuth security</h3></p>
+<p>Currently the OAuth implementation is at a user level - but why give a consumer of an API access to features/data they don't need.</p>
 <p>Security is currently conext-specific so this will likely take the form of an API consumer requesting a set of required permissions, along with an associated scope (project-specific or application-wide) as part of fetching the request token - and these scope restrictions the being applied to any security checks.</p>
 <p>Implementing this delegation is actually likely to be less challenging then the refactoring of our permission structure to be more granular to suit the requirements of an API, as opposed to the existing UI usecases.</p>
-<h3>Usage Metrics&#47;Tracking<&#47;h3></p>
+<h3>Usage Metrics/Tracking</h3></p>
 <p>Anonmyous usage metrics for the API would be very valuable when it comes to making decisions about changing aspects of the API.</p>
 <p>Additionally tracking usage (including the type of usage, IP address etc.) would be valuable especially for instances of Enterprise Tester externally accessible on the internet (Either hosted or self-hosting customers).</p>
-<p><a href="http:&#47;&#47;www.strathweb.com&#47;2012&#47;05&#47;implementing-message-handlers-to-track-your-asp-net-web-api-usage&#47;" target="_blank">FYI - StrathWeb has a post on implementing this via 2 DelegatingHandler's which might be a starting point for anyone looking to implement this themselves<&#47;a>.</p>
-<h2>Wrapping Up<&#47;h2></p>
+<p><a href="http://www.strathweb.com/2012/05/implementing-message-handlers-to-track-your-asp-net-web-api-usage/" target="_blank">FYI - StrathWeb has a post on implementing this via 2 DelegatingHandler's which might be a starting point for anyone looking to implement this themselves</a>.</p>
+<h2>Wrapping Up</h2></p>
 <p>So this is where I end my series on the API development for Enterprise Tester - hopefully this series has been interesting to at least a few of you embarking on implementing your own API's for existing applications.</p>
-<h3>Describing the Experience<&#47;h3></p>
-<p>I think if I had to describe API development for a large existing application, it would be Cathartic - It's an opportunity to revisit old code, review decisions you made in the past, and re-imagine what interacting with your application can be like - it's quite cleansing&#47;refreshing, as it's not often you implement a feature that touches on so many parts of an application at one time, that isn't some death march of restructuring and refactoring to please the gods of static typing.</p>
-<h3>Resources<&#47;h3></p>
-<p>I found these blogs&#47;websites particulary useful while working on the API:</p>
+<h3>Describing the Experience</h3></p>
+<p>I think if I had to describe API development for a large existing application, it would be Cathartic - It's an opportunity to revisit old code, review decisions you made in the past, and re-imagine what interacting with your application can be like - it's quite cleansing/refreshing, as it's not often you implement a feature that touches on so many parts of an application at one time, that isn't some death march of restructuring and refactoring to please the gods of static typing.</p>
+<h3>Resources</h3></p>
+<p>I found these blogs/websites particulary useful while working on the API:</p>
 <ul>
-<li><a href="http:&#47;&#47;www.strathweb.com" target="_blank">StrathWeb - Filip Woj's blog<&#47;a><&#47;li>
-<li><a href="http:&#47;&#47;blogs.msdn.com&#47;b&#47;gblock&#47;" target="_blank">Glenn Block's blog<&#47;a><&#47;li>
-<li><a href="http:&#47;&#47;west-wind.com&#47;weblog&#47;" target="_blank">Rick Strahl's blog<&#47;a><&#47;li>
-<li><a href="http:&#47;&#47;webapibloggers.com&#47;" target="_blank">Collection of popular WebAPI bloggers<&#47;a><&#47;li>
-<li><a href="http:&#47;&#47;blogs.msdn.com&#47;b&#47;alexj&#47;" target="_blank">Alex Jame's blog, great for keeping tabs on what's happening with OData on WebAPI<&#47;a><&#47;li>
-<li><a href="http:&#47;&#47;aspnetwebstack.codeplex.com&#47;discussions&#47;topics&#47;5322&#47;asp-net-web-api" target="_blank">ASP.Net Web API Discussions on Codplex<&#47;a><&#47;li><br />
-<&#47;ul></p>
-<h3>Previous Parts<&#47;h3></p>
+<li><a href="http://www.strathweb.com" target="_blank">StrathWeb - Filip Woj's blog</a></li>
+<li><a href="http://blogs.msdn.com/b/gblock/" target="_blank">Glenn Block's blog</a></li>
+<li><a href="http://west-wind.com/weblog/" target="_blank">Rick Strahl's blog</a></li>
+<li><a href="http://webapibloggers.com/" target="_blank">Collection of popular WebAPI bloggers</a></li>
+<li><a href="http://blogs.msdn.com/b/alexj/" target="_blank">Alex Jame's blog, great for keeping tabs on what's happening with OData on WebAPI</a></li>
+<li><a href="http://aspnetwebstack.codeplex.com/discussions/topics/5322/asp-net-web-api" target="_blank">ASP.Net Web API Discussions on Codplex</a></li><br />
+</ul></p>
+<h3>Previous Parts</h3></p>
 <ul>
-<li><a href="&#47;?p=83489862">Intro - Enterprise Tester API Series<&#47;a><&#47;li>
-<li><a href="&#47;?p=83489868">Part 1 - Links, absolute URL's and JSON rewriting.<&#47;a><&#47;li>
-<li><a href="&#47;?p=83489876">Part 2 - "Expand" implementation and view model mapping.<&#47;a><&#47;li>
-<li><a href="&#47;?p=83489900">Part 3 - Generating API documentation.<&#47;a><&#47;li>
-<li><a href="&#47;?p=83489915">Part 4 - OData, TQL and Filtering.<&#47;a><&#47;li>
-<li><a href="&#47;?p=83489964">Part 5 - Authentication - Session, Basic and OAuth.<&#47;a><&#47;li>
-<li><a href="&#47;?p=83489922">Part 6 - Long running tasks.<&#47;a><&#47;li>
-<li><a href="&#47;?p=83489985">Part 7 - WebAPI Testing.<&#47;a><&#47;li>
-<li><a href="&#47;?p=83489992">Part 8 - Anatomy of an API plugin.<&#47;a><&#47;li><br />
-<&#47;ul></p>
+<li><a href="/?p=83489862">Intro - Enterprise Tester API Series</a></li>
+<li><a href="/?p=83489868">Part 1 - Links, absolute URL's and JSON rewriting.</a></li>
+<li><a href="/?p=83489876">Part 2 - "Expand" implementation and view model mapping.</a></li>
+<li><a href="/?p=83489900">Part 3 - Generating API documentation.</a></li>
+<li><a href="/?p=83489915">Part 4 - OData, TQL and Filtering.</a></li>
+<li><a href="/?p=83489964">Part 5 - Authentication - Session, Basic and OAuth.</a></li>
+<li><a href="/?p=83489922">Part 6 - Long running tasks.</a></li>
+<li><a href="/?p=83489985">Part 7 - WebAPI Testing.</a></li>
+<li><a href="/?p=83489992">Part 8 - Anatomy of an API plugin.</a></li><br />
+</ul></p>

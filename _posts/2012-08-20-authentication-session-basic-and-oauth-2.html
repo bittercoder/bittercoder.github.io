@@ -20,16 +20,16 @@ categories:
 tags: []
 comments: []
 ---
-<h2>Authentication<&#47;h2></p>
+<h2>Authentication</h2></p>
 <p>Authenticating users of an API is very important - and thankfully the many available extension points within ASP.Net MVC WebAPI make this really easy to implement.</p>
 <p>We intended the API being developed to be consumed by both the application itself, as well as clients armed with a username and password - so that meant:</p>
 <ul>
-<li>Session based authentication<&#47;li>
-<li>Basic Authentication<&#47;li><br />
-<&#47;ul></p>
+<li>Session based authentication</li>
+<li>Basic Authentication</li><br />
+</ul></p>
 <p>The application was already an OAuth provider (to support our OpenSocial gadget support) - so we also decided to adopt this for the API, thus allowing those gadgets to also interact with the API (and to allow for delegated authentication scenarios).</p>
-<h2>Delegating Handler<&#47;h2></p>
-<p>Initially we attempted to support these three authentication methods through separate <a href="http:&#47;&#47;msdn.microsoft.com&#47;en-us&#47;library&#47;system.net.http.delegatinghandler(v=vs.110).aspx">delegating handlers<&#47;a>, but eventually abandoned that approach for a single class that handled all 3 authentication methods - here is the guts of determining which method to use:</p>
+<h2>Delegating Handler</h2></p>
+<p>Initially we attempted to support these three authentication methods through separate <a href="http://msdn.microsoft.com/en-us/library/system.net.http.delegatinghandler(v=vs.110).aspx">delegating handlers</a>, but eventually abandoned that approach for a single class that handled all 3 authentication methods - here is the guts of determining which method to use:</p>
 <pre>
 Task<HttpResponseMessage> AuthenticateRequest(HttpRequestMessage request, CancellationToken cancellationToken)<br />
 {<br />
@@ -54,13 +54,13 @@ Task<HttpResponseMessage> AuthenticateRequest(HttpRequestMessage request, Cancel
   }</p>
 <p>  return HandleWithSessionAuthentication(request, cancellationToken, context);<br />
 }<br />
-<&#47;pre></p>
+</pre></p>
 <p>So the approach taken was that:</p>
 <ul>
-<li>If the request properties contains a user, we treat the request as pre-authenticated (used for testing mostly, more on that in a future post).<&#47;li>
-<li>If there is authorization header, we check the scheme and perform either Basic or OAuth handling of the request.<&#47;li>
-<li>Otherwise, we fall through to handling the request with session authentication.<&#47;li><br />
-<&#47;ul></p>
+<li>If the request properties contains a user, we treat the request as pre-authenticated (used for testing mostly, more on that in a future post).</li>
+<li>If there is authorization header, we check the scheme and perform either Basic or OAuth handling of the request.</li>
+<li>Otherwise, we fall through to handling the request with session authentication.</li><br />
+</ul></p>
 <p>The HttpContext (and it's related abstractions) are fairly baked in to parts of the pre-existing Authentication infrastructure and so we need to extract this from the request to complete authentication in many cases - this has actually got much easier with each release of the WebAPI - the first WCF based drops of the WebAPI made this almost impossible to do without spelunking into reflection over private fields.</p>
 <p>All authentication methods would eventually end up associating an authenticated user with the requests properties via a SetIdentity method:</p>
 <pre>
@@ -68,9 +68,9 @@ void SetIdentity(User user, HttpRequestMessage request)<br />
 {<br />
     request.Properties.Add("user", user);<br />
 }<br />
-<&#47;pre></p>
-<h2>OAuth<&#47;h2></p>
-<p>Enterprise Tester uses <a href="https:&#47;&#47;github.com&#47;bittercoder&#47;DevDefined.OAuth">DevDefined.OAuth<&#47;a> - which includes support for the <a href="http:&#47;&#47;wiki.oauth.net&#47;w&#47;page&#47;12238543&#47;ProblemReporting">problem reporting extension as part of OAuth 1<&#47;a> - this is exposed as <b>Report<&#47;b> property on the OAuthException, which can be then used as the content of a response when Authentication fails:</p>
+</pre></p>
+<h2>OAuth</h2></p>
+<p>Enterprise Tester uses <a href="https://github.com/bittercoder/DevDefined.OAuth">DevDefined.OAuth</a> - which includes support for the <a href="http://wiki.oauth.net/w/page/12238543/ProblemReporting">problem reporting extension as part of OAuth 1</a> - this is exposed as <b>Report</b> property on the OAuthException, which can be then used as the content of a response when Authentication fails:</p>
 <pre>
 Task<HttpResponseMessage> HandleWithOAuthAuthentication(<br />
     HttpRequestMessage request,<br />
@@ -98,17 +98,17 @@ Task<HttpResponseMessage> HandleWithOAuthAuthentication(<br />
 <p>        return Task.Factory.StartNew(() => new HttpResponseMessage(HttpStatusCode.Forbidden) {Content = new StringContent(reportAsText)});<br />
     }<br />
 }<br />
-<&#47;pre></p>
-<h2>Async<&#47;h2></p>
-<p>Within the application we have a simple service for returning the "current user" associated with a request&#47;thread:</p>
+</pre></p>
+<h2>Async</h2></p>
+<p>Within the application we have a simple service for returning the "current user" associated with a request/thread:</p>
 <pre>
 public interface IUserContext<br />
 {<br />
     User CurrentUser { get; }<br />
 }<br />
-<&#47;pre></p>
+</pre></p>
 <p>With the WebAPI being asynchronous the mechanics of this didn't work very well for us (The thread the DelegatingHandler executes on for Authentication wasn't necessarily the same thread that constructed the controller and executed the action).</p>
-<p>To avoid too much rework we just implemented an <a href="http:&#47;&#47;msdn.microsoft.com&#47;en-us&#47;library&#47;system.web.http.filters.actionfilterattribute(v=vs.108).aspx">ActionFilterAttribute<&#47;a> that was applied to a base controller which all the "authenticated" controllers inherited from:</p>
+<p>To avoid too much rework we just implemented an <a href="http://msdn.microsoft.com/en-us/library/system.web.http.filters.actionfilterattribute(v=vs.108).aspx">ActionFilterAttribute</a> that was applied to a base controller which all the "authenticated" controllers inherited from:</p>
 <pre>
 public class AssociateUserWithThreadFilterAttribute : ActionFilterAttribute<br />
 {<br />
@@ -123,9 +123,9 @@ public class AssociateUserWithThreadFilterAttribute : ActionFilterAttribute<br /
 <p>        base.OnActionExecuting(actionContext);<br />
     }<br />
 }<br />
-<&#47;pre></p>
+</pre></p>
 <p>It's not a beautiful solution, but had no impact on our existing implementation for authentication which is great.</p>
-<p>The one gotcha here is if returning a Task<HttpResponseMessage> as the result of a controller action you need to be a little careful&#47;take care with associating the user with the task's thread yourself.</p>
+<p>The one gotcha here is if returning a Task<HttpResponseMessage> as the result of a controller action you need to be a little careful/take care with associating the user with the task's thread yourself.</p>
 <p>So far we only return a Task<T> from the POST methods handling the upload of attachments as a mime multipart request, so this hasn't been too much of a problem to deal with.</p>
-<h2>Next<&#47;h2></p>
-<p><a href="&#47;?p=83489922">Next in part 6 we take a look at how we handled exposing long running tasks.<&#47;a></p>
+<h2>Next</h2></p>
+<p><a href="/?p=83489922">Next in part 6 we take a look at how we handled exposing long running tasks.</a></p>

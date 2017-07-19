@@ -21,26 +21,26 @@ categories:
 tags: []
 comments: []
 ---
-<h2>Drilling down<&#47;h2></p>
+<h2>Drilling down</h2></p>
 <p>When using an API the consumer generally wants to be able to:</p>
 <ul>
-<li>Access a subset of a large collection of resources (paging)<&#47;li>
-<li>Order the set of resources they get back.<&#47;li>
-<li>Filter the resources returned based on some criteria.<&#47;li>
-<li>Aggregate across the resources matching the filter (at the very least get a total count back)<&#47;li><br />
-<&#47;ul></p>
+<li>Access a subset of a large collection of resources (paging)</li>
+<li>Order the set of resources they get back.</li>
+<li>Filter the resources returned based on some criteria.</li>
+<li>Aggregate across the resources matching the filter (at the very least get a total count back)</li><br />
+</ul></p>
 <p>Enterprise Tester aims to provide ways to achieve all of this - the approach we took was fairly pragmatic:</p>
 <ul>
-<li>Leverage existing query language investments (we have a query language in our application already, it makes sense to also expose this in the API)<&#47;li>
-<li>For anything else, use the OData $filter functionality to filter it (we didn't want to invent another query language)<&#47;li><br />
-<&#47;ul></p>
-<h2>TQL Support<&#47;h2></p>
-<h3>Query Language<&#47;h3><br />
+<li>Leverage existing query language investments (we have a query language in our application already, it makes sense to also expose this in the API)</li>
+<li>For anything else, use the OData $filter functionality to filter it (we didn't want to invent another query language)</li><br />
+</ul></p>
+<h2>TQL Support</h2></p>
+<h3>Query Language</h3><br />
 TQL (Testing Query Language) is a Domain Specific Query language developed for searching and aggregating test information - and worth a series of posts all on it's own - but was definitely an existing investment we wanted to leverage when building out the products API.</p>
 <p>TQL Queries can be quite simple:</p>
 <pre>
 Status = Open<br />
-<&#47;pre></p>
+</pre></p>
 <p>Or quite complex (the below query would find any requirements which are associated (indirectly) to bugs with a Resolution of 'Wont Fix' raised in the last week).</p>
 <pre>
 EntityType = Requirement<br />
@@ -52,27 +52,27 @@ EntityType = Requirement<br />
       }<br />
   }<br />
 ORDER BY Package ASC, LastUpdatedAt DESC<br />
-<&#47;pre></p>
-<p>The parsing of the Query Language is implemented in <a href="http:&#47;&#47;www.quanttec.com&#47;fparsec&#47;">F# using FParsec<&#47;a> (if you haven't looked at FParsec, then umm.. you should - I can't say enough good things about this library!)</p>
+</pre></p>
+<p>The parsing of the Query Language is implemented in <a href="http://www.quanttec.com/fparsec/">F# using FParsec</a> (if you haven't looked at FParsec, then umm.. you should - I can't say enough good things about this library!)</p>
 <p>We have not so for had to make any changes to the query language to make it more palatable to consumption from the API - I think a few things worked in our favor there:</p>
 <ul>
-<li>Quoting strings is optional for words not containing whitespace, and you can use single or double quotes.<&#47;li>
-<li>Encoding of strings follows the JSON conventions for escaping etc.<&#47;li>
-<li>When implementing the parser we ensured it was whitespace insensitive - so the above query can also just be written on a single line.<&#47;li>
-<li>We did not use symbols for AND and OR logical operators - so we avoided using ampersands [<b>&<&#47;b>] for AND<&#47;li>
-<li>Having the query include ordering info avoided the need for a second order&#47;sort query parameter<&#47;li><br />
-<&#47;ul></p>
+<li>Quoting strings is optional for words not containing whitespace, and you can use single or double quotes.</li>
+<li>Encoding of strings follows the JSON conventions for escaping etc.</li>
+<li>When implementing the parser we ensured it was whitespace insensitive - so the above query can also just be written on a single line.</li>
+<li>We did not use symbols for AND and OR logical operators - so we avoided using ampersands [<b>&</b>] for AND</li>
+<li>Having the query include ordering info avoided the need for a second order/sort query parameter</li><br />
+</ul></p>
 <p>This allowed us to make it easy to search via the API without having to URL encode the query parameter in many cases.</p>
 <p>Working against our favor is Lucene itself - the query language allows performing a contains search using a Tilde (~) operator:</p>
 <pre>
 Name ~ "defect bug"<br />
-<&#47;pre></p>
-<p>Within the string being searched for we support the use of <a href="http:&#47;&#47;lucene.apache.org&#47;core&#47;3_6_1&#47;queryparsersyntax.html">Lucene query parser syntax<&#47;a>:</p>
+</pre></p>
+<p>Within the string being searched for we support the use of <a href="http://lucene.apache.org/core/3_6_1/queryparsersyntax.html">Lucene query parser syntax</a>:</p>
 <pre>
 Name ~ "te?t" AND Description ~ "'REST API' && 'Curl Example'"<br />
-<&#47;pre></p>
+</pre></p>
 <p>This can trip up people experimenting with the API directly within a browser, where in some cases not escaping these characters correctly can result in part of their query being parsed as a parameter - so far this hasn't really proven to be much of an issue.</p>
-<h3>Controller<&#47;h3></p>
+<h3>Controller</h3></p>
 <p>The implementation of a controller taking a TQL query was fairly simple:</p>
 <pre>
 public HttpResponseMessage Get(string tql = null)<br />
@@ -92,9 +92,9 @@ public HttpResponseMessage Get(string tql = null)<br />
 <p>    HttpResponseMessage response = Request.CreateResponse(HttpStatusCode.OK, wrappedResults);</p>
 <p>    return response;<br />
 }<br />
-<&#47;pre></p>
-<p>The implementation defaults to including skip&#47;top&#47;total as well as next&#47;prev&#47;first&#47;last links in the response - but we did provide a way for client consumer to excluded that information if they so desired (i.e. if implementing a search which is guaranteed to return 1 result) - by passing in the <a href="http:&#47;&#47;www.odata.org&#47;documentation&#47;uri-conventions&#47;#InlinecountSystemQueryOption">OData $inlinecount query parameter<&#47;a>.</p>
-<p><code>GET &#47;api&#47;automatedtests?tql=Name~Selenium&$inlinecount=none<&#47;code></p>
+</pre></p>
+<p>The implementation defaults to including skip/top/total as well as next/prev/first/last links in the response - but we did provide a way for client consumer to excluded that information if they so desired (i.e. if implementing a search which is guaranteed to return 1 result) - by passing in the <a href="http://www.odata.org/documentation/uri-conventions/#InlinecountSystemQueryOption">OData $inlinecount query parameter</a>.</p>
+<p><code>GET /api/automatedtests?tql=Name~Selenium&$inlinecount=none</code></p>
 <p>We also exposed a search method, allowing you to execute TQL queries to search across all the entity types at once, implementation of the controller there was similar - one thing we did do is leverage the "Expansions" dictionary every view model has to embellish it with the type of the search result (as a property called "EntityType").</p>
 <pre>
 wrappedResults.Items = results.Items.Select(result =><br />
@@ -104,20 +104,20 @@ wrappedResults.Items = results.Items.Select(result =><br />
     ((AbstractModel) mapped).Expansions.Add("EntityType", type);<br />
     return mapped;<br />
 }).ToList();<br />
-<&#47;pre></p>
+</pre></p>
 <p>In the case of search results we are dealing directly with NHibernate entities, which can be proxies - thus the call to .GetUnproxiedType().</p>
-<h2>OData<&#47;h2></p>
+<h2>OData</h2></p>
 <p>I always feel a little disingenuous referring to OData in our API docs - but unfortunately I don't know of a good term for what we are doing.</p>
 <p>Our support for OData extends as far as filtering a set of results (GET requests) and goes no further - we certainly did not build an OData compliant API, or ensure the shape of our results conformed to something an OData consumer may expect.</p>
 <p>The filtering specification outlined in OData though is incredibly useful to avoid inventing yet another query language unnecessarily (and was one of the draw cards for using WebAPI in the first place).</p>
 <ul>
-<li>$expand<&#47;li>
-<li>$filter<&#47;li>
-<li>$inlinecount<&#47;li>
-<li>$orderby<&#47;li>
-<li>$skip<&#47;li>
-<li>$top<&#47;li><br />
-<&#47;ul></p>
+<li>$expand</li>
+<li>$filter</li>
+<li>$inlinecount</li>
+<li>$orderby</li>
+<li>$skip</li>
+<li>$top</li><br />
+</ul></p>
 <p>Initially our collection resource GET methods looked like this (or in some cases with additional query parameters to identify the collection owner)</p>
 <pre>
 [Queryable]<br />
@@ -125,8 +125,8 @@ public IQueryable<ViewModelXXX> Get()<br />
 {<br />
    ...<br />
 }<br />
-<&#47;pre></p>
-<p>But as we moved through the pre-releases for the WebAPI we hit a bit of a snag in that <a href="http:&#47;&#47;aspnetwebstack.codeplex.com&#47;discussions&#47;359229&#47;">OData support was pulled from the beta<&#47;a> - we knew the problem would eventually be rectified, but in the mean time we had code that didn't work any more - so we pulled the necessary pieces that made up OData execution in earlier builds and re-introduced support - so our controllers ended up like this:</p>
+</pre></p>
+<p>But as we moved through the pre-releases for the WebAPI we hit a bit of a snag in that <a href="http://aspnetwebstack.codeplex.com/discussions/359229/">OData support was pulled from the beta</a> - we knew the problem would eventually be rectified, but in the mean time we had code that didn't work any more - so we pulled the necessary pieces that made up OData execution in earlier builds and re-introduced support - so our controllers ended up like this:</p>
 <pre>
 public HttpResponseMessage Get()<br />
 {<br />
@@ -134,7 +134,7 @@ public HttpResponseMessage Get()<br />
     HttpResponseMessage response = Request.CreateResponse(HttpStatusCode.OK, results);<br />
     return response;<br />
 }<br />
-<&#47;pre></p>
+</pre></p>
 <p>And the code to handle executing the OData query and return the results:</p>
 <pre>
 public static class ODataQueryExecutor<br />
@@ -154,9 +154,9 @@ public static class ODataQueryExecutor<br />
 <p>        resultsPage.SetSelfAndGenerateLinks(uri);</p>
 <p>        return resultsPage;<br />
     }<br />
-<&#47;pre></p>
+</pre></p>
 <p>This allowed us to just do filtering, and get the results back in our familiar QueryResults<T> form (so we ensure consistency with the equivalent TQL query responses).</p>
-<h2>Aggregation<&#47;h2></p>
+<h2>Aggregation</h2></p>
 <p>The TQL (Testing Query Language) also features the ability to perform aggregations (Think group by, count, sum, average, faceted querying etc.) - these can be quite complex:</p>
 <pre>
 COUNT,<br />
@@ -178,9 +178,9 @@ FACETED OrArgs(Equal(Status,Failed), Equal(Status,Blocked)) AS "Failed OR Blocke
 WHERE EntityType = ScriptAssignment<br />
   AND Project = 'Project X'<br />
   AND Status != NotRun<br />
-<&#47;pre></p>
+</pre></p>
 <p>Which within the application would return a result like this:</p>
-<p><a href="http:&#47;&#47;blog.bittercoder.com&#47;wp-content&#47;uploads&#47;2012&#47;08&#47;AggregateQueryResults.png"><img src="http:&#47;&#47;blog.bittercoder.com&#47;wp-content&#47;uploads&#47;2012&#47;08&#47;AggregateQueryResults.png" alt="" title="AggregateQueryResults" class="alignnone size-full wp-image-83489927" &#47;><&#47;a></p>
+<p><a href="http://blog.bittercoder.com/wp-content/uploads/2012/08/AggregateQueryResults.png"><img src="http://blog.bittercoder.com/wp-content/uploads/2012/08/AggregateQueryResults.png" alt="" title="AggregateQueryResults" class="alignnone size-full wp-image-83489927" /></a></p>
 <p>And from the API, returns a result like this:</p>
 <pre>
 {<br />
@@ -224,17 +224,17 @@ WHERE EntityType = ScriptAssignment<br />
       }<br />
     },<br />
     "Packages": {<br />
-      "Execution Sets&#47;Cycle 1&#47;Reports": {<br />
+      "Execution Sets/Cycle 1/Reports": {<br />
         "Total Estimated": "02:05:00",<br />
         "Total Actual": "02:25:00",<br />
         "Average Remaining Time (Per Script)": "-00:03:00"<br />
       },<br />
-      "Execution Sets&#47;Cycle 1 - regression testing": {<br />
+      "Execution Sets/Cycle 1 - regression testing": {<br />
         "Total Estimated": "01:10:00",<br />
         "Total Actual": "02:00:00",<br />
         "Average Remaining Time (Per Script)": "-00:12:30"<br />
       },<br />
-      "Execution Sets&#47;Cycle 1&#47;Transfers": {<br />
+      "Execution Sets/Cycle 1/Transfers": {<br />
         "Total Estimated": "01:10:00",<br />
         "Total Actual": "04:45:00",<br />
         "Average Remaining Time (Per Script)": "-00:28:20"<br />
@@ -246,24 +246,24 @@ WHERE EntityType = ScriptAssignment<br />
           {<br />
             "Id": "5b932463-6089-4bc9-9e23-a0b100e133b0",<br />
             "EntityType": "ScriptAssignment",<br />
-            "Self": "http:&#47;&#47;localhost&#47;EnterpriseTester&#47;api&#47;scriptassignment&#47;5b932463-6089-4bc9-9e23-a0b100e133b0"<br />
+            "Self": "http://localhost/EnterpriseTester/api/scriptassignment/5b932463-6089-4bc9-9e23-a0b100e133b0"<br />
           },<br />
           {<br />
             "Id": "39c54b0c-5340-4b93-ace9-a0b100e13519",<br />
             "EntityType": "ScriptAssignment",<br />
-            "Self": "http:&#47;&#47;localhost&#47;EnterpriseTester&#47;api&#47;scriptassignment&#47;39c54b0c-5340-4b93-ace9-a0b100e13519"<br />
+            "Self": "http://localhost/EnterpriseTester/api/scriptassignment/39c54b0c-5340-4b93-ace9-a0b100e13519"<br />
           },<br />
           {<br />
             "Id": "ac8e5dce-322c-4e05-9975-a0b100e13375",<br />
             "EntityType": "ScriptAssignment",<br />
-            "Self": "http:&#47;&#47;localhost&#47;EnterpriseTester&#47;api&#47;scriptassignment&#47;ac8e5dce-322c-4e05-9975-a0b100e13375"<br />
+            "Self": "http://localhost/EnterpriseTester/api/scriptassignment/ac8e5dce-322c-4e05-9975-a0b100e13375"<br />
           }<br />
         ]<br />
       }<br />
     }<br />
   }<br />
 }<br />
-<&#47;pre></p>
+</pre></p>
 <p>To achieve this we needed to parse the query to determine if it was an aggregation, and then handle the search query differently in each case:</p>
 <pre>
 public HttpResponseMessage Get(string tql = null, string format = null)<br />
@@ -277,9 +277,9 @@ public HttpResponseMessage Get(string tql = null, string format = null)<br />
     }</p>
 <p>    return HandleQuery(parsed, format, context);<br />
 }<br />
-<&#47;pre></p>
+</pre></p>
 <p>Aggregated search results are generated as a set of nested IDictionary<string,object> instances - which actually serialize very well to JSON when using JSON.Net - all except our entities...</p>
-<p>With the aggregated queries support in TQL, you can use functions such as COUNT, SUM(Field), AVG(Field) and so on... one of these functions <b>Entities<&#47;b> - which actually just returns an List of all the entities matching the criteria. This is not something SQL does, but this isn't SQL now is it - so there is nothing stopping us returning an array as opposed to a single value for any node in the tree of results.</p>
+<p>With the aggregated queries support in TQL, you can use functions such as COUNT, SUM(Field), AVG(Field) and so on... one of these functions <b>Entities</b> - which actually just returns an List of all the entities matching the criteria. This is not something SQL does, but this isn't SQL now is it - so there is nothing stopping us returning an array as opposed to a single value for any node in the tree of results.</p>
 <p>By default Entities will stop being collected by the query after there is 25, but the limit can be increased too if necessary.  This feature is really useful when combined with a faceted search where expressions and formulas can be used to calculate which entities to include or not, and where you don't expect to get a large number of matching entities.</p>
 <p>So within the dictionary of results returned from the TQL query engine for the aggregated query, we may have a list of EntityInfo elements, one for each entity returned from a "Entities" aggregate function.</p>
 <p>EntityInfo consisted of the CLR Type and Guid ID for the entity - not something we want to expose in our API (but very useful for other parts of the application) so to overcome this we pass a visitor over the dictionary of results to rewrite these into a form that's palatable for our API consumers:</p>
@@ -299,7 +299,7 @@ HttpResponseMessage CreateDefaultAggregatedResponse(IDictionary<string, object> 
 <p>    visitor.Visit(results);</p>
 <p>    return Request.CreateResponse(HttpStatusCode.OK, new RawAggregatedQueryModel {Results = results});<br />
 }<br />
-<&#47;pre></p>
+</pre></p>
 <p>So we ensure those aggregation results now have a URL pointing at the resource for that entity.</p>
-<h2>Next<&#47;h2></p>
-<p><a href="&#47;?p=83489964">Next in part 5 we take a look at how we handled Authentication, including support for Session, Basic and OAuth.<&#47;a></p>
+<h2>Next</h2></p>
+<p><a href="/?p=83489964">Next in part 5 we take a look at how we handled Authentication, including support for Session, Basic and OAuth.</a></p>

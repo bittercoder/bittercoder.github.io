@@ -23,30 +23,30 @@ tags:
 - webapi
 comments: []
 ---
-<h2>Introduction<&#47;h2></p>
-<p>CORS (<a href="http:&#47;&#47;en.wikipedia.org&#47;wiki&#47;Cross-origin_resource_sharing">Cross-origin resource sharing<&#47;a>) is a way in which a browser can make a request to a web server other then the one which served up the original resource.</p>
-<p><a href="http:&#47;&#47;hacks.mozilla.org&#47;2009&#47;07&#47;cross-site-xmlhttprequest-with-cors&#47;">As per the Mozilla docs:<&#47;a></p>
+<h2>Introduction</h2></p>
+<p>CORS (<a href="http://en.wikipedia.org/wiki/Cross-origin_resource_sharing">Cross-origin resource sharing</a>) is a way in which a browser can make a request to a web server other then the one which served up the original resource.</p>
+<p><a href="http://hacks.mozilla.org/2009/07/cross-site-xmlhttprequest-with-cors/">As per the Mozilla docs:</a></p>
 <blockquote><p>
-The CORS specification mandates that requests that use methods other than POST or GET, or that use custom headers, or request bodies other than text&#47;plain, are preflighted. A preflighted request first sends the OPTIONS header to the resource on the other domain, to check and see if the actual request is safe to send. This capability is currently not supported by IE8&prime;s XDomainRequest object, but is supported by Firefox 3.5 and Safari 4 with XMLHttpRequest. The web developer does not need to worry about the mechanics of preflighting, since the implementation handles that.<br />
-<&#47;blockquote></p>
+The CORS specification mandates that requests that use methods other than POST or GET, or that use custom headers, or request bodies other than text/plain, are preflighted. A preflighted request first sends the OPTIONS header to the resource on the other domain, to check and see if the actual request is safe to send. This capability is currently not supported by IE8&prime;s XDomainRequest object, but is supported by Firefox 3.5 and Safari 4 with XMLHttpRequest. The web developer does not need to worry about the mechanics of preflighting, since the implementation handles that.<br />
+</blockquote></p>
 <p>You can achieve this using a DelegatingHandler in ASP.Net Web API - the way it works is to:</p>
 <ul>
-<li>Identify requests containing the "Origin" header"<&#47;li>
+<li>Identify requests containing the "Origin" header"</li>
 <li>If the request is NOT of HTTP method "OPTIONS" (no preflighting) then we add the following headers to the response:
 <ul>
-<li><strong>Access-Control-Allow-Origin<&#47;strong> - this will have the same value as the <strong>Origin<&#47;strong> value passed in the request.<&#47;strong><&#47;li>
-<li><strong>Access-Control-Allow-Credentials<&#47;strong> - this will have the value <strong>true<&#47;strong>, allowing requests to contain basic-auth credentials<&#47;li><br />
-  <&#47;ul><br />
-<&#47;li></p>
+<li><strong>Access-Control-Allow-Origin</strong> - this will have the same value as the <strong>Origin</strong> value passed in the request.</strong></li>
+<li><strong>Access-Control-Allow-Credentials</strong> - this will have the value <strong>true</strong>, allowing requests to contain basic-auth credentials</li><br />
+  </ul><br />
+</li></p>
 <li>If the request is of HTTP method "OPTIONS", then we treat this as a "pre-flighting" request, responding with a 200-OK response, and returning the following headers in the response:
 <ul>
-<li><strong>Access-Control-Allow-Origin<&#47;strong> - this will have the same value as the <strong>Origin<&#47;strong> value passed in the request header.<&#47;strong><&#47;li>
-<li><strong>Access-Control-Allow-Credentials<&#47;strong> - this will have the value <strong>true<&#47;strong>, allowing requests to contain basic-auth credentials<&#47;li>
-<li><strong>Access-Control-Allow-Methods<&#47;strong> - this will have the same value as the <strong>Access-Control-Request-Method<&#47;strong> value passed in the request header.<&#47;li>
-<li><strong>Access-Control-Allow-Headers<&#47;strong> - this will have the same value as the <strong>Access-Control-Request-Headers<&#47;strong> value passed in the request header.<&#47;li><br />
-  <&#47;ul><br />
-<&#47;li><br />
-<&#47;ul></p>
+<li><strong>Access-Control-Allow-Origin</strong> - this will have the same value as the <strong>Origin</strong> value passed in the request header.</strong></li>
+<li><strong>Access-Control-Allow-Credentials</strong> - this will have the value <strong>true</strong>, allowing requests to contain basic-auth credentials</li>
+<li><strong>Access-Control-Allow-Methods</strong> - this will have the same value as the <strong>Access-Control-Request-Method</strong> value passed in the request header.</li>
+<li><strong>Access-Control-Allow-Headers</strong> - this will have the same value as the <strong>Access-Control-Request-Headers</strong> value passed in the request header.</li><br />
+  </ul><br />
+</li><br />
+</ul></p>
 <p>And here's the code to achieve that:</p>
 <pre>
 public class CORSHandler : DelegatingHandler<br />
@@ -103,13 +103,13 @@ public class CORSHandler : DelegatingHandler<br />
   }<br />
  }<br />
 }<br />
-<&#47;pre></p>
+</pre></p>
 <p>If using basic-auth, it's worth noting that the pre-flighted request is unauthenticated - so add the CORSHandler to your configurations set of MessageHandlers prior to any authentication handlers, so the OPTIONS requests can be handled correctly.</p>
-<h2>Access-Control-Allow-Credentials<&#47;h2></p>
-<p>In the handler above we enable <strong>Access-Control-Allow-Credentials<&#47;strong> - meaning if the Web API supports basic auth, then the browser is able to authenticate with the API using basic-auth cross-origin, in a jQuery ajax request that would look like this:</p>
+<h2>Access-Control-Allow-Credentials</h2></p>
+<p>In the handler above we enable <strong>Access-Control-Allow-Credentials</strong> - meaning if the Web API supports basic auth, then the browser is able to authenticate with the API using basic-auth cross-origin, in a jQuery ajax request that would look like this:</p>
 <pre>
 $.ajax({<br />
-  url: "http:&#47;&#47;localhost&#47;myapp&#47;api&#47;collectionres,<br />
+  url: "http://localhost/myapp/api/collectionres,<br />
   type: "GET",<br />
   username: "mylogin",<br />
   password: "mypassword",<br />
@@ -120,5 +120,5 @@ $.ajax({<br />
   crossDomain: true,<br />
   success: success<br />
 });<br />
-<&#47;pre></p>
-<p>I definitely don't recommend this approach for production code - but, it can make for great way for people to play with an API programmatically in javascript, without having to resort to using Node (and using a tool like Dropbox allows them to privately "host" their html&#47;javascript as well, making it possible to share and collaborate on simple mashups).</p>
+</pre></p>
+<p>I definitely don't recommend this approach for production code - but, it can make for great way for people to play with an API programmatically in javascript, without having to resort to using Node (and using a tool like Dropbox allows them to privately "host" their html/javascript as well, making it possible to share and collaborate on simple mashups).</p>
