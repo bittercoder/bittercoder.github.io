@@ -20,74 +20,75 @@ categories:
 tags: []
 comments: []
 ---
-<h2>Out of the box API help</h2></p>
+
+<h2>Out of the box API help</h2>
 <p>The WebAPI supports generation of a help page featuring descriptions of each controller / Http method etc. - even generated samples - I found <a href="http://blogs.msdn.com/b/yaohuang1/archive/2012/08/15/introducing-the-asp-net-web-api-help-page-preview.aspx">this blog useful to understand the process</a>, including a nice video - and the feature has come a long way since it was first introduced.</p>
 <p>For a green-fields application I would strongly recommend using it!</p>
-<h2>Here's one I prepared earlier...</h2></p>
+<h2>Here's one I prepared earlier...</h2>
 <p>However, for Enterprise Tester we already had an existing in-application help system in place, and so decided to also put our generated API documentation there as well.</p>
 <p>Here's what the help system looks like:</p>
-<p><a href="http://blog.bittercoder.com/wp-content/uploads/2012/08/OnlineHelp.png" target="_blank"><img src="http://blog.bittercoder.com/wp-content/uploads/2012/08/OnlineHelp.png" alt="" title="OnlineHelp" class="alignnone size-medium wp-image-83489901" /></a></p>
+<p><a href="http://blog.bittercoder.com/wp-content/uploads/2012/08/OnlineHelp.png" target="_blank"><img src="http://blog.bittercoder.com/wp-content/uploads/2012/08/OnlineHelp.png" alt="" title="OnlineHelp" class="alignnone size-medium wp-image-83489901"></a></p>
 <p>We did initially look at harnessing what came out of the box with WebAPI, but decided given the way our JSON rewriting works, and some of our additional metadata such as expansions, that it would be easier to implement much of what we needed from scratch.</p>
 <p>To do this we opted for a more localized approach - marking controllers and action methods up with attributes to provide the metadata to generate the documentation - this also provides a hint about the Expands it supports etc.</p>
 <pre>
-[HttpMethodInfo(<br />
-     Description = "Retrieves all (or a subset) of automated tests that are visible to the current user.",<br />
-     RequiredPermissions = new[] {CoreOperations.CoreOperationsTestManagementView.FullName},<br />
-     SupportsTQL = true)]<br />
-[HttpMethodSupportsStatusCode(HttpStatusCode.OK, "....description...")]<br />
-[HttpMethodSupportsStatusCode(HttpStatusCode.Forbidden, "....description...")]<br />
-[ExpandInfo(typeof (AutomatedTest), typeof (ViewAutomatedTestModel))]<br />
-public HttpResponseMessage Get(string tql = null)<br />
-{<br />
-  ...<br />
-}<br />
-</pre></p>
+[HttpMethodInfo(<br>
+     Description = "Retrieves all (or a subset) of automated tests that are visible to the current user.",<br>
+     RequiredPermissions = new[] {CoreOperations.CoreOperationsTestManagementView.FullName},<br>
+     SupportsTQL = true)]<br>
+[HttpMethodSupportsStatusCode(HttpStatusCode.OK, "....description...")]<br>
+[HttpMethodSupportsStatusCode(HttpStatusCode.Forbidden, "....description...")]<br>
+[ExpandInfo(typeof (AutomatedTest), typeof (ViewAutomatedTestModel))]<br>
+public HttpResponseMessage Get(string tql = null)<br>
+{<br>
+  ...<br>
+}<br>
+</pre>
 <p>Next, we wanted to provide multiple examples for each HTTP method - we did this by setting up a class called "ExampleInfo":</p>
 <pre>
-public class ExampleInfo<br />
-{<br />
-    public string Method { get; set; }<br />
-    public string Title { get; set; }<br />
-    public string Description { get; set; }<br />
-    public List<ParameterInfo> RequestHeaders { get; set; }<br />
-    public List<ParameterInfo> ResponseHeaders { get; set; }<br />
-    public List<ParameterInfo> RequestParameters { get; set; }<br />
-    public object RequestModel { get; set; }<br />
-    public string RenderedRequest { get; set; }<br />
-    public object ResponseModel { get; set; }<br />
-    public string RenderedResponse { get; set; }<br />
-    public HttpStatusCode ResponseStatus { get; set; }<br />
-}</p>
-<p>public class ParameterInfo<br />
-{<br />
-    public string Key { get; set; }<br />
-    public string Value { get; set; }<br />
-    public string Description { get; set; }<br />
-}<br />
-</pre></p>
+public class ExampleInfo<br>
+{<br>
+    public string Method { get; set; }<br>
+    public string Title { get; set; }<br>
+    public string Description { get; set; }<br>
+    public List<parameterinfo> RequestHeaders { get; set; }<br>
+    public List<parameterinfo> ResponseHeaders { get; set; }<br>
+    public List<parameterinfo> RequestParameters { get; set; }<br>
+    public object RequestModel { get; set; }<br>
+    public string RenderedRequest { get; set; }<br>
+    public object ResponseModel { get; set; }<br>
+    public string RenderedResponse { get; set; }<br>
+    public HttpStatusCode ResponseStatus { get; set; }<br>
+}
+<p>public class ParameterInfo<br>
+{<br>
+    public string Key { get; set; }<br>
+    public string Value { get; set; }<br>
+    public string Description { get; set; }<br>
+}<br>
+</p></parameterinfo></parameterinfo></parameterinfo></pre>
 <p>And then controllers (or their abstract base controllers...) could provide examples by implementation a static method on the controller itself i.e.</p>
 <pre>
-static IEnumerable<ExampleInfo> GetPostExamples()<br />
-{<br />
-    yield return new ExampleInfo { .... };<br />
-}<br />
-</pre></p>
+static IEnumerable<exampleinfo> GetPostExamples()<br>
+{<br>
+    yield return new ExampleInfo { .... };<br>
+}<br>
+</exampleinfo></pre>
 <p>The name of the method is not important, we match only on type signature (so you can have as many example methods as you like i.e. one per HTTP method etc.)</p>
 <p>Also notice that in the example info we have both a ResponseModel and a RenderedResponse properties (and equivalents for the request) - rendered requests (strings) are useful when providing examples for documenting multi-part mime supporting methods, but primarily we leveraged the RequestModel/ResponseModel which meant changes to examples would always reflect the current codebase.</p>
-<h2>Resource documentation</h2></p>
+<h2>Resource documentation</h2>
 <p>Given all this information we then generate a help topic that looks like this:</p>
-<p><a href="http://blog.bittercoder.com/wp-content/uploads/2012/08/ResourceHelp.png" target="_blank"><img src="http://blog.bittercoder.com/wp-content/uploads/2012/08/ResourceHelp.png" /></a></p>
+<p><a href="http://blog.bittercoder.com/wp-content/uploads/2012/08/ResourceHelp.png" target="_blank"><img src="http://blog.bittercoder.com/wp-content/uploads/2012/08/ResourceHelp.png"></a></p>
 <p>In addition we generate a index list of all available resources, providing a quick overview of what methods are support by each resource.</p>
 <p>For collection resources, where the results can be filtered (either by filtering via OData's $filter query parameter, or via TQL - Testing Query Language) we also include a small label indicating which query type is supported.</p>
-<p><a href="http://blog.bittercoder.com/wp-content/uploads/2012/08/ResourceList.png" target="_blank"><img src="http://blog.bittercoder.com/wp-content/uploads/2012/08/ResourceList.png" alt="" title="ResourceList" class="alignnone size-full wp-image-83489903" /></a></p>
+<p><a href="http://blog.bittercoder.com/wp-content/uploads/2012/08/ResourceList.png" target="_blank"><img src="http://blog.bittercoder.com/wp-content/uploads/2012/08/ResourceList.png" alt="" title="ResourceList" class="alignnone size-full wp-image-83489903"></a></p>
 <p>Last of all (an arguably one of the most useful views for a developer building an API) is the permission view - though you should obviously have tests to verify the authorization restrictions applied to each method, it can be very useful to see it presented in a matrix view - so for each resource, we can see what permissions are required.</p>
-<p><a href="http://blog.bittercoder.com/wp-content/uploads/2012/08/PermissionsMatrix.png" target="_blank"><img src="http://blog.bittercoder.com/wp-content/uploads/2012/08/PermissionsMatrix.png" alt="" title="PermissionsMatrix" class="alignnone size-large wp-image-83489904" /></a></p>
+<p><a href="http://blog.bittercoder.com/wp-content/uploads/2012/08/PermissionsMatrix.png" target="_blank"><img src="http://blog.bittercoder.com/wp-content/uploads/2012/08/PermissionsMatrix.png" alt="" title="PermissionsMatrix" class="alignnone size-large wp-image-83489904"></a></p>
 <p>Because of the underlying help system it's possible for 3rd party developers to further extend the content of these help topics or add new topics to further document the capabilities of the API.</p>
-<h2>Bulk Actions</h2></p>
+<h2>Bulk Actions</h2>
 <p>Last of all beyond REST we also expose some existing functionality via JSON RPC, such as support for bulk actions.</p>
 <p>Bulk actions within the application take a set of items (or a query returning a set of items) and then applies an action to that set - be it generating some form of Export, performing a bulk move/update/delete etc.</p>
 <p>We contemplated trying to translate these concepts into a RESTful context, but it didn't really make sense and so instead opted for a mechanism to start these background tasks, and then monitor their progress.</p>
 <p>Metadata related to bulk actions was already available via the IoC container, so we implemented some additional help topic "providers" to generate additional topics necessary for examples of the various types of action you could execute through the API.</p>
-<p><a href="http://blog.bittercoder.com/wp-content/uploads/2012/08/BulkActions.png"><img src="http://blog.bittercoder.com/wp-content/uploads/2012/08/BulkActions-1024x694.png" alt="" title="BulkActions" class="alignnone size-large wp-image-83489905" /></a></p>
-<h2>Next</h2></p>
+<p><a href="http://blog.bittercoder.com/wp-content/uploads/2012/08/BulkActions.png"><img src="http://blog.bittercoder.com/wp-content/uploads/2012/08/BulkActions-1024x694.png" alt="" title="BulkActions" class="alignnone size-large wp-image-83489905"></a></p>
+<h2>Next</h2>
 <p><a href="/?p=83489915">Next in part 4 we take a look at OData, TQL and filtering of collection resources.</a></p>

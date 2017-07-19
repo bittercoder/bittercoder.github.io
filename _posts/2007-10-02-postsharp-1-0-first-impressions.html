@@ -28,121 +28,122 @@ comments:
   date_gmt: '2007-10-03 18:38:39 +0000'
   content: "Thanks for info!\n:)\nwas useful to know there are such new products "
 ---
+
 <p>Ok so I must've been sleeping under a rock or something, so&nbsp;this is no doubt old news to many people - but <a href="http://www.postsharp.org/">PostSharp</a> completely slipped by&nbsp;without me noticing it until now... Having played with it tonight,&nbsp;I'm definitely liking it :)</p>
 <p>So far I've just used it for doing some AOP... unlike doing AOP&nbsp;using something like Dynamic Proxy / <a href="http://www.castleproject.org/aspectsharp/index.html">AspectSharp</a>&nbsp;in <a href="http://www.castleproject.org/">Castle</a>, PostSharp&nbsp;gives you a more... personal experience... letting you apply AOP to&nbsp;internal or sealed types, and allowing you to declaratively setup&nbsp;aspects with very little effort... as an example I created a simple&nbsp;little class for recording and playing back methods out of sync...&nbsp;so, first off I have a recorder interface:</p>
 <pre>
-public interface IRecorder<br />
-{<br />
-    bool IsPlayback { get; }<br />
-    void RecordMethod(MethodInfo method, object[] parameters);<br />
-}<br />
-</pre></p>
+public interface IRecorder<br>
+{<br>
+    bool IsPlayback { get; }<br>
+    void RecordMethod(MethodInfo method, object[] parameters);<br>
+}<br>
+</pre>
 <p>Following that I implemented a base class for recording the&nbsp;methods, and allowing for playback:</p>
 <pre>
-public class BaseRecorder : IRecorder {<br />
-    private readonly List<RecordedMethod><br />
-    _methods = new List<RecordedMethod>();<br />
-    private bool _isPlayback; </p>
+public class BaseRecorder : IRecorder {<br>
+    private readonly List<recordedmethod><br>
+    _methods = new List<recordedmethod>();<br>
+    private bool _isPlayback; 
 <p>    #region IRecorder Members </p>
-<p>    public void RecordMethod(MethodInfo method, object[] parameters)<br />
-    {<br />
-        _methods.Add(new RecordedMethod(method, parameters));<br />
+<p>    public void RecordMethod(MethodInfo method, object[] parameters)<br>
+    {<br>
+        _methods.Add(new RecordedMethod(method, parameters));<br>
     } </p>
-<p>    public bool IsPlayback<br />
-    {<br />
-        get { return _isPlayback; }<br />
+<p>    public bool IsPlayback<br>
+    {<br>
+        get { return _isPlayback; }<br>
     } </p>
 <p>    #endregion </p>
-<p>    public void Playback()<br />
-    {<br />
-        try {<br />
-           _isPlayback = true;<br />
-          foreach (RecordedMethod method in _methods) method.Replay(this);<br />
-        } finally {<br />
-            _isPlayback = false;<br />
-        }<br />
+<p>    public void Playback()<br>
+    {<br>
+        try {<br>
+           _isPlayback = true;<br>
+          foreach (RecordedMethod method in _methods) method.Replay(this);<br>
+        } finally {<br>
+            _isPlayback = false;<br>
+        }<br>
      } </p>
 <p>     #region Nested type: RecordedMethod </p>
-<p>     public class RecordedMethod {<br />
-         private readonly MethodInfo _method;<br />
+<p>     public class RecordedMethod {<br>
+         private readonly MethodInfo _method;<br>
          private readonly object[] _parameters; </p>
-<p>         public RecordedMethod(MethodInfo method, object[] parameters)<br />
-         {<br />
-             _method = method; _parameters = parameters;<br />
+<p>         public RecordedMethod(MethodInfo method, object[] parameters)<br>
+         {<br>
+             _method = method; _parameters = parameters;<br>
          } </p>
-<p>         public void Replay(object instance)<br />
-         {<br />
-             _method.Invoke(instance, _parameters);<br />
-         }<br />
+<p>         public void Replay(object instance)<br>
+         {<br>
+             _method.Invoke(instance, _parameters);<br>
+         }<br>
     } </p>
-<p>    #endregion<br />
-}<br />
-</pre></p>
+<p>    #endregion<br>
+}<br>
+</p></recordedmethod></recordedmethod></pre>
 <p>Pretty basic - then I wrote myself the aspect - it really could not&nbsp;be simpler:</p>
 <pre>
-[Serializable]<br />
-public class MethodRecordAttribute : OnMethodInvocationAspect<br />
-{<br />
-    public override void OnInvocation(MethodInvocationEventArgs eventArgs)<br />
-    {<br />
-        IRecorder recorder = (IRecorder) eventArgs.Delegate.Target;<br />
-        object[] arguments = eventArgs.GetArguments();<br />
-        if (recorder.IsPlayback) eventArgs.Delegate.DynamicInvoke(arguments);<br />
-        else recorder.RecordMethod(eventArgs.Delegate.Method, arguments);<br />
-    }<br />
-}<br />
-</pre></p>
+[Serializable]<br>
+public class MethodRecordAttribute : OnMethodInvocationAspect<br>
+{<br>
+    public override void OnInvocation(MethodInvocationEventArgs eventArgs)<br>
+    {<br>
+        IRecorder recorder = (IRecorder) eventArgs.Delegate.Target;<br>
+        object[] arguments = eventArgs.GetArguments();<br>
+        if (recorder.IsPlayback) eventArgs.Delegate.DynamicInvoke(arguments);<br>
+        else recorder.RecordMethod(eventArgs.Delegate.Method, arguments);<br>
+    }<br>
+}<br>
+</pre>
 <p>And finally a demo... so I create a recorder class of my very own&nbsp;and decorate it with the attribute created above:</p>
 <pre>
-[MethodRecord]<br />
-public class MyRecorder : BaseRecorder<br />
-{<br />
-    public void SayHiTo(string name)<br />
-    {<br />
-        Console.WriteLine("Hi  {0}", name);<br />
-    }</p>
-<p>    public void AddSomeNumbers(int x, int y)<br />
-    {<br />
-        Console.WriteLine("{0} + {1} = {2}", x, y, x + y);<br />
-    }<br />
-}<br />
-</pre></p>
+[MethodRecord]<br>
+public class MyRecorder : BaseRecorder<br>
+{<br>
+    public void SayHiTo(string name)<br>
+    {<br>
+        Console.WriteLine("Hi  {0}", name);<br>
+    }
+<p>    public void AddSomeNumbers(int x, int y)<br>
+    {<br>
+        Console.WriteLine("{0} + {1} = {2}", x, y, x + y);<br>
+    }<br>
+}<br>
+</p></pre>
 <p>And now a quick demo:</p>
 <pre>
-[TestFixture]<br />
-public sealed class TryOutPostSharp<br />
-{<br />
-    [Test]<br />
-    public void RecordAndPlayback()<br />
-    {<br />
-        MyRecorder recorder = new MyRecorder();<br />
-        Console.WriteLine("Starting to record");<br />
-        recorder.SayHiTo("Alex");<br />
-        recorder.SayHiTo("Renee");<br />
-        recorder.SayHiTo("Blog subscribers");<br />
-        recorder.AddSomeNumbers(10, 20);<br />
-        Console.WriteLine("Starting to replay");<br />
-        recorder.Playback();<br />
-        Console.WriteLine("All done");<br />
-    }<br />
-}<br />
-</pre></p>
+[TestFixture]<br>
+public sealed class TryOutPostSharp<br>
+{<br>
+    [Test]<br>
+    public void RecordAndPlayback()<br>
+    {<br>
+        MyRecorder recorder = new MyRecorder();<br>
+        Console.WriteLine("Starting to record");<br>
+        recorder.SayHiTo("Alex");<br>
+        recorder.SayHiTo("Renee");<br>
+        recorder.SayHiTo("Blog subscribers");<br>
+        recorder.AddSomeNumbers(10, 20);<br>
+        Console.WriteLine("Starting to replay");<br>
+        recorder.Playback();<br>
+        Console.WriteLine("All done");<br>
+    }<br>
+}<br>
+</pre>
 <p>The output is:</p>
-<p><strong><br />
-</strong><strong>Starting to record<br />
-Starting to replay<br />
-Hi&nbsp; Alex<br />
-Hi&nbsp; Renee<br />
-Hi&nbsp; Blog subscribers<br />
-10 + 20 = 30<br />
+<p><strong><br>
+</strong><strong>Starting to record<br>
+Starting to replay<br>
+Hi&nbsp; Alex<br>
+Hi&nbsp; Renee<br>
+Hi&nbsp; Blog subscribers<br>
+10 + 20 = 30<br>
 All done</strong></p>
 <p>Which I think is pretty darn sweet, I can definitely see this&nbsp;having a place in my toolbox in the near future - especially when&nbsp;attempting to uphold <a href="http://en.wikipedia.org/wiki/Don%27t_repeat_yourself">DRY</a> in&nbsp;some of my code - anyone using it on production projects in NZ at&nbsp;the moment?</p>
 <p>So how does PostSharp pull it off?&nbsp; Well it post-processes the&nbsp;compiled assembly... it does so by hooking in to an existing&nbsp;extension point in msbuild, so that the post-processor is executed&nbsp;for any project where it references the PostSharp.Public&nbsp;assembly.</p>
 <p>All this means that you get to see a couple of extra lines in the&nbsp;build output during compilation:</p>
-<p><strong>Compile complete -- 0 errors, 0 warnings<br />
-PostSharp 1.0 [1.0.7.261] - Copyright (c) Gael Fraiteur and<br />
-Community, 2005-2007.<br />
-TryPostSharp -><br />
+<p><strong>Compile complete -- 0 errors, 0 warnings<br>
+PostSharp 1.0 [1.0.7.261] - Copyright (c) Gael Fraiteur and<br>
+Community, 2005-2007.<br>
+TryPostSharp -><br>
 C:devexperimentsTryPostSharpTryPostSharpbinDebugTryPostSharp.dll</strong></p>
 <p>========== Rebuild All: 1 succeeded, 0 failed, 0 skipped&nbsp;==========</p>
 <p>But how does it really work? Well if we take a look at the list of&nbsp;<a href="http://www.ayende.com/Blog/archive/2007/07/02/7-Approaches-for-AOP-in-.Net.aspx">7 approaches to AOP</a> <a href="http://www.ayende.com/">Ayende</a>&nbsp;did ... then it fits into the last two (Compile-time &amp; Run-time&nbsp;IL Weaving).</p>
@@ -150,5 +151,5 @@ C:devexperimentsTryPostSharpTryPostSharpbinDebugTryPostSharp.dll</strong></p>
 <ul>
 <li><a href="http://www.postsharp.org/">PostSharp site</a></li>
 <li><a href="http://gael.fraiteur.net/blog">PostSharp blog (Gael&nbsp;Fraiteur's blog)</a></li>
-<li><a href="http://www.postsharp.org/about/news/1.0-rc-1">PostSharp&nbsp;RC1</a></li><br />
-</ul></p>
+<li><a href="http://www.postsharp.org/about/news/1.0-rc-1">PostSharp&nbsp;RC1</a></li><br>
+</ul>

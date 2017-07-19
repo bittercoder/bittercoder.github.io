@@ -33,34 +33,35 @@ comments:
 
      - Alex
 ---
+
 <p>No so much for my future reference, but to refer people too should the topic of how generic types are represented by name ever crops up again.</p>
 <table border="1" cellspacing="1" cellpadding="1">
 <tbody>
 <tr>
-<th>Type</th></p>
-<th>FullName</th><br />
-</tr><br />
-</tbody></p>
+<th>Type</th>
+<th>FullName</th><br>
+</tr><br>
+</tbody>
 <tbody>
 <tr>
-<td>typeof (List<>).FullName</td></p>
-<td>System.Collections.Generic.List`1</td><br />
-</tr></p>
+<td>typeof (List<>).FullName</td>
+<td>System.Collections.Generic.List`1</td><br>
+</tr>
 <tr>
-<td>typeof(List<int>).FullName</td></p>
-<td>System.Collections.Generic.List`1[[System.Int32]]</td><br />
-</tr></p>
+<td>typeof(List<int>).FullName</int></td>
+<td>System.Collections.Generic.List`1[[System.Int32]]</td><br>
+</tr>
 <tr>
-<td>typeof(Dictionary<,>).FullName</td></p>
-<td>System.Collections.Generic.Dictionary`2</td><br />
-</tr></p>
+<td>typeof(Dictionary<,>).FullName</,></td>
+<td>System.Collections.Generic.Dictionary`2</td><br>
+</tr>
 <tr>
-<td>typeof(Dictionary<string,int>).FullName</td></p>
-<td>System.Collections.Generic.Dictionary`2[[System.String],[System.Int32]]</td><br />
-</tr></p>
+<td>typeof(Dictionary<string,int>).FullName</string,int></td>
+<td>System.Collections.Generic.Dictionary`2[[System.String],[System.Int32]]</td><br>
+</tr>
 <tr>
-<td>typeof(Dictionary<string,List<int>>).FullName</td></p>
-<td>System.Collections.Generic.Dictionary`2[[System.String],[System.Collections.Generic.List`1[[System.Int32]]]]</td><br />
-</tr><br />
-</tbody><br />
-</table></p>
+<td>typeof(Dictionary<><int>>).FullName</int></td>
+<td>System.Collections.Generic.Dictionary`2[[System.String],[System.Collections.Generic.List`1[[System.Int32]]]]</td><br>
+</tr><br>
+</tbody><br>
+</table>

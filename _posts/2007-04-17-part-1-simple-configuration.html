@@ -23,86 +23,87 @@ tags:
 - IoC
 comments: []
 ---
-<p><img src="http://blog.bittercoder.com/images/ioc_tutorial_titles/1_simple_configuration.png" /><br /></p>
+
+<p><img src="http://blog.bittercoder.com/images/ioc_tutorial_titles/1_simple_configuration.png"><br></p>
 <p>
-  Welcome to part 1... today we're looking at supporting basic configuration in components without additional coding by using the windsor container.<br /><br />
-</p>So - with the container we can provide configuration for a component which is loaded at runtime, so every time you start your app it will be read in - you can do this using the configuration support in .Net - but using castle makes support for this very code-light in comparison... let's take a look.<br /><br />
-<br /><br />
-So first off, we have a class we can use to calculate the tax on a gross ammount:<br /><br />
-<br /></p>
+  Welcome to part 1... today we're looking at supporting basic configuration in components without additional coding by using the windsor container.<br><br>
+</p>So - with the container we can provide configuration for a component which is loaded at runtime, so every time you start your app it will be read in - you can do this using the configuration support in .Net - but using castle makes support for this very code-light in comparison... let's take a look.<br><br>
+<br><br>
+So first off, we have a class we can use to calculate the tax on a gross ammount:<br><br>
+<br>
 <pre>
-public class TaxCalculator<br />
-{<br />
-    private decimal _rate = 0.125m;</p>
-<p>    public decimal Rate<br />
-    {<br />
-        set { _rate = value; }<br />
-        get { return _rate; }<br />
+public class TaxCalculator<br>
+{<br>
+    private decimal _rate = 0.125m;
+<p>    public decimal Rate<br>
+    {<br>
+        set { _rate = value; }<br>
+        get { return _rate; }<br>
     }</p>
-<p>    public decimal CalculateTax(decimal gross)<br />
-    {<br />
-        return Math.Round(_rate*gross, 2);<br />
-    }<br />
-}<br />
-</pre><br /><br />
-By default the tax rate is 12.5% - but we can change the tax rate by setting the "Rate" property.<br /><br />
-<br /><br />
-Now, lets look at setting up the container... so we have this code in our sample:<br /><br />
-<br /></p>
+<p>    public decimal CalculateTax(decimal gross)<br>
+    {<br>
+        return Math.Round(_rate*gross, 2);<br>
+    }<br>
+}<br>
+</p></pre><br><br>
+By default the tax rate is 12.5% - but we can change the tax rate by setting the "Rate" property.<br><br>
+<br><br>
+Now, lets look at setting up the container... so we have this code in our sample:<br><br>
+<br>
 <pre>
-private static void Main(string[] args)<br />
-{<br />
-    WindsorContainer container = new WindsorContainer(new XmlInterpreter());</p>
-<p>    TaxCalculator calculator = container.Resolve<TaxCalculator>();</p>
-<p>    decimal gross = 100;<br />
+private static void Main(string[] args)<br>
+{<br>
+    WindsorContainer container = new WindsorContainer(new XmlInterpreter());
+<p>    TaxCalculator calculator = container.Resolve<taxcalculator>();</taxcalculator></p>
+<p>    decimal gross = 100;<br>
     decimal tax = calculator.CalculateTax(gross);</p>
-<p>    Console.WriteLine("Gross: {0}, Tax: {1}", gross, tax);<br />
-    Console.Read();<br />
-}<br />
-</pre><br /><br />
-The windsor container is constructed with an "XmlInterpreter" - this configuration will pull the setup for our container from a section in the App.config.<br /><br />
-<br /><br />
-Let's have a look at that:<br /><br />
-<br /></p>
+<p>    Console.WriteLine("Gross: {0}, Tax: {1}", gross, tax);<br>
+    Console.Read();<br>
+}<br>
+</p></pre><br><br>
+The windsor container is constructed with an "XmlInterpreter" - this configuration will pull the setup for our container from a section in the App.config.<br><br>
+<br><br>
+Let's have a look at that:<br><br>
+<br>
 <pre>
-<configuration></p>
-<p>  <configSections></p>
-<section name="castle"<br />
-        type="Castle.Windsor.Configuration.AppDomain.CastleSectionHandler, Castle.Windsor" /><br />
-  </configSections></p>
-<p>  <castle><br />
-    <components><br />
-      <component id="taxcalc.service" type="IoC.Tutorials.Part1.TaxCalculator, IoC.Tutorials.Part1" /><br />
-    </components><br />
+<configuration>
+<p>  <configsections></configsections></p>
+<section name="castle"></section><br>
+        type="Castle.Windsor.Configuration.AppDomain.CastleSectionHandler, Castle.Windsor" /><br>
+  
+<p>  <castle><br>
+    <components><br>
+      <component id="taxcalc.service" type="IoC.Tutorials.Part1.TaxCalculator, IoC.Tutorials.Part1"></component><br>
+    </components><br>
   </castle></p>
-<p></configuration><br />
-</pre><br /><br />
-Running the program will display: <b>Gross: 100, Tax: 12.50</b><br /><br />
-<br /><br />
-Now, what about changing the tax rate in the configuration?<br /><br />
-<br /></p>
+<p></p></configuration><br>
+</pre><br><br>
+Running the program will display: <b>Gross: 100, Tax: 12.50</b><br><br>
+<br><br>
+Now, what about changing the tax rate in the configuration?<br><br>
+<br>
 <pre>
-<configuration></p>
-<p>  <configSections></p>
-<section name="castle"<br />
-        type="Castle.Windsor.Configuration.AppDomain.CastleSectionHandler, Castle.Windsor" /><br />
-  </configSections></p>
-<p>  <castle><br />
-    <components><br />
-      <component id="taxcalc.service" type="IoC.Tutorials.Part1.TaxCalculator, IoC.Tutorials.Part1"></p>
+<configuration>
+<p>  <configsections></configsections></p>
+<section name="castle"></section><br>
+        type="Castle.Windsor.Configuration.AppDomain.CastleSectionHandler, Castle.Windsor" /><br>
+  
+<p>  <castle><br>
+    <components><br>
+      <component id="taxcalc.service" type="IoC.Tutorials.Part1.TaxCalculator, IoC.Tutorials.Part1"></component></components></castle></p>
 <parameters>
-          <Rate>0.25</Rate><br />
-        </parameters><br />
-      </component><br />
-    </components><br />
-  </castle></p>
-<p></configuration><br />
-</pre><br /></p>
+          <rate>0.25</rate><br>
+        </parameters><br>
+      <br>
+    <br>
+  
+<p></p></configuration><br>
+</pre><br>
 <p>
-  Now running the program will display: <b>Gross: 100, Tax: 25.00</b><br /><br />
-  <br /><br />
-  And that's part 1 done - so now you can see how can we supply configuration parameters, and provide sensible defaults for them.<br />
-</p></p>
+  Now running the program will display: <b>Gross: 100, Tax: 25.00</b><br><br>
+  <br><br>
+  And that's part 1 done - so now you can see how can we supply configuration parameters, and provide sensible defaults for them.<br>
+</p>
 <p>
-  Next time we'll look at configuring arrays...<br /><br />
-</p></p>
+  Next time we'll look at configuring arrays...<br><br>
+</p>

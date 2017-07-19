@@ -27,71 +27,72 @@ comments:
   date_gmt: '2007-06-14 01:52:02 +0000'
   content: I will do, just going to tidy it up a bit first.
 ---
+
 <p>
-  So I've been mulling some ideas over after the whole abusing<br />
-  lambdas for Hash table construction (<a href="http://blog.bittercoder.com/PermaLink,guid,d1831805-dbf7-4b74-a6fd-2e9ed437c3d9.aspx">here</a><br />
-  and <a href="http://blog.bittercoder.com/PermaLink,guid,206e64d1-29ae-4362-874b-83f5b103727f.aspx">here</a>) ... and after reading a post on <a href="http://evain.net/blog/articles/2007/06/12/annotating-objects">Jb<br />
-  Evain's blog</a> I decided to create a little bit of code for<br />
-  doing annotations... so given a class say:<br />
-</p></p>
+  So I've been mulling some ideas over after the whole abusing<br>
+  lambdas for Hash table construction (<a href="http://blog.bittercoder.com/PermaLink,guid,d1831805-dbf7-4b74-a6fd-2e9ed437c3d9.aspx">here</a><br>
+  and <a href="http://blog.bittercoder.com/PermaLink,guid,206e64d1-29ae-4362-874b-83f5b103727f.aspx">here</a>) ... and after reading a post on <a href="http://evain.net/blog/articles/2007/06/12/annotating-objects">Jb<br>
+  Evain's blog</a> I decided to create a little bit of code for<br>
+  doing annotations... so given a class say:<br>
+</p>
 <p>
-  public class ClassA<br /><br />
-  {<br /><br />
-  &nbsp;&nbsp;&nbsp; public int Id { get; set; }<br /><br />
-  &nbsp;&nbsp;&nbsp; public string Name { get; set; }<br /><br />
-  }<br />
-</p></p>
+  public class ClassA<br><br>
+  {<br><br>
+  &nbsp;&nbsp;&nbsp; public int Id { get; set; }<br><br>
+  &nbsp;&nbsp;&nbsp; public string Name { get; set; }<br><br>
+  }<br>
+</p>
 <p>
-  You can then do this kind of thing (assuming you've added the<br />
-  apropriate namespace where&nbsp;the Annotations static class<br />
-  resides in)<br />
-</p></p>
+  You can then do this kind of thing (assuming you've added the<br>
+  apropriate namespace where&nbsp;the Annotations static class<br>
+  resides in)<br>
+</p>
 <p>
-  [Test]<br /><br />
-  public void AnnotateClass()<br /><br />
-  {<br /><br />
-  &nbsp;&nbsp;&nbsp; ClassA classA = new ClassA();<br /><br />
-  &nbsp;&nbsp;&nbsp; classA.Annotate(IsValid => false);<br /><br />
-  &nbsp;&nbsp;&nbsp; classA.Annotate(MapsToTable => "TblClassA",<br />
-  Key => "Id");<br /><br />
-  &nbsp;&nbsp;&nbsp; classA.Annotate(Roles => new []<br />
-  {"Administrator", "User"});<br />
-</p></p>
+  [Test]<br><br>
+  public void AnnotateClass()<br><br>
+  {<br><br>
+  &nbsp;&nbsp;&nbsp; ClassA classA = new ClassA();<br><br>
+  &nbsp;&nbsp;&nbsp; classA.Annotate(IsValid => false);<br><br>
+  &nbsp;&nbsp;&nbsp; classA.Annotate(MapsToTable => "TblClassA",<br>
+  Key => "Id");<br><br>
+  &nbsp;&nbsp;&nbsp; classA.Annotate(Roles => new []<br>
+  {"Administrator", "User"});<br>
+</p>
 <p>
-  &nbsp;&nbsp;&nbsp;<br />
-  Assert.IsFalse(classA.Annotation<bool>("IsValid"));<br /><br />
-  &nbsp;&nbsp;&nbsp; Assert.AreEqual("TblClassA",<br />
-  classA.Annotation<string>("MapsToTable"));<br /><br />
-  &nbsp;&nbsp;&nbsp; Assert.AreEqual("Id",<br />
-  classA.Annotation<string>("Key"));<br /><br />
-  }<br />
-</p></p>
+  &nbsp;&nbsp;&nbsp;<br>
+  Assert.IsFalse(classA.Annotation<bool>("IsValid"));<br><br>
+  &nbsp;&nbsp;&nbsp; Assert.AreEqual("TblClassA",<br>
+  classA.Annotation<string>("MapsToTable"));<br><br>
+  &nbsp;&nbsp;&nbsp; Assert.AreEqual("Id",<br>
+  classA.Annotation<string>("Key"));<br><br>
+  }<br>
+</string></string></bool></p>
 <p>
-  Or, perhaps&nbsp;you want to attach some&nbsp;annotations to a<br />
-  specific property... no problem!<br />
-</p></p>
+  Or, perhaps&nbsp;you want to attach some&nbsp;annotations to a<br>
+  specific property... no problem!<br>
+</p>
 <p>
-  [Test]<br /><br />
-  public void AnnotateProperty()<br /><br />
-  {<br /><br />
-  &nbsp;&nbsp;&nbsp; ClassA classA = new ClassA();<br /><br />
-  &nbsp;&nbsp;&nbsp; classA.Annotate(() => classA.Name,<br />
-  CanBeNull => true);<br /><br />
-  &nbsp;&nbsp;&nbsp; bool canBeNull =<br />
-  classA.Annotation<bool>(() => classA.Name,<br />
-  "CanBeNull");<br /><br />
-  &nbsp;&nbsp;&nbsp; Assert.AreEqual(true, canBeNull);<br /><br />
-  }<br />
-</p></p>
+  [Test]<br><br>
+  public void AnnotateProperty()<br><br>
+  {<br><br>
+  &nbsp;&nbsp;&nbsp; ClassA classA = new ClassA();<br><br>
+  &nbsp;&nbsp;&nbsp; classA.Annotate(() => classA.Name,<br>
+  CanBeNull => true);<br><br>
+  &nbsp;&nbsp;&nbsp; bool canBeNull =<br>
+  classA.Annotation<bool>(() => classA.Name,<br>
+  "CanBeNull");<br><br>
+  &nbsp;&nbsp;&nbsp; Assert.AreEqual(true, canBeNull);<br><br>
+  }<br>
+</bool></p>
 <p>
-  Under the hood the values are stored against a dictionary where<br />
-  the keys (in this case the instance of classA)&nbsp;are weak<br />
-  referenced... so once classA is garbage collected the entries in<br />
-  the dictionary will also dissapear in time (next time any method<br />
-  touches the dictionary).<br />
-</p></p>
+  Under the hood the values are stored against a dictionary where<br>
+  the keys (in this case the instance of classA)&nbsp;are weak<br>
+  referenced... so once classA is garbage collected the entries in<br>
+  the dictionary will also dissapear in time (next time any method<br>
+  touches the dictionary).<br>
+</p>
 <p>
-  The nice thing is obviously you can directly interogate the<br />
-  Annotations static class itself with a query expression to say<br />
-  find all objects with a certain annotation.<br /><br />
-</p></p>
+  The nice thing is obviously you can directly interogate the<br>
+  Annotations static class itself with a query expression to say<br>
+  find all objects with a certain annotation.<br><br>
+</p>

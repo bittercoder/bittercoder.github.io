@@ -21,65 +21,66 @@ categories:
 tags: []
 comments: []
 ---
-<p>I've had some requests from different ASP.Net developers writing<br />
-applications for the <a href="http://code.google.com/apis/opensocial/">OpenSocial</a> platform<br />
-lately wanting to use <a href="http://code.google.com/p/devdefined-tools/wiki/OAuth">DevDefined.OAuth</a><br />
-to validate signed requests with a public certificate - so I've put<br />
-together a little example to help get people started.<br /></p>
+
+<p>I've had some requests from different ASP.Net developers writing<br>
+applications for the <a href="http://code.google.com/apis/opensocial/">OpenSocial</a> platform<br>
+lately wanting to use <a href="http://code.google.com/p/devdefined-tools/wiki/OAuth">DevDefined.OAuth</a><br>
+to validate signed requests with a public certificate - so I've put<br>
+together a little example to help get people started.<br></p>
 <h2>
-  What are we trying to do?<br />
-</h2><br /><br />
-So first of let's review how the process works and what we're<br />
-trying to achieve.<br /><br />
-<br /><br />
-<img src="http://blog.bittercoder.com/images/OAuthOpenSocialRequestFlow.PNG"<br />
-alt="OAuthOpenSocialRequestFlow.PNG" border="1" height="112" widthsrc="692" /><br /><br />
-<br /><br />
-Basically as a developer for the OpenSocial platform you will be<br />
-writing gadgets - these gadgets are generally defined in an XML<br />
-document providing information about your application and a chunk<br />
-of html content which will be rendered into an IFrame to kick the<br />
-application off (including javascript functions etc. to fetch<br />
-remote content) - to work around spoofing issues and to avoid<br />
-cross-scripting issues your gadget can use pre-canned functions in<br />
-the open-social java-script library to make requests to your own<br />
-services, which to the developer appear to be a direct request to<br />
-their site.<br /><br />
-<br /><br />
-Under the hood the the requests are instead made to the opensocial<br />
-host platform, which acts as a proxy passing the request onto your<br />
-application - at this point the platform employes OAuth (though<br />
-without any 3-pronged delegate authority being established) to sign<br />
-the request using a x509 Certificate (i.e. the RSA-SHA1 signature<br />
-method) at which point it calls your application with the signed<br />
-request and passed on response back to the calling gadget.<br /><br />
-<br /><br />
-The main goals in signing the request (in so far as I can tell) are<br />
-to ensure it hasn't been tampered with, spoofed and provide a Nonce<br />
-and timestamp so you can void replay attacks - something that using<br />
-SSL alone would not prevent.<br /><br />
-<br /><br />
-Because a lot of the mechanics of OAuth itself is being<br />
-circumnavigated, it's much simpler to verify the signature is<br />
-valid.<br /><br />
-<br /></p>
+  What are we trying to do?<br>
+</h2><br><br>
+So first of let's review how the process works and what we're<br>
+trying to achieve.<br><br>
+<br><br>
+<img src="http://blog.bittercoder.com/images/OAuthOpenSocialRequestFlow.PNG"><br>
+alt="OAuthOpenSocialRequestFlow.PNG" border="1" height="112" widthsrc="692" /><br><br>
+<br><br>
+Basically as a developer for the OpenSocial platform you will be<br>
+writing gadgets - these gadgets are generally defined in an XML<br>
+document providing information about your application and a chunk<br>
+of html content which will be rendered into an IFrame to kick the<br>
+application off (including javascript functions etc. to fetch<br>
+remote content) - to work around spoofing issues and to avoid<br>
+cross-scripting issues your gadget can use pre-canned functions in<br>
+the open-social java-script library to make requests to your own<br>
+services, which to the developer appear to be a direct request to<br>
+their site.<br><br>
+<br><br>
+Under the hood the the requests are instead made to the opensocial<br>
+host platform, which acts as a proxy passing the request onto your<br>
+application - at this point the platform employes OAuth (though<br>
+without any 3-pronged delegate authority being established) to sign<br>
+the request using a x509 Certificate (i.e. the RSA-SHA1 signature<br>
+method) at which point it calls your application with the signed<br>
+request and passed on response back to the calling gadget.<br><br>
+<br><br>
+The main goals in signing the request (in so far as I can tell) are<br>
+to ensure it hasn't been tampered with, spoofed and provide a Nonce<br>
+and timestamp so you can void replay attacks - something that using<br>
+SSL alone would not prevent.<br><br>
+<br><br>
+Because a lot of the mechanics of OAuth itself is being<br>
+circumnavigated, it's much simpler to verify the signature is<br>
+valid.<br><br>
+<br>
 <h2>
-  Gadget XML<br />
-</h2><br /><br />
-Right - onto the code - Let's take a look at the Gadget XML<br />
-first:<br /><br />
-<br /></p>
+  Gadget XML<br>
+</h2><br><br>
+Right - onto the code - Let's take a look at the Gadget XML<br>
+first:<br><br>
+<br>
 <pre>
-<?xml version="1.0" encoding="UTF-8" ?><br />
-<Module><br />
-  <ModulePrefs title="OAuth TestBed" description="Testbed to test the OAuth library"     title_url="http://www.devdefined.com/" author="Alex Henderson" author_email="bittercoder@gmail.com" author_affiliation="friendster"    author_location="Auckland, New Zealand" thumbnail="" icon=""><br />
-    <Icon></Icon><br />
-    <Locale lang="en" /><br />
-    <Require feature="opensocial-0.7" /><br />
-    <Require feature="dynamic-height"/><br />
-    <Require feature="views"/><br />
-  </ModulePrefs><br />
-  <Content type="html"><br />
+<?xml version="1.0" encoding="UTF-8"?><br>
+<module><br>
+  <moduleprefs title="OAuth TestBed" description="Testbed to test the OAuth library" title_url="http://www.devdefined.com/" author="Alex Henderson" author_email="bittercoder@gmail.com" author_affiliation="friendster" author_location="Auckland, New Zealand" thumbnail="" icon=""><br>
+    <icon></icon><br>
+    <locale lang="en"></locale><br>
+    <require feature="opensocial-0.7"></require><br>
+    <require feature="dynamic-height"></require><br>
+    <require feature="views"></require><br>
+  </moduleprefs><br>
+  <content type="html"><br>
     <![CDATA[<br />
     <script><br />
       function makeRequest(server_url,fn){<br />
@@ -103,173 +104,173 @@ first:<br /><br />
 <p>      gadgets.util.registerOnLoadHandler(function() {<br />
           renderPage();<br />
       });<br />
-    </script></p>
+    </script>
 <div id="container">
-    </div><br />
-  ]]><br />
-  </Content><br />
-</Module><br />
-</pre><br /><br />
-Basically the XML for the gadget is a chunk of metadata and finally<br />
-some actual content for the gadget itself - notice that it regsters<br />
-a handler to run on load of the gadget, and that it's then making a<br />
-request to the url<br />
-<b>http://demo.devdefined.com/Friendster/SocialService.aspx</b> and<br />
-render the response in the inner HTML of the container div DOM<br />
-element.<br /><br />
-<br /><br />
-The key to this being an OAuth signed request is the 5<sup>th</sup><br />
-line of the makeRequest function:<br /><br />
-<br /></p>
-<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;<br />
-  params[gadgets.io.RequestParameters.AUTHORIZATION] =<br />
-  gadgets.io.AuthorizationType.<span style="text-decoration: underline">SIGNED</span>;<br />
-</p></p>
-<p style="margin: 0px;"><br /><br />
-</p></p>
-<p style="margin: 0px;">So far so good - uploading your application is pretty easy - but<br />
-  is generally platform specific - if you wanted to try this out on<br />
-  Friendster then just head to <a href="http://www.friendster.com/developer/">http://www.friendster.com/developer/</a><br />
-  click on the OpenSocial tab and follow the instructions - the<br />
-  approach is to save your gadget definition as an XML file<br />
-  somewhere, then publish that XML document on the web and then<br />
-  create an application in your open social host of choice and<br />
-  direct th it to the XML files location.&nbsp; It takes all of a<br />
-  minute to do.<br />
-</p></p>
-<p style="margin: 0px;"><br /><br />
-</p></p>
-<h2 style="margin: 0px;">ASP.Net Application (Provider)<br /><br />
-</h2></p>
-<p style="margin: 0px;"><br /><br />
-</p></p>
-<p style="margin: 0px;">Now for the application itself - first off you need to locate and<br />
-  download the provided public key (certificate) for the social<br />
-  platform host and either store it on the filesystem or in the<br />
-  case of this demo we'll just store it as a string, like so:<br />
-</p></p>
-<p style="margin: 0px;"><br /><br />
-</p></p>
+    </div><br>
+  ]]><br>
+  </content><br>
+</module><br>
+</pre><br><br>
+Basically the XML for the gadget is a chunk of metadata and finally<br>
+some actual content for the gadget itself - notice that it regsters<br>
+a handler to run on load of the gadget, and that it's then making a<br>
+request to the url<br>
+<b>http://demo.devdefined.com/Friendster/SocialService.aspx</b> and<br>
+render the response in the inner HTML of the container div DOM<br>
+element.<br><br>
+<br><br>
+The key to this being an OAuth signed request is the 5<sup>th</sup><br>
+line of the makeRequest function:<br><br>
+<br>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;<br>
+  params[gadgets.io.RequestParameters.AUTHORIZATION] =<br>
+  gadgets.io.AuthorizationType.<span style="text-decoration: underline">SIGNED</span>;<br>
+</p>
+<p style="margin: 0px;"><br><br>
+</p>
+<p style="margin: 0px;">So far so good - uploading your application is pretty easy - but<br>
+  is generally platform specific - if you wanted to try this out on<br>
+  Friendster then just head to <a href="http://www.friendster.com/developer/">http://www.friendster.com/developer/</a><br>
+  click on the OpenSocial tab and follow the instructions - the<br>
+  approach is to save your gadget definition as an XML file<br>
+  somewhere, then publish that XML document on the web and then<br>
+  create an application in your open social host of choice and<br>
+  direct th it to the XML files location.&nbsp; It takes all of a<br>
+  minute to do.<br>
+</p>
+<p style="margin: 0px;"><br><br>
+</p>
+<h2 style="margin: 0px;">ASP.Net Application (Provider)<br><br>
+</h2>
+<p style="margin: 0px;"><br><br>
+</p>
+<p style="margin: 0px;">Now for the application itself - first off you need to locate and<br>
+  download the provided public key (certificate) for the social<br>
+  platform host and either store it on the filesystem or in the<br>
+  case of this demo we'll just store it as a string, like so:<br>
+</p>
+<p style="margin: 0px;"><br><br>
+</p>
 <p style="margin: 0px;"><!--<br />
 {rtf1ansiansicpglang1024noproof65001uc1 deff0{fonttbl{f0fnilfcharset0fprq1 Courier New;}}{colortbl;??red0green0blue255;red255green255blue255;red0green0blue0;red43green145blue175;red163green21blue21;}??fs20 cf1 publiccf0  cf1 classcf0  cf4 OpenSocialCertificatespar ??cf0 {par ??    cf1 privatecf0  cf1 constcf0  cf1 stringcf0  _friendsterCertificate =par ??cf5 @"=====BEGIN CERTIFICATE=====par ??MIIB2TCCAYOgAwIBAgIBADANBgkqhkiG9w0BAQUFADAvMQswCQYDVQQGEwJVUzELpar ??MAkGA1UECBMCQ0ExEzARBgNVBAoTCkZyaWVuZHN0ZXIwHhcNMDgwODEzMTgwMzQ5par ??WhcNMTQwMjAzMTgwMzQ5WjAvMQswCQYDVQQGEwJVUzELMAkGA1UECBMCQ0ExEzARpar ??BgNVBAoTCkZyaWVuZHN0ZXIwXDANBgkqhkiG9w0BAQEFAANLADBIAkEAyVjnX2Hrpar ??SLTyAuh2f2/OSRWkLFo3+q+l0Czb48v24Me6CsoexkPgwLOjXmPn/Pt8WtwlisQPpar ??tZ9RX30iymg0owIDAQABo4GJMIGGMB0GA1UdDgQWBBQlDiW+HfExpSnvWqM5a1JDpar ??C+IMyTBXBgNVHSMEUDBOgBQlDiW+HfExpSnvWqM5a1JDC+IMyaEzpDEwLzELMAkGpar ??A1UEBhMCVVMxCzAJBgNVBAgTAkNBMRMwEQYDVQQKEwpGcmllbmRzdGVyggEAMAwGpar ??A1UdEwQFMAMBAf8wDQYJKoZIhvcNAQEFBQADQQCXFtEZswNcPcOTT78oeTuslgmupar ??0shaZB0PAjA3I89OJZBI7SknIwDxj56kNZpEo6Rhf3uilpj44gkJFecSYnG2par ??=====END CERTIFICATE====="cf0 ;par ??par ??    cf1 publiccf0  cf1 staticcf0  cf4 X509Certificate2cf0  FriendsterCertificatepar ??    {par ??      cf1 getcf0  { cf1 returncf0  cf1 newcf0  cf4 X509Certificate2cf0 (cf4 Encodingcf0 .ASCII.GetBytes(_friendsterCertificate)); }par ??    }par ??}}<br />
---><br />
-</p></p>
+--><br>
+</p>
 <pre>
-public class OpenSocialCertificates<br />
-{<br />
-    private const string _friendsterCertificate =<br />
-@"-----BEGIN CERTIFICATE-----<br />
-MIIB2TCCAYOgAwIBAgIBADANBgkqhkiG9w0BAQUFADAvMQswCQYDVQQGEwJVUzEL<br />
-MAkGA1UECBMCQ0ExEzARBgNVBAoTCkZyaWVuZHN0ZXIwHhcNMDgwODEzMTgwMzQ5<br />
-WhcNMTQwMjAzMTgwMzQ5WjAvMQswCQYDVQQGEwJVUzELMAkGA1UECBMCQ0ExEzAR<br />
-BgNVBAoTCkZyaWVuZHN0ZXIwXDANBgkqhkiG9w0BAQEFAANLADBIAkEAyVjnX2Hr<br />
-SLTyAuh2f2/OSRWkLFo3+q+l0Czb48v24Me6CsoexkPgwLOjXmPn/Pt8WtwlisQP<br />
-tZ9RX30iymg0owIDAQABo4GJMIGGMB0GA1UdDgQWBBQlDiW+HfExpSnvWqM5a1JD<br />
-C+IMyTBXBgNVHSMEUDBOgBQlDiW+HfExpSnvWqM5a1JDC+IMyaEzpDEwLzELMAkG<br />
-A1UEBhMCVVMxCzAJBgNVBAgTAkNBMRMwEQYDVQQKEwpGcmllbmRzdGVyggEAMAwG<br />
-A1UdEwQFMAMBAf8wDQYJKoZIhvcNAQEFBQADQQCXFtEZswNcPcOTT78oeTuslgmu<br />
-0shaZB0PAjA3I89OJZBI7SknIwDxj56kNZpEo6Rhf3uilpj44gkJFecSYnG2<br />
------END CERTIFICATE-----";</p>
-<p>    public static X509Certificate2 FriendsterCertificate<br />
-    {<br />
-      get { return new X509Certificate2(Encoding.ASCII.GetBytes(_friendsterCertificate)); }<br />
-    }<br />
-}<br />
-</pre></p>
-<p style="margin: 0px;"><br /><br />
-  It's worth noting that the certificates can be changed at any<br />
-  time - but fair warning will be given (according to the document)<br />
-  - and that the location (url) of the certificate is actually<br />
-  included as a parameter in the requests the host makes to your<br />
-  application (<b>xoauth_signature_publickey</b>) - so it's fairly<br />
-  trivial to implement a caching scheme to automatically pull down<br />
-  and update the certificate if it has changed.<br />
-</p></p>
-<p style="margin: 0px;"><br /><br />
-</p></p>
-<p style="margin: 0px;">Now that we have the certificate we just need to validate the<br />
-  request, in this cause I'm just going to check it's been signed -<br />
-  I've left validating timestamps and nonces out of the example, as<br />
-  these tend to be propritary to the app your building, but both<br />
-  are easy to implement.<br /><br />
-</p></p>
-<p style="margin: 0px;"><br /><br />
-</p></p>
+public class OpenSocialCertificates<br>
+{<br>
+    private const string _friendsterCertificate =<br>
+@"-----BEGIN CERTIFICATE-----<br>
+MIIB2TCCAYOgAwIBAgIBADANBgkqhkiG9w0BAQUFADAvMQswCQYDVQQGEwJVUzEL<br>
+MAkGA1UECBMCQ0ExEzARBgNVBAoTCkZyaWVuZHN0ZXIwHhcNMDgwODEzMTgwMzQ5<br>
+WhcNMTQwMjAzMTgwMzQ5WjAvMQswCQYDVQQGEwJVUzELMAkGA1UECBMCQ0ExEzAR<br>
+BgNVBAoTCkZyaWVuZHN0ZXIwXDANBgkqhkiG9w0BAQEFAANLADBIAkEAyVjnX2Hr<br>
+SLTyAuh2f2/OSRWkLFo3+q+l0Czb48v24Me6CsoexkPgwLOjXmPn/Pt8WtwlisQP<br>
+tZ9RX30iymg0owIDAQABo4GJMIGGMB0GA1UdDgQWBBQlDiW+HfExpSnvWqM5a1JD<br>
+C+IMyTBXBgNVHSMEUDBOgBQlDiW+HfExpSnvWqM5a1JDC+IMyaEzpDEwLzELMAkG<br>
+A1UEBhMCVVMxCzAJBgNVBAgTAkNBMRMwEQYDVQQKEwpGcmllbmRzdGVyggEAMAwG<br>
+A1UdEwQFMAMBAf8wDQYJKoZIhvcNAQEFBQADQQCXFtEZswNcPcOTT78oeTuslgmu<br>
+0shaZB0PAjA3I89OJZBI7SknIwDxj56kNZpEo6Rhf3uilpj44gkJFecSYnG2<br>
+-----END CERTIFICATE-----";
+<p>    public static X509Certificate2 FriendsterCertificate<br>
+    {<br>
+      get { return new X509Certificate2(Encoding.ASCII.GetBytes(_friendsterCertificate)); }<br>
+    }<br>
+}<br>
+</p></pre>
+<p style="margin: 0px;"><br><br>
+  It's worth noting that the certificates can be changed at any<br>
+  time - but fair warning will be given (according to the document)<br>
+  - and that the location (url) of the certificate is actually<br>
+  included as a parameter in the requests the host makes to your<br>
+  application (<b>xoauth_signature_publickey</b>) - so it's fairly<br>
+  trivial to implement a caching scheme to automatically pull down<br>
+  and update the certificate if it has changed.<br>
+</p>
+<p style="margin: 0px;"><br><br>
+</p>
+<p style="margin: 0px;">Now that we have the certificate we just need to validate the<br>
+  request, in this cause I'm just going to check it's been signed -<br>
+  I've left validating timestamps and nonces out of the example, as<br>
+  these tend to be propritary to the app your building, but both<br>
+  are easy to implement.<br><br>
+</p>
+<p style="margin: 0px;"><br><br>
+</p>
 <p style="margin: 0px;"><!--<br />
 {rtf1ansiansicpglang1024noproof65001uc1 deff0{fonttbl{f0fnilfcharset0fprq1 Courier New;}}{colortbl;??red0green0blue255;red255green255blue255;red0green0blue0;red43green145blue175;red0green128blue0;red163green21blue21;}??fs20 cf1 publiccf0  cf1 partialcf0  cf1 classcf0  cf4 SocialServicecf0  : cf4 Pagepar ??cf0 {par ??    cf1 protectedcf0  cf1 voidcf0  Page_Load(cf1 objectcf0  sender, cf4 EventArgscf0  e)par ??    {par ??        ValidateWithDevDefinedOAuth();par ??par ??        cf5 // now handle the request...par ??cf0     }par ??par ??    cf1 privatecf0  cf1 voidcf0  ValidateWithDevDefinedOAuth()par ??    {par ??        cf1 trypar ??cf0         {par ??            cf4 OAuthContextcf0  context = cf1 newcf0  cf4 OAuthContextBuildercf0 ().FromHttpRequest(Request);par ??            cf1 varcf0  signer = cf1 newcf0  cf4 OAuthContextSignercf0 ();par ??            cf1 varcf0  signingContext = cf1 newcf0  cf4 SigningContextcf0  {Algorithm = cf4 OpenSocialCertificatescf0 .FriendsterCertificate.PublicKey.Key};par ??par ??            cf1 ifcf0  (!signer.ValidateSignature(context, signingContext))par ??            {par ??                cf1 throwcf0  cf1 newcf0  cf4 OAuthExceptioncf0 (context, cf4 OAuthProblemscf0 .SignatureInvalid, cf6 "check certificate is still valid"cf0 );par ??            }par ??        }par ??        cf1 catchcf0  (cf4 OAuthExceptioncf0  authEx)par ??        {par ??            Response.Clear();par ??            Response.Write(authEx.Report.ToString());par ??            Response.End();par ??        }par ??    }par ??}}<br />
---><br />
-</p></p>
+--><br>
+</p>
 <pre>
-public partial class SocialService : Page<br />
-{<br />
-    protected void Page_Load(object sender, EventArgs e)<br />
-    {<br />
-        ValidateWithDevDefinedOAuth();</p>
-<p>        // now handle the request...<br />
+public partial class SocialService : Page<br>
+{<br>
+    protected void Page_Load(object sender, EventArgs e)<br>
+    {<br>
+        ValidateWithDevDefinedOAuth();
+<p>        // now handle the request...<br>
     }</p>
-<p>    private void ValidateWithDevDefinedOAuth()<br />
-    {<br />
-        try<br />
-        {<br />
-            OAuthContext context = new OAuthContextBuilder().FromHttpRequest(Request);<br />
-            var signer = new OAuthContextSigner();<br />
+<p>    private void ValidateWithDevDefinedOAuth()<br>
+    {<br>
+        try<br>
+        {<br>
+            OAuthContext context = new OAuthContextBuilder().FromHttpRequest(Request);<br>
+            var signer = new OAuthContextSigner();<br>
             var signingContext = new SigningContext {Algorithm = OpenSocialCertificates.FriendsterCertificate.PublicKey.Key};</p>
-<p>            if (!signer.ValidateSignature(context, signingContext))<br />
-            {<br />
-                throw new OAuthException(context, OAuthProblems.SignatureInvalid, "check certificate is still valid");<br />
-            }<br />
-        }<br />
-        catch (OAuthException authEx)<br />
-        {<br />
-            Response.Clear();<br />
-            Response.Write(authEx.Report.ToString());<br />
-            Response.End();<br />
-        }<br />
-    }<br />
-}<br />
-</pre></p>
-<p style="margin: 0px;"><br /><br />
-</p></p>
-<p style="margin: 0px;">The process is basically using the <b>OAuthContextBuilder</b><br />
-  class to construct a context (which is used to calculate a<br />
-  signature base) from the current pages request.&nbsp; It then<br />
-  constructs a signer (used for signing requests and checking their<br />
-  signatures i.e. validation) and a signing context, which is used<br />
-  to provide additional information to the signer, such as the<br />
-  public key of the friendster certificate.<br />
-</p></p>
-<p style="margin: 0px;"><br /><br />
-</p></p>
-<p style="margin: 0px;">We then invoke <b>ValidateSignature</b> to ensure the signature<br />
-  is valid - if not we throw an exception.<br /><br />
-</p></p>
-<p style="margin: 0px;"><br /><br />
-</p></p>
-<p style="margin: 0px;">Finally if an OAuthException is thrown we catch it and render<br />
-  it's report to response stream and close it - this provides<br />
-  diagnostic information as per the <a href="http://oauth.pbwiki.com/ProblemReporting">OAuth problem<br />
-  reporting extension</a>.<br />
-</p></p>
-<p style="margin: 0px;"><br /><br />
-</p></p>
-<p style="margin: 0px;">Hope this has been useful to some people out there - BTW I'm no<br />
-  OpenSocial expert, so please direct general OpenSocial questions<br />
-  to the apropriate google groups, I can only help with OAuth<br />
-  library questions.<br /><br />
-</p></p>
-<p style="margin: 0px;"><br /><br />
-</p></p>
-<h2 style="margin: 0px;">Problems with Friendster Requests<br /><br />
-</h2></p>
-<p style="margin: 0px;"><br /><br />
-</p></p>
-<p style="margin: 0px;">As a side note - for anyone who's tried writing an OpenSocial<br />
-  application using DevDefined.OAuth to validate request signatures<br />
-  they may have found it didn't work! This was a result of<br />
-  Friendster appending an ampersand (&amp;) to the end of the query<br />
-  string on the Url, which was causing the signature base to be<br />
-  incorrect (I'm not sure if this is an issue for other OpenSocial<br />
-  implementations) - The code now checks for this and removes it if<br />
-  discovered - and signature validation works as expected.<br />
-</p></p>
-<p style="margin: 0px;"></p></p>
+<p>            if (!signer.ValidateSignature(context, signingContext))<br>
+            {<br>
+                throw new OAuthException(context, OAuthProblems.SignatureInvalid, "check certificate is still valid");<br>
+            }<br>
+        }<br>
+        catch (OAuthException authEx)<br>
+        {<br>
+            Response.Clear();<br>
+            Response.Write(authEx.Report.ToString());<br>
+            Response.End();<br>
+        }<br>
+    }<br>
+}<br>
+</p></pre>
+<p style="margin: 0px;"><br><br>
+</p>
+<p style="margin: 0px;">The process is basically using the <b>OAuthContextBuilder</b><br>
+  class to construct a context (which is used to calculate a<br>
+  signature base) from the current pages request.&nbsp; It then<br>
+  constructs a signer (used for signing requests and checking their<br>
+  signatures i.e. validation) and a signing context, which is used<br>
+  to provide additional information to the signer, such as the<br>
+  public key of the friendster certificate.<br>
+</p>
+<p style="margin: 0px;"><br><br>
+</p>
+<p style="margin: 0px;">We then invoke <b>ValidateSignature</b> to ensure the signature<br>
+  is valid - if not we throw an exception.<br><br>
+</p>
+<p style="margin: 0px;"><br><br>
+</p>
+<p style="margin: 0px;">Finally if an OAuthException is thrown we catch it and render<br>
+  it's report to response stream and close it - this provides<br>
+  diagnostic information as per the <a href="http://oauth.pbwiki.com/ProblemReporting">OAuth problem<br>
+  reporting extension</a>.<br>
+</p>
+<p style="margin: 0px;"><br><br>
+</p>
+<p style="margin: 0px;">Hope this has been useful to some people out there - BTW I'm no<br>
+  OpenSocial expert, so please direct general OpenSocial questions<br>
+  to the apropriate google groups, I can only help with OAuth<br>
+  library questions.<br><br>
+</p>
+<p style="margin: 0px;"><br><br>
+</p>
+<h2 style="margin: 0px;">Problems with Friendster Requests<br><br>
+</h2>
+<p style="margin: 0px;"><br><br>
+</p>
+<p style="margin: 0px;">As a side note - for anyone who's tried writing an OpenSocial<br>
+  application using DevDefined.OAuth to validate request signatures<br>
+  they may have found it didn't work! This was a result of<br>
+  Friendster appending an ampersand (&amp;) to the end of the query<br>
+  string on the Url, which was causing the signature base to be<br>
+  incorrect (I'm not sure if this is an issue for other OpenSocial<br>
+  implementations) - The code now checks for this and removes it if<br>
+  discovered - and signature validation works as expected.<br>
+</p>
+<p style="margin: 0px;"></p>

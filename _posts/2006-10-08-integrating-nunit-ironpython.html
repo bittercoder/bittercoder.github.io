@@ -20,177 +20,178 @@ categories:
 tags: []
 comments: []
 ---
+
 <h2>
-  Breaking scripts<br />
-</h2></p>
+  Breaking scripts<br>
+</h2>
 <p>
-  I've been thinking about the issues involved with using<br />
-  IronPython in a product as a scripting language, internally we've<br />
-  already struggled at Syzmk with my love of refactoring breaking<br />
-  scripts in our deployed products left right and centre.<br />
-</p></p>
+  I've been thinking about the issues involved with using<br>
+  IronPython in a product as a scripting language, internally we've<br>
+  already struggled at Syzmk with my love of refactoring breaking<br>
+  scripts in our deployed products left right and centre.<br>
+</p>
 <p>
-  I think the problems I need to solve first are:<br />
-</p></p>
+  I think the problems I need to solve first are:<br>
+</p>
 <ul>
-<li>Ensuring an understanding of the user experience when<br />
-  scripting with the application (read: dogfooding the scripting<br />
-  experience)<br /><br />
-  </li></p>
-<li>Making sure I identify where helper classes / wrappers etc.<br />
-  may be necessary to make the scripting experience more palatable<br />
-  to end users.<br />
-  </li></p>
-<li>Ensuring any changes don't clobber the contracts between the<br />
-  scripting language and the client when refactoring the underlying<br />
-  .Net classes they rely on.<br />
-  </li><br />
-</ul></p>
+<li>Ensuring an understanding of the user experience when<br>
+  scripting with the application (read: dogfooding the scripting<br>
+  experience)<br><br>
+  </li>
+<li>Making sure I identify where helper classes / wrappers etc.<br>
+  may be necessary to make the scripting experience more palatable<br>
+  to end users.<br>
+  </li>
+<li>Ensuring any changes don't clobber the contracts between the<br>
+  scripting language and the client when refactoring the underlying<br>
+  .Net classes they rely on.<br>
+  </li><br>
+</ul>
 <p>
-  Regression tests for expected script usage is what it comes<br />
-  down... but if you sit down and start trying to write these tests<br />
-  in NUnit it all gets a bit unwieldy - there's a lot of time<br />
-  wasted making sure your tabs are right, escaping characters<br />
-  correctly in strings, and running scripts, evaluating the<br />
-  results, and then asserting against them - it's frustrating, and<br />
-  fails to emulate the experience of your users who are writing<br />
-  scripts purely in Python.<br />
-</p></p>
+  Regression tests for expected script usage is what it comes<br>
+  down... but if you sit down and start trying to write these tests<br>
+  in NUnit it all gets a bit unwieldy - there's a lot of time<br>
+  wasted making sure your tabs are right, escaping characters<br>
+  correctly in strings, and running scripts, evaluating the<br>
+  results, and then asserting against them - it's frustrating, and<br>
+  fails to emulate the experience of your users who are writing<br>
+  scripts purely in Python.<br>
+</p>
 <h2>
-  PyUnit?<br />
-</h2></p>
+  PyUnit?<br>
+</h2>
 <p>
-  So my next port of call was to try the unit testing support that<br />
-  comes with python (PyUnit) - it would definitely do the job - but<br />
-  then I need to do a couple of things... first I need to start<br />
-  bundling quite a few standard libraries with the scripting engine<br />
-  in our product, and then I have to write additional functionality<br />
-  to support capturing the results of running the PyUnit tests and<br />
-  presenting them to the automated build process... It's all<br />
-  sounding like a pain in the ass, and&nbsp; the automation build<br />
-  works nicely as it is, I'd rather not have to mess with it...<br />
-</p></p>
+  So my next port of call was to try the unit testing support that<br>
+  comes with python (PyUnit) - it would definitely do the job - but<br>
+  then I need to do a couple of things... first I need to start<br>
+  bundling quite a few standard libraries with the scripting engine<br>
+  in our product, and then I have to write additional functionality<br>
+  to support capturing the results of running the PyUnit tests and<br>
+  presenting them to the automated build process... It's all<br>
+  sounding like a pain in the ass, and&nbsp; the automation build<br>
+  works nicely as it is, I'd rather not have to mess with it...<br>
+</p>
 <p>
-  So I decided to do a little integration work, to see if I could<br />
-  run a test suite written in python as part of a C# assembly.<br />
-</p></p>
+  So I decided to do a little integration work, to see if I could<br>
+  run a test suite written in python as part of a C# assembly.<br>
+</p>
 <h2>
-  NUnit meets (Iron)Python<br />
-</h2></p>
+  NUnit meets (Iron)Python<br>
+</h2>
 <p>
-  First off, my solutions user experience is ok - not perfect - but<br />
-  then I just wanted to make sure I could get it working, before I<br />
-  put any effort into cleaning it up, and not being an expert in<br />
-  extending NUnit, or coding python, it was probably doomed from<br />
-  the start to be a mediocre solution ;o)<br />
-</p></p>
+  First off, my solutions user experience is ok - not perfect - but<br>
+  then I just wanted to make sure I could get it working, before I<br>
+  put any effort into cleaning it up, and not being an expert in<br>
+  extending NUnit, or coding python, it was probably doomed from<br>
+  the start to be a mediocre solution ;o)<br>
+</p>
 <p>
-  The steps to get it working in a test assembly are:<br />
-</p></p>
+  The steps to get it working in a test assembly are:<br>
+</p>
 <ol>
-<li>Writing a fixture in python, and including it in the assembly<br />
-  as an embedded resource.<br />
-  </li></p>
-<li>Creating a suite which references the embedded python files -<br />
-  this is a class derived from the "AbstractPythonSuite".<br /><br />
-  </li></p>
-<li>Creating a Suite builder (I had to do this in the test<br />
-  assembly itself, because it wasn't working when I bundled this in<br />
-  a support library).<br />
-  </li></p>
-<li>Run the suite ;o)<br />
-  </li><br />
-</ol></p>
+<li>Writing a fixture in python, and including it in the assembly<br>
+  as an embedded resource.<br>
+  </li>
+<li>Creating a suite which references the embedded python files -<br>
+  this is a class derived from the "AbstractPythonSuite".<br><br>
+  </li>
+<li>Creating a Suite builder (I had to do this in the test<br>
+  assembly itself, because it wasn't working when I bundled this in<br>
+  a support library).<br>
+  </li>
+<li>Run the suite ;o)<br>
+  </li><br>
+</ol>
 <p>
-  First off, we write the fixture, the only requirements are:<br />
-</p></p>
+  First off, we write the fixture, the only requirements are:<br>
+</p>
 <ul>
-<li>The fixture class is derived from "NUnitFixture".<br />
-  </li></p>
-<li>The test methods are prefixed with "test" - as per PyUnit.<br />
-  And take only a "self" argument.<br />
-  </li><br />
-</ul></p>
+<li>The fixture class is derived from "NUnitFixture".<br>
+  </li>
+<li>The test methods are prefixed with "test" - as per PyUnit.<br>
+  And take only a "self" argument.<br>
+  </li><br>
+</ul>
 <p>
-  Here's an example fixture:<br />
-</p></p>
+  Here's an example fixture:<br>
+</p>
 <pre>
-import System<br />
-from System import Console</p>
+import System<br>
+from System import Console
 <p>class MyPythonFixture(NUnitFixture):</p>
-<p>    def testPass(self):<br />
-        Console.WriteLine("--testPass--")<br />
+<p>    def testPass(self):<br>
+        Console.WriteLine("--testPass--")<br>
         Assert.IsTrue(True)</p>
-<p>    def testFail(self):<br />
-        Console.WriteLine("--testFail--")<br />
-        Assert.IsTrue(False, "this will fail")<br />
-</pre></p>
+<p>    def testFail(self):<br>
+        Console.WriteLine("--testFail--")<br>
+        Assert.IsTrue(False, "this will fail")<br>
+</p></pre>
 <p>
-  As you can see we are just using the existing NUnit Assert<br />
-  methods... There is one caveat to this that I will cover in<br />
-  another post (that of testing for expected exceptions).<br /><br />
-</p></p>
+  As you can see we are just using the existing NUnit Assert<br>
+  methods... There is one caveat to this that I will cover in<br>
+  another post (that of testing for expected exceptions).<br><br>
+</p>
 <p>
-  Next we create a suite - which can wrap one or more python script<br />
-  files (included as assembly resources) - this is all we need to<br />
-  bridge the gap.<br />
-</p></p>
+  Next we create a suite - which can wrap one or more python script<br>
+  files (included as assembly resources) - this is all we need to<br>
+  bridge the gap.<br>
+</p>
 <pre>
-public class MyPythonSuite : AbstractPythonSuite<br />
-{<br />
-    public MyPythonSuite()<br />
-        : base("MyPythonFixture.py")<br />
-    {<br />
-    }<br />
-}<br />
-</pre></p>
+public class MyPythonSuite : AbstractPythonSuite<br>
+{<br>
+    public MyPythonSuite()<br>
+        : base("MyPythonFixture.py")<br>
+    {<br>
+    }<br>
+}<br>
+</pre>
 <p>
-  And last of all, we need to drop in a suite builder - in theory I<br />
-  should be able to include this in a support assembly - but it<br />
-  doesn't seem to work, here's the code:<br />
-</p></p>
+  And last of all, we need to drop in a suite builder - in theory I<br>
+  should be able to include this in a support assembly - but it<br>
+  doesn't seem to work, here's the code:<br>
+</p>
 <pre>
-[SuiteBuilder]<br />
-public class PythonSuiteExtensionBuilder : ISuiteBuilder<br />
-{<br />
-    public TestSuite BuildFrom(Type type, int assemblyKey)<br />
-    {<br />
-        if (CanBuildFrom(type))  return new PythonSuiteExtension(type, assemblyKey);<br />
-        return null;<br />
-    }</p>
-<p>    public bool CanBuildFrom(Type type)<br />
-    {<br />
-        return (typeof(AbstractPythonSuite).IsAssignableFrom(type) &amp;&amp; (type != typeof(AbstractPythonSuite)));<br />
-    }<br />
-}<br />
-</pre></p>
+[SuiteBuilder]<br>
+public class PythonSuiteExtensionBuilder : ISuiteBuilder<br>
+{<br>
+    public TestSuite BuildFrom(Type type, int assemblyKey)<br>
+    {<br>
+        if (CanBuildFrom(type))  return new PythonSuiteExtension(type, assemblyKey);<br>
+        return null;<br>
+    }
+<p>    public bool CanBuildFrom(Type type)<br>
+    {<br>
+        return (typeof(AbstractPythonSuite).IsAssignableFrom(type) &amp;&amp; (type != typeof(AbstractPythonSuite)));<br>
+    }<br>
+}<br>
+</p></pre>
 <p>
-  At this point when can test the assembly with <b>NUnitGui</b>,<br />
-  and see our python fixtures appear under the "MyPythonSuite"...<br />
-  pretty slick huh?<br /><br />
-</p></p>
+  At this point when can test the assembly with <b>NUnitGui</b>,<br>
+  and see our python fixtures appear under the "MyPythonSuite"...<br>
+  pretty slick huh?<br><br>
+</p>
 <p>
-  <img src="http://blog.bittercoder.com/content/binary/slick.png"<br />
-  border="0" /><br />
-</p></p>
+  <img src="http://blog.bittercoder.com/content/binary/slick.png"><br>
+  border="0" /><br>
+</p>
 <p>
-  <br /><br />
-  The big downsides of this approach are that you can't run the<br />
-  tests individually using something like <b>TestDriven.Net</b>,<br />
-  and <b>Resharper</b>'s unit test window doesn't pick them up...<br />
-  However <b>NUnitGui</b> and the corresponding <b>NUnitConsole</b><br />
-  have no problems with them, and running all the tests in your<br />
-  assembly with <b>TestDriven.Net</b> does pick them up thankfully<br />
-  - so as long you don't have many slow tests in your assembly it<br />
-  should still be tolerable (you can run them while still<br />
-  coding...).<br />
-</p></p>
+  <br><br>
+  The big downsides of this approach are that you can't run the<br>
+  tests individually using something like <b>TestDriven.Net</b>,<br>
+  and <b>Resharper</b>'s unit test window doesn't pick them up...<br>
+  However <b>NUnitGui</b> and the corresponding <b>NUnitConsole</b><br>
+  have no problems with them, and running all the tests in your<br>
+  assembly with <b>TestDriven.Net</b> does pick them up thankfully<br>
+  - so as long you don't have many slow tests in your assembly it<br>
+  should still be tolerable (you can run them while still<br>
+  coding...).<br>
+</p>
 <p>
-  And of course, they will be picked up in your automated builds -<br />
-  which is great news for me... I hate messing around with<br />
-  CruiseControl.Net's configuration.<br /><br />
-</p></p>
+  And of course, they will be picked up in your automated builds -<br>
+  which is great news for me... I hate messing around with<br>
+  CruiseControl.Net's configuration.<br><br>
+</p>
 <p>
-  I'll tidy up the implementation a little and post the code<br />
-  soon.<br /><br />
-</p></p>
+  I'll tidy up the implementation a little and post the code<br>
+  soon.<br><br>
+</p>

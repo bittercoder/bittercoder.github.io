@@ -29,41 +29,42 @@ comments:
   date_gmt: '2007-06-14 10:53:55 +0000'
   content: Thanks for the code!  I'm looking forward to digging into this soon.
 ---
-<p><a href="http://blog.bittercoder.com/content/binary/AnnotationsCode.zip">Here's the code</a> for my last post on <a href="http://blog.bittercoder.com/PermaLink,guid,2e0e231a-e837-4585-aaab-79999bdcb484.aspx">Annotations</a> - I tidied up a few things up (it's still very basic but it does work) there's a single test fixture to give you a guide for usage... so things like:<br /></p>
+
+<p><a href="http://blog.bittercoder.com/content/binary/AnnotationsCode.zip">Here's the code</a> for my last post on <a href="http://blog.bittercoder.com/PermaLink,guid,2e0e231a-e837-4585-aaab-79999bdcb484.aspx">Annotations</a> - I tidied up a few things up (it's still very basic but it does work) there's a single test fixture to give you a guide for usage... so things like:<br></p>
 <pre>
-    [Test]<br />
-    public void QueryStoreForClassAnnotationsWithCertainKey()<br />
-    {<br />
-        ClassA target1 = new ClassA();<br />
-        ClassA target2 = new ClassA();<br />
-        ClassA target3 = new ClassA();<br />
-        target1.Annotate(Description => "class number 1");<br />
-        target2.Annotate(Description => "class number 2");<br />
-        target3.Annotate(Parsed => true);</p>
-<p>        var results = AnnotationStore.Classes<br />
-            .Where(a => a.HasKey("Description"))<br />
+    [Test]<br>
+    public void QueryStoreForClassAnnotationsWithCertainKey()<br>
+    {<br>
+        ClassA target1 = new ClassA();<br>
+        ClassA target2 = new ClassA();<br>
+        ClassA target3 = new ClassA();<br>
+        target1.Annotate(Description => "class number 1");<br>
+        target2.Annotate(Description => "class number 2");<br>
+        target3.Annotate(Parsed => true);
+<p>        var results = AnnotationStore.Classes<br>
+            .Where(a => a.HasKey("Description"))<br>
             .ToList();</p>
-<p>        Assert.AreEqual(2, results.Count);<br />
-    }<br />
-</pre></p>
+<p>        Assert.AreEqual(2, results.Count);<br>
+    }<br>
+</p></pre>
 <p>And also the equivalent thing is possible for members... though I suspect annotating members isn't all that useful in most cases...</p>
 <pre>
-  [Test]<br />
-  public void QueryStoreForMemberAnnotations()<br />
-  {<br />
-      ClassA target1 = new ClassA();<br />
-      ClassA target2 = new ClassA();<br />
-      ClassA target3 = new ClassA();</p>
-<p>      target1.Annotate(() => target1.FirstName,<br />
-          CamelCase => true); // annotating a property<br />
-      target1.Annotate(() => target1.Field,<br />
-          Ignored => true); // annotating a field<br />
-      target2.Annotate(() => target2.Execute(),<br />
-          Parsed => true); // annotating a method<br />
+  [Test]<br>
+  public void QueryStoreForMemberAnnotations()<br>
+  {<br>
+      ClassA target1 = new ClassA();<br>
+      ClassA target2 = new ClassA();<br>
+      ClassA target3 = new ClassA();
+<p>      target1.Annotate(() => target1.FirstName,<br>
+          CamelCase => true); // annotating a property<br>
+      target1.Annotate(() => target1.Field,<br>
+          Ignored => true); // annotating a field<br>
+      target2.Annotate(() => target2.Execute(),<br>
+          Parsed => true); // annotating a method<br>
       target3.Annotate(Parsed => true);</p>
-<p>      var results = AnnotationStore.Members<br />
-          .Where(p => p.HasKey("CamelCase"))<br />
+<p>      var results = AnnotationStore.Members<br>
+          .Where(p => p.HasKey("CamelCase"))<br>
           .ToList();</p>
-<p>      Assert.AreEqual(1, results.Count);<br />
-  }<br />
-</pre></p>
+<p>      Assert.AreEqual(1, results.Count);<br>
+  }<br>
+</p></pre>

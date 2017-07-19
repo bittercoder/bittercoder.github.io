@@ -23,98 +23,99 @@ tags:
 - IoC
 comments: []
 ---
-<p><img src="http://blog.bittercoder.com/images/ioc_tutorial_titles/2_more_config_arrays.png" /><br /><br />
-So welcome to part 2, today we're going to look at some more config - this time it's arrays...<br /><br />
-<br /><br />
-So we have a class, that tells us when we can down tools and go to the beach...<br /><br />
-<br /></p>
+
+<p><img src="http://blog.bittercoder.com/images/ioc_tutorial_titles/2_more_config_arrays.png"><br><br>
+So welcome to part 2, today we're going to look at some more config - this time it's arrays...<br><br>
+<br><br>
+So we have a class, that tells us when we can down tools and go to the beach...<br><br>
+<br></p>
 <pre>
-public class HolidayService<br />
-{<br />
-    private DateTime[] _holidays;</p>
-<p>    public DateTime[] Holidays<br />
-    {<br />
-        get<br />
-        {<br />
-            return _holidays;<br />
-        }<br />
-        set { _holidays = value; }<br />
+public class HolidayService<br>
+{<br>
+    private DateTime[] _holidays;
+<p>    public DateTime[] Holidays<br>
+    {<br>
+        get<br>
+        {<br>
+            return _holidays;<br>
+        }<br>
+        set { _holidays = value; }<br>
     }</p>
-<p>    public bool IsHoliday(DateTime date)<br />
-    {<br />
-        if (_holidays != null)<br />
-        {<br />
-            DateTime matchDate = date.Date;<br />
-            foreach (DateTime test in Holidays)<br />
-            {<br />
-                if (test.Date.Equals(matchDate))<br />
-                {<br />
-                    return true;<br />
-                }<br />
-            }<br />
+<p>    public bool IsHoliday(DateTime date)<br>
+    {<br>
+        if (_holidays != null)<br>
+        {<br>
+            DateTime matchDate = date.Date;<br>
+            foreach (DateTime test in Holidays)<br>
+            {<br>
+                if (test.Date.Equals(matchDate))<br>
+                {<br>
+                    return true;<br>
+                }<br>
+            }<br>
         }</p>
-<p>        return false;<br />
-    }<br />
-}<br />
-</pre><br /><br />
-We can set the days we are allowed off by adding dates to the holidays array...<br /><br />
-<br /><br />
-So lets look at our code for running this service:<br /><br />
-<br /></p>
+<p>        return false;<br>
+    }<br>
+}<br>
+</p></pre><br><br>
+We can set the days we are allowed off by adding dates to the holidays array...<br><br>
+<br><br>
+So lets look at our code for running this service:<br><br>
+<br>
 <pre>
-internal class Program<br />
-{<br />
-    private static void Main(string[] args)<br />
-    {<br />
-        WindsorContainer container = new WindsorContainer(new XmlInterpreter());</p>
-<p>        HolidayService holidayService = container.Resolve<HolidayService>();</p>
-<p>        DateTime xmas = new DateTime(2007, 12, 25);<br />
+internal class Program<br>
+{<br>
+    private static void Main(string[] args)<br>
+    {<br>
+        WindsorContainer container = new WindsorContainer(new XmlInterpreter());
+<p>        HolidayService holidayService = container.Resolve<holidayservice>();</holidayservice></p>
+<p>        DateTime xmas = new DateTime(2007, 12, 25);<br>
         DateTime newYears = new DateTime(2008, 1, 1);</p>
-<p>        if (holidayService.IsHoliday(xmas))<br />
-            Console.WriteLine("merry xmas!");<br />
-        else<br />
+<p>        if (holidayService.IsHoliday(xmas))<br>
+            Console.WriteLine("merry xmas!");<br>
+        else<br>
             Console.WriteLine("xmas is only for management!");</p>
-<p>        if (holidayService.IsHoliday(newYears))<br />
-            Console.WriteLine("happy new year");<br />
-        else<br />
+<p>        if (holidayService.IsHoliday(newYears))<br>
+            Console.WriteLine("happy new year");<br>
+        else<br>
             Console.WriteLine("new year, you haven't done all the work for last year!");</p>
-<p>        Console.Read();<br />
-    }<br />
-}<br />
-</pre><br /><br />
-The service configuration is just like last time, we have the component registered with no parameters... so if we run the program we shall see on the screen:<br /><br />
-<br /><br />
-<b>xmas is only for management!<br /><br />
-new year, you haven't done all the work for last year!<br /></b><br /><br />
-Mum will be dissapointed, she'd done a roast 'n all... so lets get some configuration in their so we can have a few days off...<br /><br />
-<br /></p>
+<p>        Console.Read();<br>
+    }<br>
+}<br>
+</p></pre><br><br>
+The service configuration is just like last time, we have the component registered with no parameters... so if we run the program we shall see on the screen:<br><br>
+<br><br>
+<b>xmas is only for management!<br><br>
+new year, you haven't done all the work for last year!<br></b><br><br>
+Mum will be dissapointed, she'd done a roast 'n all... so lets get some configuration in their so we can have a few days off...<br><br>
+<br>
 <pre>
-<configuration></p>
-<p>  <configSections></p>
-<section name="castle"<br />
-        type="Castle.Windsor.Configuration.AppDomain.CastleSectionHandler, Castle.Windsor" /><br />
-  </configSections></p>
-<p>  <castle><br />
-    <components><br />
-      <component id="holidays.service" type="IoC.Tutorials.Part2.HolidayService, IoC.Tutorials.Part2" ></p>
+<configuration>
+<p>  <configsections></configsections></p>
+<section name="castle"></section><br>
+        type="Castle.Windsor.Configuration.AppDomain.CastleSectionHandler, Castle.Windsor" /><br>
+  
+<p>  <castle><br>
+    <components><br>
+      <component id="holidays.service" type="IoC.Tutorials.Part2.HolidayService, IoC.Tutorials.Part2"></component></components></castle></p>
 <parameters>
-          <Holidays><br />
-            <array><br />
-              <item>2007-12-24</item><br />
-              <item>2007-12-25</item><br />
-              <item>2008-1-1</item><br />
-            </array><br />
-          </Holidays><br />
-        </parameters><br />
-      </component><br />
-    </components><br />
-  </castle></p>
-<p></configuration><br />
-</pre><br /><br />
-Now let's see if we're going to have a merry xmas and a happy new year - a quick run of our application....<br /><br />
-<br /><br />
-merry xmas!<br /><br />
-happy new year<br /><br />
-<br /><br />
-You don't just have to use arrays either, you can do lists too - though I didn't show them here, just use <strong>list</strong> instead of <strong>array</strong> in the xml configuration...<br /><br />
-<br /> See you for part 3 where we do dictionary configurations.<br /></p>
+          <holidays><br>
+            <array><br>
+              <item>2007-12-24</item><br>
+              <item>2007-12-25</item><br>
+              <item>2008-1-1</item><br>
+            </array><br>
+          </holidays><br>
+        </parameters><br>
+      <br>
+    <br>
+  
+<p></p></configuration><br>
+</pre><br><br>
+Now let's see if we're going to have a merry xmas and a happy new year - a quick run of our application....<br><br>
+<br><br>
+merry xmas!<br><br>
+happy new year<br><br>
+<br><br>
+You don't just have to use arrays either, you can do lists too - though I didn't show them here, just use <strong>list</strong> instead of <strong>array</strong> in the xml configuration...<br><br>
+<br> See you for part 3 where we do dictionary configurations.<br>

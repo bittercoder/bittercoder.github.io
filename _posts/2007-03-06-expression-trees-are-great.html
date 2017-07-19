@@ -20,44 +20,45 @@ categories:
 tags: []
 comments: []
 ---
-<p>Have you ever wanted to be able to do something like this in<br />
-C#?<br /><br />
-<br /><br />
-<b>string propertyName = GetName(MyClass.MyProperty);</b><br /><br />
-<br /><br />
-Well I have, in fact I've wanted the ability to do this since<br />
-Version 1 of the .Net Framework, and now with C# 3.0 we finally<br />
-can!<br /><br />
-<br /><br />
-First off, check out the original blog post here - <a href="http://themechanicalbride.blogspot.com/2007/03/symbols-on-steroids-in-c.html"><br />
-Symbols in C# 3.0</a> by <a href="http://themechanicalbride.blogspot.com/">Jafar Husain</a> - it's a<br />
-clever (and once I thought about, plainly obvious) use of extension<br />
-methods and expression trees.<br /><br />
-<br /></p>
+
+<p>Have you ever wanted to be able to do something like this in<br>
+C#?<br><br>
+<br><br>
+<b>string propertyName = GetName(MyClass.MyProperty);</b><br><br>
+<br><br>
+Well I have, in fact I've wanted the ability to do this since<br>
+Version 1 of the .Net Framework, and now with C# 3.0 we finally<br>
+can!<br><br>
+<br><br>
+First off, check out the original blog post here - <a href="http://themechanicalbride.blogspot.com/2007/03/symbols-on-steroids-in-c.html"><br>
+Symbols in C# 3.0</a> by <a href="http://themechanicalbride.blogspot.com/">Jafar Husain</a> - it's a<br>
+clever (and once I thought about, plainly obvious) use of extension<br>
+methods and expression trees.<br><br>
+<br></p>
 <pre>
-public static class SymbolExtensions<br />
-{<br />
-    public static string GetPropertySymbol<T,R>(this T obj, Expression<Func<T, R>> expr)<br />
-    {<br />
-        return ((System.Linq.Expressions.MemberExpression)           (((System.Linq.Expressions.LambdaExpression)(expr)).Body)).Member.Name;<br />
-    }<br />
-}<br />
-</pre><br /><br />
-Usage requires a lambda, but that's not to painful, here's example<br />
-usage:<br /><br />
-<br /></p>
+public static class SymbolExtensions<br>
+{<br>
+    public static string GetPropertySymbol<t,r>(this T obj, Expression<><t, r="">> expr)<br>
+    {<br>
+        return ((System.Linq.Expressions.MemberExpression)           (((System.Linq.Expressions.LambdaExpression)(expr)).Body)).Member.Name;<br>
+    }<br>
+}<br>
+</t,></t,r></pre><br><br>
+Usage requires a lambda, but that's not to painful, here's example<br>
+usage:<br><br>
+<br>
 <pre>
-MyClass o;<br />
-//...<br />
-string propertyName = this.GetPropertySymbol(o => o.MyProperty)<br />
-</pre><br /><br />
-The beauty of this is that refactoring is entirely painless, you<br />
-don't need to spend time reviewing all the optional string<br />
-replacements that resharper may have found in case you haven't<br />
-mirrored a property or method name change correctly... it also<br />
-looks like it could offer some nice usability improvements to some<br />
-unit testing scenarios (nothing worse then unit tests that don't<br />
-seamlessly refactor with your code).<br /><br />
-<br /><br />
-I wonder what other ideas are floating around for expression trees<br />
-at the moment (outside of the obvious querying concepts) ?<br /></p>
+MyClass o;<br>
+//...<br>
+string propertyName = this.GetPropertySymbol(o => o.MyProperty)<br>
+</pre><br><br>
+The beauty of this is that refactoring is entirely painless, you<br>
+don't need to spend time reviewing all the optional string<br>
+replacements that resharper may have found in case you haven't<br>
+mirrored a property or method name change correctly... it also<br>
+looks like it could offer some nice usability improvements to some<br>
+unit testing scenarios (nothing worse then unit tests that don't<br>
+seamlessly refactor with your code).<br><br>
+<br><br>
+I wonder what other ideas are floating around for expression trees<br>
+at the moment (outside of the obvious querying concepts) ?<br>

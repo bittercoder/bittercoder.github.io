@@ -30,50 +30,51 @@ comments:
   content: Very clever, I never thought to use the parameter name of an anonymous
     delegate - Love it!
 ---
+
 <p>So, I got a comment on the last post about <a href="http://blog.bittercoder.com/PermaLink,guid,d1831805-dbf7-4b74-a6fd-2e9ed437c3d9.aspx">hashes</a> <a href="http://tempuri.org/tempuri.html">from&nbsp;lambdas</a> (from <a href="http://blog.ashmind.com/">Andrey&nbsp;Shchekin</a>)... It pointed out the fact that you don't need to&nbsp;use expressions at all... which hilights an observation that I&nbsp;hadn't made myself - such that the lambda parameter&nbsp;names&nbsp;are available in the generated delegate... which of&nbsp;course makes perfect sense!</p>
 <p>So given:</p>
-<pre>Func<string, T> func = Name => "Value"; </pre><br />
-You can get the lambda parameter "Name" from the function&nbsp;delegate by calling:</p>
-<pre>func.Method.GetParameters()[0].Name // would&nbsp;return "Name" </pre><br />
-Here's the revised Hash method from Andrey:</p>
-<pre>public Dictionary<string, T> Hash<T>(params Func<string, T>[] args)<br />
-where T : class {<br />
-    var items = new Dictionary<string,T>();<br />
-    foreach (var func in args) {<br />
-        var item = func(null);<br />
-        items.Add(func.Method.GetParameters()[0].Name, item);<br />
-    } return items;<br />
-} </pre></p>
+<pre>Func<string, t=""> func = Name => "Value"; </string,></pre><br>
+You can get the lambda parameter "Name" from the function&nbsp;delegate by calling:
+<pre>func.Method.GetParameters()[0].Name // would&nbsp;return "Name" </pre><br>
+Here's the revised Hash method from Andrey:
+<pre>public Dictionary<string, t=""> Hash<t>(params Func<string, t="">[] args)<br>
+where T : class {<br>
+    var items = new Dictionary<string,t>();<br>
+    foreach (var func in args) {<br>
+        var item = func(null);<br>
+        items.Add(func.Method.GetParameters()[0].Name, item);<br>
+    } return items;<br>
+} </string,t></string,></t></string,></pre>
 <p>Very elegant and simple :)</p>
 <p>He even did some stats, which I suspect are probably a lot more&nbsp;accurate then my inital observations:</p>
 <p>For 10000 consecutive calls:</p>
 <table style="width: 298px; height: 87px;" border="1" cellspacing="1">
 <tbody>
 <tr>
-<td>WithAdd</td></p>
-<td>10.0144ms</td><br />
-</tr></p>
+<td>WithAdd</td>
+<td>10.0144ms</td><br>
+</tr>
 <tr>
-<td>WithLambdas</td></p>
-<td>9713.968ms</td><br />
-</tr></p>
+<td>WithLambdas</td>
+<td>9713.968ms</td><br>
+</tr>
 <tr>
-<td>WithLambdasConstantsOnly</td></p>
-<td>240.3456ms</td><br />
-</tr></p>
+<td>WithLambdasConstantsOnly</td>
+<td>240.3456ms</td><br>
+</tr>
 <tr>
-<td>WithDelegates</td></p>
-<td>30.0432ms</td><br />
-</tr><br />
-</tbody><br />
-</table><br />
-Now what about multiple parameters... so far I can't think&nbsp;of any uses I would have for it... perhaps a 2 level configuration&nbsp;dictionary?</p>
+<td>WithDelegates</td>
+<td>30.0432ms</td><br>
+</tr><br>
+</tbody><br>
+</table><br>
+Now what about multiple parameters... so far I can't think&nbsp;of any uses I would have for it... perhaps a 2 level configuration&nbsp;dictionary?
 <pre>
-[Test]<br />
-public void HashTwoLevelDict()<br />
-{<br />
-    Dictionary<string, Dictionary<string,object>> config = this.Hash<object>((Connection, DriverClass) => typeof(SqlClientDriver), (Dialect, DialectClass) => typeof(MsSql2000Dialect), (Connection, Provider) => typeof(DriverConnectionProvider), (Connection, ConnectionString) =>"Data Source=.;Initial Catalog=test;Integrated Security=SSPI");<br />
-    Assert.AreEqual(typeof(SqlClientDriver), config["Connection"]["DriverClass"]);<br />
-}<br />
-</pre></p>
+[Test]<br>
+public void HashTwoLevelDict()<br>
+{<br>
+    Dictionary<string,></string,><string,object>> config = this.Hash<object>((Connection, DriverClass) => typeof(SqlClientDriver), (Dialect, DialectClass) => typeof(MsSql2000Dialect), (Connection, Provider) => typeof(DriverConnectionProvider), (Connection, ConnectionString) =>"Data Source=.;Initial Catalog=test;Integrated Security=SSPI");<br>
+    Assert.AreEqual(typeof(SqlClientDriver), config["Connection"]["DriverClass"]);<br>
+}<br>
+</object></string,object></pre>
 <p>Who knows... I look forward to seeing how Lambdas get used and&nbsp;abused for non-functional programming tasks :)</p>

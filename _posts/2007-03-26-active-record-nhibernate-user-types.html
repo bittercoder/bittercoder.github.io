@@ -20,33 +20,34 @@ categories:
 tags: []
 comments: []
 ---
-<p>I've got a little project on at the moment which I chose to use ActiveRecord for... this is for a "legacy" database where there are existing nightly data warehousing scripts written against it... The cost of changing the database structure and tables is potentially quite high (it has run on effects to other systems, potentially effects SLA's when the nightly scripts fail.. and&nbsp;a small project ends up having a big&nbsp;impact)<br /><br />
-  <br /><br />
-  At any rate, I'm just consuming the existing database as-is... which includes a single character status columns i.e. "A" for active, "P" for pending etc... after poking round with a few solutions I ended up creating an NHibernate custom type... first off, this was surprisingly easy... but it annoyed me a little that I had to create a different custom type for each set of enumerated values, and that this information was no longer declarative, compared to the rest of the ActiveRecord implementation...<br />
-</p></p>
+
+<p>I've got a little project on at the moment which I chose to use ActiveRecord for... this is for a "legacy" database where there are existing nightly data warehousing scripts written against it... The cost of changing the database structure and tables is potentially quite high (it has run on effects to other systems, potentially effects SLA's when the nightly scripts fail.. and&nbsp;a small project ends up having a big&nbsp;impact)<br><br>
+  <br><br>
+  At any rate, I'm just consuming the existing database as-is... which includes a single character status columns i.e. "A" for active, "P" for pending etc... after poking round with a few solutions I ended up creating an NHibernate custom type... first off, this was surprisingly easy... but it annoyed me a little that I had to create a different custom type for each set of enumerated values, and that this information was no longer declarative, compared to the rest of the ActiveRecord implementation...<br>
+</p>
 <p>
-  So I took a few minutes to re-write it&nbsp;as generic solution to the problem today... which at least solves the declarative problem... first off, here's a property with the custom type applied - nothing amazing here, but notice the type is generic... with the type of status field itself qualifying the generic custom type...<br />
-</p></p>
+  So I took a few minutes to re-write it&nbsp;as generic solution to the problem today... which at least solves the declarative problem... first off, here's a property with the custom type applied - nothing amazing here, but notice the type is generic... with the type of status field itself qualifying the generic custom type...<br>
+</p>
 <pre>
-[Property("dBlrStatus", "App.Model.MappedEnumerationHibernateType`1[[App.Model.Status, App.Model]], App.Model")]<br />
-public virtual Status Status  {<br />
-    get { return _status; }<br />
-    set { _status = value; }<br />
-}<br />
-</pre><br /><br />
-We then declare the mappings on the enumeration itself...<br /><br />
-<br /></p>
+[Property("dBlrStatus", "App.Model.MappedEnumerationHibernateType`1[[App.Model.Status, App.Model]], App.Model")]<br>
+public virtual Status Status  {<br>
+    get { return _status; }<br>
+    set { _status = value; }<br>
+}<br>
+</pre><br><br>
+We then declare the mappings on the enumeration itself...<br><br>
+<br>
 <pre>
-<p>public enum Status<br />
-{<br />
-    [MapToCharacters('A', 'a', '+')]<br />
-    Active,<br />
-    [MapToCharacters('I', 'i', '-')]<br />
-    [Default]<br />
-    InActive<br />
-}<br />
-</pre></p>
+<p>public enum Status<br>
+{<br>
+    [MapToCharacters('A', 'a', '+')]<br>
+    Active,<br>
+    [MapToCharacters('I', 'i', '-')]<br>
+    [Default]<br>
+    InActive<br>
+}<br>
+</p></pre>
 <p>
-  <br /><br />
-I think this is a good fit for ActiveRecord... If anyone wants the code at some point just leave a comment and I'll package it up and post it... it's pretty elementary stuff, though it might save some time if you wanted to re-implement it yourself...<br />
-</p></p>
+  <br><br>
+I think this is a good fit for ActiveRecord... If anyone wants the code at some point just leave a comment and I'll package it up and post it... it's pretty elementary stuff, though it might save some time if you wanted to re-implement it yourself...<br>
+</p>

@@ -38,48 +38,49 @@ comments:
     could then be edited to change the order/visibile/editability etc. It's
     pretty trivial though.\n\nCheers, \n\n - Alex"
 ---
+
 <p>
-  Here are some more SharePoint hacks (continuing on from my last<br />
-  post <a href="http://blog.bittercoder.com/PermaLink,guid,d9d2ba93-08b4-4495-866e-6a6d9241c02d.aspx">here</a>)<br /><br />
-  <br /><br />
-  First off some hacks for the <a href="http://blogs.msdn.com/powlo/archive/2007/02/25/displaying-custom-data-through-sharepoint-lists-using-spgridview-and-spmenufield.aspx">SPGridView</a> which is actually a pretty useful control, but<br />
-  fails to do a few things, like displaying attachment columns<br />
-  as-per SharePoint's default List views (with a little paper-clip<br />
-  symbol), and the second (and much more annoying) it doesn't use<br />
-  the current users regional settings / timezone for formatting<br />
-  DateTime values.<br /><br />
-  <br /><br />
-  The hacks:<br /><br />
-</p></p>
+  Here are some more SharePoint hacks (continuing on from my last<br>
+  post <a href="http://blog.bittercoder.com/PermaLink,guid,d9d2ba93-08b4-4495-866e-6a6d9241c02d.aspx">here</a>)<br><br>
+  <br><br>
+  First off some hacks for the <a href="http://blogs.msdn.com/powlo/archive/2007/02/25/displaying-custom-data-through-sharepoint-lists-using-spgridview-and-spmenufield.aspx">SPGridView</a> which is actually a pretty useful control, but<br>
+  fails to do a few things, like displaying attachment columns<br>
+  as-per SharePoint's default List views (with a little paper-clip<br>
+  symbol), and the second (and much more annoying) it doesn't use<br>
+  the current users regional settings / timezone for formatting<br>
+  DateTime values.<br><br>
+  <br><br>
+  The hacks:<br><br>
+</p>
 <ul>
 <li>
-    <a href="http://wiki.bittercoder.com/AttachmentColumnInSPGridView.ashx">Attachments bound field</a><br />
-  </li></p>
+    <a href="http://wiki.bittercoder.com/AttachmentColumnInSPGridView.ashx">Attachments bound field</a><br>
+  </li>
 <li>
-    <a href="http://wiki.bittercoder.com/DatesNotWorkingWithDSTInSPGridView.ashx">Localized DateFime bound field</a><br />
-  </li><br />
-</ul>And finally support for a ListForm replacement web part -<br />
-after trying to customize the ListForm to suit a customers<br />
-requirements by creating a CustomListForm in SharePoint designer I<br />
-gave up in disgust because it's just too limited in what it lets<br />
-you achieve, and worst of all, it breaks attachments support!&nbsp;<br />
-So I wrote a small web part to replace it, which allows for<br />
-fine-grained control of visibility and editability (if that's even<br />
-a word) of each field, and as an added bonus it doesn't break the<br />
-attachments functionality.&nbsp; I also wanted to add additional<br />
-links/buttons to the form which triggered a save including<br />
-validation etc. - so I did a little hack to implement that as<br />
-well.<br /></p>
+    <a href="http://wiki.bittercoder.com/DatesNotWorkingWithDSTInSPGridView.ashx">Localized DateFime bound field</a><br>
+  </li><br>
+</ul>And finally support for a ListForm replacement web part -<br>
+after trying to customize the ListForm to suit a customers<br>
+requirements by creating a CustomListForm in SharePoint designer I<br>
+gave up in disgust because it's just too limited in what it lets<br>
+you achieve, and worst of all, it breaks attachments support!&nbsp;<br>
+So I wrote a small web part to replace it, which allows for<br>
+fine-grained control of visibility and editability (if that's even<br>
+a word) of each field, and as an added bonus it doesn't break the<br>
+attachments functionality.&nbsp; I also wanted to add additional<br>
+links/buttons to the form which triggered a save including<br>
+validation etc. - so I did a little hack to implement that as<br>
+well.<br>
 <ul>
 <li>
-    <a href="http://wiki.bittercoder.com/WebPartToReplaceNewOrEditForm.ashx">Web part to replace New or Edit ListForm</a><br />
-  </li></p>
+    <a href="http://wiki.bittercoder.com/WebPartToReplaceNewOrEditForm.ashx">Web part to replace New or Edit ListForm</a><br>
+  </li>
 <li>
-    <a href="http://wiki.bittercoder.com/AddLinksToEditFormWebPart.ashx">Adding<br />
-    links to the Edit Form web part</a><br /><br />
-  </li><br />
-</ul>I might have a few more to post before the end of the project<br />
-- but it's almost wrapped up, so these may be the last for a<br />
-while.<br /><br />
-<br /><br />
-Hopefully someone out there finds them useful.<br /></p>
+    <a href="http://wiki.bittercoder.com/AddLinksToEditFormWebPart.ashx">Adding<br>
+    links to the Edit Form web part</a><br><br>
+  </li><br>
+</ul>I might have a few more to post before the end of the project<br>
+- but it's almost wrapped up, so these may be the last for a<br>
+while.<br><br>
+<br><br>
+Hopefully someone out there finds them useful.<br>

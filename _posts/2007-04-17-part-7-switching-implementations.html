@@ -23,110 +23,111 @@ tags:
 - IoC
 comments: []
 ---
-<p><img src="http://blog.bittercoder.com/images/ioc_tutorial_titles/7_switching_implementations.png" /><br /><br />
-So this time we're going to look at how you can not only change configuration for a component at runtime, but actually change which component is doing the work for us... powerful stuff :)<br /><br />
-<br /><br />
-So the "trick" here is to abstract out what features we expect our component to support from it's implementation, and stuff those into an interface... so in this case I have an idea for a simple service which lets us get the "message of the day" - so lets look at my interface:<br /><br />
-<br /></p>
+
+<p><img src="http://blog.bittercoder.com/images/ioc_tutorial_titles/7_switching_implementations.png"><br><br>
+So this time we're going to look at how you can not only change configuration for a component at runtime, but actually change which component is doing the work for us... powerful stuff :)<br><br>
+<br><br>
+So the "trick" here is to abstract out what features we expect our component to support from it's implementation, and stuff those into an interface... so in this case I have an idea for a simple service which lets us get the "message of the day" - so lets look at my interface:<br><br>
+<br></p>
 <pre>
-public interface IMessageOfTheDay<br />
-{<br />
-    string GetMessageOfTheDay();<br />
-}<br />
-</pre><br /><br />
-Now we have two implementations of this service, one that lets us have a static message set via configuration:<br /><br />
-<br /></p>
+public interface IMessageOfTheDay<br>
+{<br>
+    string GetMessageOfTheDay();<br>
+}<br>
+</pre><br><br>
+Now we have two implementations of this service, one that lets us have a static message set via configuration:<br><br>
+<br>
 <pre>
-public class StaticMessageOfTheDay : IMessageOfTheDay<br />
-{<br />
-    private string _message;</p>
-<p>    public string Message<br />
-    {<br />
-        set { _message = value; }<br />
+public class StaticMessageOfTheDay : IMessageOfTheDay<br>
+{<br>
+    private string _message;
+<p>    public string Message<br>
+    {<br>
+        set { _message = value; }<br>
     }</p>
-<p>    public string GetMessageOfTheDay()<br />
-    {<br />
-        return _message;<br />
-    }<br />
-}<br />
-</pre><br /><br />
-And another, which goes to <a href="http://en.wikiquote.org/wiki/Main_Page">wiki quotes</a> and grabs the quote of the day:<br /><br />
-<br /></p>
+<p>    public string GetMessageOfTheDay()<br>
+    {<br>
+        return _message;<br>
+    }<br>
+}<br>
+</p></pre><br><br>
+And another, which goes to <a href="http://en.wikiquote.org/wiki/Main_Page">wiki quotes</a> and grabs the quote of the day:<br><br>
+<br>
 <pre>
-public class WikiQuotesMessageOfTheDay : IMessageOfTheDay<br />
-{<br />
-    public string GetMessageOfTheDay()<br />
-    {<br />
-        WebClient client = new WebClient();<br />
-        string content = client.DownloadString("http://en.wikiquote.org/wiki/Main_Page");</p>
+public class WikiQuotesMessageOfTheDay : IMessageOfTheDay<br>
+{<br>
+    public string GetMessageOfTheDay()<br>
+    {<br>
+        WebClient client = new WebClient();<br>
+        string content = client.DownloadString("http://en.wikiquote.org/wiki/Main_Page");
 <p>        string toFind = "
-<div style="background: #fff5f5">";<br />
-        int start = content.IndexOf(toFind) + toFind.Length;<br />
-        int length = content.IndexOf("<a", start) - start;</p>
-<p>        return content.Substring(start, length);<br />
-    }<br />
-}<br />
-</pre><br /><br />
-so - our program is pretty simple:<br /><br />
-<br /></p>
+<div style="background: #fff5f5">";<br>
+        int start = content.IndexOf(toFind) + toFind.Length;<br>
+        int length = content.IndexOf("<a", start)="" -=""></a",></div></p>
+<p>        return content.Substring(start, length);<br>
+    }<br>
+}<br>
+</p></pre><br><br>
+so - our program is pretty simple:<br><br>
+<br>
 <pre>
-private static void Main(string[] args)<br />
-{<br />
-    WindsorContainer container = new WindsorContainer(new XmlInterpreter());</p>
-<p>    IMessageOfTheDay motd = container.Resolve<IMessageOfTheDay>();</p>
+private static void Main(string[] args)<br>
+{<br>
+    WindsorContainer container = new WindsorContainer(new XmlInterpreter());
+<p>    IMessageOfTheDay motd = container.Resolve<imessageoftheday>();</imessageoftheday></p>
 <p>    Console.WriteLine("MOTD: {0}", motd.GetMessageOfTheDay());</p>
-<p>    Console.Read();<br />
-}<br />
-</pre></p>
+<p>    Console.Read();<br>
+}<br>
+</p></pre>
 <p>
-  <br /><br />
-  And so how do we swap between implementations, well we need to introduce an additional attribute to our components configuration called "service" where we specifiy what service our component implements... in this case it will be "IMessageOfTheDay" - so heres the configuration when using the Static MOTD class:<br /><br />
-  <br /><br />
-</p></p>
+  <br><br>
+  And so how do we swap between implementations, well we need to introduce an additional attribute to our components configuration called "service" where we specifiy what service our component implements... in this case it will be "IMessageOfTheDay" - so heres the configuration when using the Static MOTD class:<br><br>
+  <br><br>
+</p>
 <pre>
-<configuration></p>
-<p>  <configSections></p>
-<section name="castle"<br />
-        type="Castle.Windsor.Configuration.AppDomain.CastleSectionHandler, Castle.Windsor" /><br />
-  </configSections></p>
-<p>  <castle><br />
-    <components><br />
-      <component id="motd.service"<br />
-                service="IoC.Tutorials.Part7.IMessageOfTheDay, IoC.Tutorials.Part7"<br />
-                type="IoC.Tutorials.Part7.StaticMessageOfTheDay, IoC.Tutorials.Part7"></p>
+<configuration>
+<p>  <configsections></configsections></p>
+<section name="castle"></section><br>
+        type="Castle.Windsor.Configuration.AppDomain.CastleSectionHandler, Castle.Windsor" /><br>
+  
+<p>  <castle><br>
+    <components><br>
+      <component id="motd.service"></component><br>
+                service="IoC.Tutorials.Part7.IMessageOfTheDay, IoC.Tutorials.Part7"<br>
+                type="IoC.Tutorials.Part7.StaticMessageOfTheDay, IoC.Tutorials.Part7"></components></castle></p>
 <parameters>
-          <message>Welcome to my container tutorials</message><br />
-        </parameters><br />
-      </component><br />
-    </components><br />
-  </castle></p>
-<p></configuration><br />
-</pre><br /><br />
-And running the program gives us:<br /><br />
-<br /><br />
-<b>MOTD: Welcome to my container tutorials</b><br /><br />
-<br /><br />
-But we can now swap to a different component with the same service at run-time, and get a different implementation... here's how that looks:<br /><br />
-<br /></p>
+          <message>Welcome to my container tutorials</message><br>
+        </parameters><br>
+      <br>
+    <br>
+  
+<p></p></configuration><br>
+</pre><br><br>
+And running the program gives us:<br><br>
+<br><br>
+<b>MOTD: Welcome to my container tutorials</b><br><br>
+<br><br>
+But we can now swap to a different component with the same service at run-time, and get a different implementation... here's how that looks:<br><br>
+<br>
 <pre>
-<configuration></p>
-<p>  <configSections></p>
-<section name="castle"<br />
-        type="Castle.Windsor.Configuration.AppDomain.CastleSectionHandler, Castle.Windsor" /><br />
-  </configSections></p>
-<p>  <castle></p>
-<p>    <components><br />
-      <component id="motd.service"<br />
-          service="IoC.Tutorials.Part7.IMessageOfTheDay, IoC.Tutorials.Part7"<br />
-          type="IoC.Tutorials.Part7.WikiQuotesMessageOfTheDay, IoC.Tutorials.Part7" /><br />
-    </components><br />
-  </castle></p>
-<p></configuration><br />
-</pre><br /><br />
-And now running the program gives us:<br /><br />
-<br /><br />
-<b>MOTD: Man is not an end but a beginning. We are at the beginning of the second week. We are children of the eighth day.</b><br /><br />
-<br /><br />
-A quote from <a href="http://en.wikiquote.org/wiki/Thornton_Wilder">Thorton Wilder</a> - exciting huh, this seperation between interface and implementation is what makes doing so many cool things with an Inversion of control container possible... soak up the idea.<br /><br />
-<br /><br />
-Next time we'll take a look at getting different implementations by using their "key" - have you been wondering what the "id" attribute is for in our component definitions?? Well wonder no more.</p>
+<configuration>
+<p>  <configsections></configsections></p>
+<section name="castle"></section><br>
+        type="Castle.Windsor.Configuration.AppDomain.CastleSectionHandler, Castle.Windsor" /><br>
+  
+<p>  <castle></castle></p>
+<p>    <components><br>
+      <component id="motd.service"></component><br>
+          service="IoC.Tutorials.Part7.IMessageOfTheDay, IoC.Tutorials.Part7"<br>
+          type="IoC.Tutorials.Part7.WikiQuotesMessageOfTheDay, IoC.Tutorials.Part7" /><br>
+    </components><br>
+  </p>
+<p></p></configuration><br>
+</pre><br><br>
+And now running the program gives us:<br><br>
+<br><br>
+<b>MOTD: Man is not an end but a beginning. We are at the beginning of the second week. We are children of the eighth day.</b><br><br>
+<br><br>
+A quote from <a href="http://en.wikiquote.org/wiki/Thornton_Wilder">Thorton Wilder</a> - exciting huh, this seperation between interface and implementation is what makes doing so many cool things with an Inversion of control container possible... soak up the idea.<br><br>
+<br><br>
+Next time we'll take a look at getting different implementations by using their "key" - have you been wondering what the "id" attribute is for in our component definitions?? Well wonder no more.

@@ -49,132 +49,133 @@ comments:
     is really suited to relational. When I feel really whimsical, I think need to
     do it all Coffeescript -> NodeJS -> Mongo :-)
 ---
-<h2>What is Expand</h2></p>
+
+<h2>What is Expand</h2>
 <p>Round-trips are the death of performance in many cases, and this is no different for API's.</p>
 <p>The web does scale out well - so there is certainly the option to make lots of simultaneous requests, but this does not take care of the problem of addressing those related resources - if the you need to fetch back a resource's representation before you can construct additional requests to fetch other resources, you still are faced with the issues of latency.</p>
 <p>OData provides a mechanism for implementing this via a URL <a href="http://www.odata.org/documentation/uri-conventions/#ExpandSystemQueryOption">containing the $expand query parameter</a>.  API's implemented for products such as Atlassians Jira (popular defect tracker) <a href="http://docs.atlassian.com/jira/REST/latest/#expansion">include an "expand" parameter which achieves the same thing</a>, but uses a slightly different approach.</p>
 <p>The API being presented here is not an OData compliant service - but certainly the Expand concept was a useful one we wanted to adopt.</p>
-<h2>Deep expansion</h2></p>
+<h2>Deep expansion</h2>
 <p>In addition to single-level expansion:</p>
 <p><code>GET /api//scriptpackage/{id}?$expand=Children</code></p>
 <p>Which might return:</p>
 <pre>
-{<br />
-  "Id": "1911ea14-3ede-46ca-bb1b-a0a80019f6cf",<br />
-  "ProjectId": "53cc97cd-7514-4465-b352-a0a80019f180",<br />
-  "Name": "Script Library",<br />
-  "OrderNumber": 2,<br />
-  "Expands": [<br />
-    "Children",<br />
-    "Parent",<br />
-    "Project",<br />
-    "Scripts"<br />
-  ],<br />
-  "Self": "https://localhost/api/scriptpackage/1911ea14-3ede-46ca-bb1b-a0a80019f6cf"<br />
-}<br />
-</pre></p>
+{<br>
+  "Id": "1911ea14-3ede-46ca-bb1b-a0a80019f6cf",<br>
+  "ProjectId": "53cc97cd-7514-4465-b352-a0a80019f180",<br>
+  "Name": "Script Library",<br>
+  "OrderNumber": 2,<br>
+  "Expands": [<br>
+    "Children",<br>
+    "Parent",<br>
+    "Project",<br>
+    "Scripts"<br>
+  ],<br>
+  "Self": "https://localhost/api/scriptpackage/1911ea14-3ede-46ca-bb1b-a0a80019f6cf"<br>
+}<br>
+</pre>
 <p>We wanted to support deeper expansion - so that something like:</p>
 <p><code>GET /api/project/{id}/scriptpackages?$expand=Children.Children,Children.Scripts</code></p>
 <p>Would return a script package (folder) with all it's child packages, those child packages children and those child packages scripts (test cases).</p>
 <pre>
-{<br />
-  "Id": "1911ea14-3ede-46ca-bb1b-a0a80019f6cf",<br />
-  "ProjectId": "53cc97cd-7514-4465-b352-a0a80019f180",<br />
-  "Name": "Script Library",<br />
-  "OrderNumber": 2,<br />
-  "Expands": [<br />
-    "Parent",<br />
-    "Project",<br />
-    "Scripts"<br />
-  ],<br />
-  "Children": [<br />
-  {<br />
-    "Id": "1fe2686a-eb17-485a-96b4-a0a80019f6cf",<br />
-    "ParentId": "1911ea14-3ede-46ca-bb1b-a0a80019f6cf",<br />
-    "Name": "Sprint 1",<br />
-    "OrderNumber": 0,<br />
-    "Expands": [<br />
-      "Parent",<br />
-      "Project"<br />
-    ],<br />
-    "Scripts": [...],<br />
-    "Children":[...],<br />
-    ...<br />
-  },<br />
-  ...<br />
-}<br />
-</pre></p>
+{<br>
+  "Id": "1911ea14-3ede-46ca-bb1b-a0a80019f6cf",<br>
+  "ProjectId": "53cc97cd-7514-4465-b352-a0a80019f180",<br>
+  "Name": "Script Library",<br>
+  "OrderNumber": 2,<br>
+  "Expands": [<br>
+    "Parent",<br>
+    "Project",<br>
+    "Scripts"<br>
+  ],<br>
+  "Children": [<br>
+  {<br>
+    "Id": "1fe2686a-eb17-485a-96b4-a0a80019f6cf",<br>
+    "ParentId": "1911ea14-3ede-46ca-bb1b-a0a80019f6cf",<br>
+    "Name": "Sprint 1",<br>
+    "OrderNumber": 0,<br>
+    "Expands": [<br>
+      "Parent",<br>
+      "Project"<br>
+    ],<br>
+    "Scripts": [...],<br>
+    "Children":[...],<br>
+    ...<br>
+  },<br>
+  ...<br>
+}<br>
+</pre>
 <p>Notice that we advertise the available expansions as a property of the resource - this is a feature of the Atlassian Jira API we adopted (and this list changes based on what expansions have already been applied).</p>
-<h2>Building a mapper</h2></p>
+<h2>Building a mapper</h2>
 <p>To allow expansion to be done correctly and at any depth, we needed to hand over construction of our view models to a third party - thus enters the view model mapper:</p>
 <pre>
-public interface IViewModelMapper<br />
-{<br />
-    void RegisterSearchResultConstructor<TFrom, TIntermediate, TTo>(<br />
-        Func<TFrom, TIntermediate> intermediateConstructor)<br />
-          where TFrom : class<br />
-          where TTo : AbstractModel<br />
-          where TIntermediate : class;<br />
-    void RegisterDefaultConstructors(Type[] from, Type to);<br />
-    void RegisterDefaultConstructor<TFrom, TTo>();<br />
-    void RegisterConstructor<TFrom, TTo>(Func<TFrom, TTo> constructor);<br />
-    void RemoveConstructor<TFrom, TTo>();<br />
-    void RegisterExpander<TFrom, TTo>(string expansionName, string resourceName,<br />
-        Func<TFrom, string[], object> expansion);<br />
-    void RegisterExpander(Type fromType, Type toType, string expansionName,<br />
-        string resourceName, Func<object, string[], object> expansion);<br />
-    void RegisterEntityTypeAndIdToResourceResolver(Func<Guid, string> urlFunc,<br />
-        params string[] entityTypes);<br />
-    void RemoveExpand<TFrom, TTo>(string expansionName);<br />
-    TTo Map<TFrom, TTo>(TFrom from, params string[] expansions)<br />
-        where TTo : AbstractModel;<br />
-    object MapSearchResult(object from, string[] expansions);<br />
-    object Map(object instance, Type targetType, params string[] expansions);<br />
-    IEnumerable<ExpanderDetails> GetExpandersFor(Type fromType, Type toType);<br />
-    string ResolveUrlForEntityTypeResource(string entityType, Guid id);<br />
-}<br />
-</pre></p>
+public interface IViewModelMapper<br>
+{<br>
+    void RegisterSearchResultConstructor<tfrom, tintermediate,="" tto="">(<br>
+        Func<tfrom, tintermediate=""> intermediateConstructor)<br>
+          where TFrom : class<br>
+          where TTo : AbstractModel<br>
+          where TIntermediate : class;<br>
+    void RegisterDefaultConstructors(Type[] from, Type to);<br>
+    void RegisterDefaultConstructor<tfrom, tto="">();<br>
+    void RegisterConstructor<tfrom, tto="">(Func<tfrom, tto=""> constructor);<br>
+    void RemoveConstructor<tfrom, tto="">();<br>
+    void RegisterExpander<tfrom, tto="">(string expansionName, string resourceName,<br>
+        Func<tfrom, string[],="" object=""> expansion);<br>
+    void RegisterExpander(Type fromType, Type toType, string expansionName,<br>
+        string resourceName, Func<object, string[],="" object=""> expansion);<br>
+    void RegisterEntityTypeAndIdToResourceResolver(Func<guid, string=""> urlFunc,<br>
+        params string[] entityTypes);<br>
+    void RemoveExpand<tfrom, tto="">(string expansionName);<br>
+    TTo Map<tfrom, tto="">(TFrom from, params string[] expansions)<br>
+        where TTo : AbstractModel;<br>
+    object MapSearchResult(object from, string[] expansions);<br>
+    object Map(object instance, Type targetType, params string[] expansions);<br>
+    IEnumerable<expanderdetails> GetExpandersFor(Type fromType, Type toType);<br>
+    string ResolveUrlForEntityTypeResource(string entityType, Guid id);<br>
+}<br>
+</expanderdetails></tfrom,></tfrom,></guid,></object,></tfrom,></tfrom,></tfrom,></tfrom,></tfrom,></tfrom,></tfrom,></tfrom,></pre>
 <p>The implementation of this interface comprises a service where you can register:</p>
 <ul>
 <li>Constructors - which are able to take a DTO/domain class/Tuple/whatever and construct a view model from it.</li>
 <li>Expanders - a named expansion attached to a constructor</li>
 <li>Map methods for mapping an instance to a view model, with a set of expansions to apply</li>
-<li>Handling of special cases such as translating the results of a search to a suitable form for then translating into a view model</li><br />
-</ul></p>
+<li>Handling of special cases such as translating the results of a search to a suitable form for then translating into a view model</li><br>
+</ul>
 <p>Given the plugin architecture used within the application, this provided the ability for plugins to add new Expand options to existing resources - so for example if a customer has the automated testing plugin enabled, then the script packages (folder) will also support expansions for the "AutomatedTests" collection of automated tests within that package.</p>
 <p>As an example how we register an expander - here is code to register the expansion for a collection of steps associated with a script.</p>
 <pre>
 <p>...</p>
-<p>    mapper.RegisterExpander<EditScriptDto , ViewScriptModel>(<br />
-        "Steps", null, (input, expands) => RenderSteps(expands, input));<br />
-}</p>
-<p>IList<StepModel> RenderSteps(string[] expands, EditScriptDto input)<br />
-{<br />
-    ExpandsUtility.AssertEmpty("Steps", expands);</p>
-<p>    return (input.Steps ?? Enumerable.Empty<StepDto>())<br />
-      .Select(StepModel.CreateFrom)<br />
-      .OrderBy(model => model.OrderNumber).ToList();<br />
-}<br />
-</pre></p>
+<p>    mapper.RegisterExpander<editscriptdto ,="" viewscriptmodel="">(<br>
+        "Steps", null, (input, expands) => RenderSteps(expands, input));<br>
+}</editscriptdto></p>
+<p>IList<stepmodel> RenderSteps(string[] expands, EditScriptDto input)<br>
+{<br>
+    ExpandsUtility.AssertEmpty("Steps", expands);</stepmodel></p>
+<p>    return (input.Steps ?? Enumerable.Empty<stepdto>())<br>
+      .Select(StepModel.CreateFrom)<br>
+      .OrderBy(model => model.OrderNumber).ToList();<br>
+}<br>
+</stepdto></p></pre>
 <p>In this case we are using Expand to avoid the cost of expanding a large collection (the steps for a testscript/test case) which is part of the Script aggregate (believe it or not, there are testers out there writing tests scripts with 300+ steps...).</p>
-<h2>Controllers</h2></p>
+<h2>Controllers</h2>
 <p>Within our API controllers we just call the mapping method and pass in the expands parameter:</p>
 <pre>
-var script = _scriptReportingService.GetScript(id);<br />
-var wrapped = _viewModelMapper.Map<EditScriptDto, ViewScriptModel>(script, Expands);<br />
-return Request.CreateResponse(HttpStatusCode.OK, wrapped);<br />
-</pre></p>
+var script = _scriptReportingService.GetScript(id);<br>
+var wrapped = _viewModelMapper.Map<editscriptdto, viewscriptmodel="">(script, Expands);<br>
+return Request.CreateResponse(HttpStatusCode.OK, wrapped);<br>
+</editscriptdto,></pre>
 <p>The <b>Expands</b> property in this case just exposed a property associated with the current request.</p>
 <pre>
-protected virtual string[] Expands<br />
-{<br />
-    get { return (string[]) (Request.Properties["expand"] ?? new string[] {}); }<br />
-}<br />
-</pre></p>
+protected virtual string[] Expands<br>
+{<br>
+    get { return (string[]) (Request.Properties["expand"] ?? new string[] {}); }<br>
+}<br>
+</pre>
 <p>And this request property was captured by a simple DelegatingHandler that would parse the query string for various OData parameters - this approach made it a bit easier for other delegating handlers to have access to this information prior to the controller's methods being invoked.</p>
-<h2>OData support in ASP.Net Web API</h2></p>
+<h2>OData support in ASP.Net Web API</h2>
 <p>For those who have been working with the various releases of ASP.Net WEB API since it was originally targeting WCF, there have been quite a few breaking changes along the way, including OData - which was introduced initially as a basic [Queryable] attribute that could be added to controller methods, and then later on, removed entirely pending a new OData re-implementation.</p>
 <p>Recently the <a href="http://blogs.msdn.com/b/alexj/archive/2012/08/15/odata-support-in-asp-net-web-api.aspx">Web API team have announced greatly improved support for OData in the WebAPI</a> - allowing the construction of entirely OData compliant services, as a preview release on nuget - the [Queryable] attribute is also back.</p>
 <p>I believe this now includes support for $expand, which was previously missing, but I haven't yet had a chance to play with the latest release to confirm this - but I'm not entirely sure if this would have worked for our approach at any rate.</p>
-<h2>Next</h2></p>
+<h2>Next</h2>
 <p><a href="/?p=83489900">Next, in part 3 of this series we take a look at how we generated API documentation</a>.</p>

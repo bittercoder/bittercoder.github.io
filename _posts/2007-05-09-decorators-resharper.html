@@ -41,78 +41,79 @@ comments:
 
     http://blog.bittercoder.com/CategoryView,category,IoC.aspx
 ---
-<p>More parts in the container tutorial series are on the way, I've<br />
-just been a little busy these last few days.<br /><br />
-<br /><br />
-However I had a discussion with someone about decorators this week<br />
-- they eluded to them being too hard to "create" and maintain, and<br />
-that opportunities to get them wrong abound (manually writing the<br />
-code to call all the members of the inner service) - I was a little<br />
-astounded that they didn't know how to do this using<br />
-ReSharper.<br /><br />
-<br /><br />
-So heres a quick 1 minute tutorial for those that don't know, first<br />
-an interface.<br /><br />
-<br /></p>
+
+<p>More parts in the container tutorial series are on the way, I've<br>
+just been a little busy these last few days.<br><br>
+<br><br>
+However I had a discussion with someone about decorators this week<br>
+- they eluded to them being too hard to "create" and maintain, and<br>
+that opportunities to get them wrong abound (manually writing the<br>
+code to call all the members of the inner service) - I was a little<br>
+astounded that they didn't know how to do this using<br>
+ReSharper.<br><br>
+<br><br>
+So heres a quick 1 minute tutorial for those that don't know, first<br>
+an interface.<br><br>
+<br></p>
 <pre>
-public interface IBondService<br />
-{<br />
-    void Smoke50Cigarettes();<br />
-    void RegisterEnemy(string name);<br />
-    void GetOfBed();<br />
-    bool GunLoaded();<br />
-}<br />
-</pre><br /><br />
-Now let's write the start of our decorator.<br /><br />
-<br /></p>
+public interface IBondService<br>
+{<br>
+    void Smoke50Cigarettes();<br>
+    void RegisterEnemy(string name);<br>
+    void GetOfBed();<br>
+    bool GunLoaded();<br>
+}<br>
+</pre><br><br>
+Now let's write the start of our decorator.<br><br>
+<br>
 <pre>
-public class BondService : IBondService<br />
-{<br />
-    private readonly IBondService _innerService;</p>
-<p>    public BondService(IBondService innerService)<br />
-    {<br />
-        _innerService = innerService;<br />
-    }<br />
-}<br />
-</pre><br /><br />
-And then generate the rest... by going to: <b>ReSharper<br />
-->Code->Generate...->Delegating Members<br /><br />
-<br /></b>Or just type <b>Alt-insert</b> (if your using the default<br />
-key bindings) and select "Delegating Members".<br /><br />
-<br /><br />
-At that point select the only option, the inner service.<br /><br />
-<br /><br />
-<img src="http://blog.bittercoder.com/images/delegate_members_1.png" altsrc="delegate_members_1.png" border="0" height="245" widthsrc="400" /><br /><br />
-<br /><br />
-And then select all the members to delegate for.<br /><br />
-<br /><br />
-<img src="http://blog.bittercoder.com/images/delegate_members_2.png" altsrc="delegate_members_2.png" border="0" height="276" widthsrc="400" /><br /><br />
-<br /><br />
-And then we get the results... joy<br /><br />
-<br /></p>
+public class BondService : IBondService<br>
+{<br>
+    private readonly IBondService _innerService;
+<p>    public BondService(IBondService innerService)<br>
+    {<br>
+        _innerService = innerService;<br>
+    }<br>
+}<br>
+</p></pre><br><br>
+And then generate the rest... by going to: <b>ReSharper<br>
+->Code->Generate...->Delegating Members<br><br>
+<br></b>Or just type <b>Alt-insert</b> (if your using the default<br>
+key bindings) and select "Delegating Members".<br><br>
+<br><br>
+At that point select the only option, the inner service.<br><br>
+<br><br>
+<img src="http://blog.bittercoder.com/images/delegate_members_1.png" altsrc="delegate_members_1.png" border="0" height="245" widthsrc="400"><br><br>
+<br><br>
+And then select all the members to delegate for.<br><br>
+<br><br>
+<img src="http://blog.bittercoder.com/images/delegate_members_2.png" altsrc="delegate_members_2.png" border="0" height="276" widthsrc="400"><br><br>
+<br><br>
+And then we get the results... joy<br><br>
+<br>
 <pre>
-public class BondService : IBondService<br />
-{<br />
-    private readonly IBondService _innerService;</p>
-<p>    public BondService(IBondService innerService)<br />
-    {<br />
-        _innerService = innerService;<br />
+public class BondService : IBondService<br>
+{<br>
+    private readonly IBondService _innerService;
+<p>    public BondService(IBondService innerService)<br>
+    {<br>
+        _innerService = innerService;<br>
     }</p>
-<p>    public void Smoke50Cigarettes()<br />
-    {<br />
-        _innerService.Smoke50Cigarettes();<br />
+<p>    public void Smoke50Cigarettes()<br>
+    {<br>
+        _innerService.Smoke50Cigarettes();<br>
     }</p>
-<p>    public void RegisterEnemy(string name)<br />
-    {<br />
-        _innerService.RegisterEnemy(name);<br />
+<p>    public void RegisterEnemy(string name)<br>
+    {<br>
+        _innerService.RegisterEnemy(name);<br>
     }</p>
-<p>    public void GetOfBed()<br />
-    {<br />
-        _innerService.GetOfBed();<br />
+<p>    public void GetOfBed()<br>
+    {<br>
+        _innerService.GetOfBed();<br>
     }</p>
-<p>    public bool GunLoaded()<br />
-    {<br />
-        return _innerService.GunLoaded();<br />
-    }<br />
-}<br />
-</pre><br /></p>
+<p>    public bool GunLoaded()<br>
+    {<br>
+        return _innerService.GunLoaded();<br>
+    }<br>
+}<br>
+</p></pre><br>

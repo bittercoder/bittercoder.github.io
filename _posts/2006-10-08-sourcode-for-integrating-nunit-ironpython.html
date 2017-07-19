@@ -22,143 +22,144 @@ tags:
 - NUnit
 comments: []
 ---
-<p>Back again!<br /><br />
-<br /></p>
+
+<p>Back again!<br><br>
+<br></p>
 <p>
-  Here is the source for the last post: <a href="http://blog.bittercoder.com/content/binary/ironpython-and-nunit.zip">ironpython-and-nunit.zip (23.01 KB)</a> - it's pretty rough around the edges (and in the middle :P) because I was just trying to see if it was possible, rather then to produce some production-level toolkit for integrating IronPython and NUnit.<br /><br />
-  <br /><br />
-  <b>Edit 2008-03-14:</b> An updated version of the code target<br />
-  NUnit 2.4 and VS2008 can be found <a href="http://blog.bittercoder.com/PermaLink,guid,ef0c495d-6804-4d6e-9537-ce238b6047c3.aspx">here</a>.<br /><br />
-  <br /><br />
-</p></p>
+  Here is the source for the last post: <a href="http://blog.bittercoder.com/content/binary/ironpython-and-nunit.zip">ironpython-and-nunit.zip (23.01 KB)</a> - it's pretty rough around the edges (and in the middle :P) because I was just trying to see if it was possible, rather then to produce some production-level toolkit for integrating IronPython and NUnit.<br><br>
+  <br><br>
+  <b>Edit 2008-03-14:</b> An updated version of the code target<br>
+  NUnit 2.4 and VS2008 can be found <a href="http://blog.bittercoder.com/PermaLink,guid,ef0c495d-6804-4d6e-9537-ce238b6047c3.aspx">here</a>.<br><br>
+  <br><br>
+</p>
 <h2>
-  Usage<br />
-</h2>First off... usage is pretty straightforward.<br /></p>
+  Usage<br>
+</h2>First off... usage is pretty straightforward.<br>
 <ul>
-<li>Test fixtures must have NUnitFixture as one of their base classes.<br />
-  </li></p>
-<li>Test methods must be prefixed with "test".<br />
-  </li></p>
-<li>The setup method, if you need one, must be called "setUp"<br />
-  </li></p>
-<li>The teardown method, if you need one, must be called "tearDown"<br />
-  </li></p>
-<li>Fixture setup and teardown methods are also supported, they are called "setUpFixture" and "tearDownFixture".<br />
-  </li></p>
-<li>Assert.XXX methods are the same as NUnit, unless you want to assert an exception is thrown.<br />
-  </li></p>
-<li>For asserting an exception is thrown, make a call to "self.failUnlessRaises(...)" - it has the same syntax as the <a href="http://wiki.python.org/moin/PyUnit">PyUnit</a> equivalent, however it's tweaked slightly so it will work with Python exceptions, or CLR exceptions.<br />
-  </li></p>
+<li>Test fixtures must have NUnitFixture as one of their base classes.<br>
+  </li>
+<li>Test methods must be prefixed with "test".<br>
+  </li>
+<li>The setup method, if you need one, must be called "setUp"<br>
+  </li>
+<li>The teardown method, if you need one, must be called "tearDown"<br>
+  </li>
+<li>Fixture setup and teardown methods are also supported, they are called "setUpFixture" and "tearDownFixture".<br>
+  </li>
+<li>Assert.XXX methods are the same as NUnit, unless you want to assert an exception is thrown.<br>
+  </li>
+<li>For asserting an exception is thrown, make a call to "self.failUnlessRaises(...)" - it has the same syntax as the <a href="http://wiki.python.org/moin/PyUnit">PyUnit</a> equivalent, however it's tweaked slightly so it will work with Python exceptions, or CLR exceptions.<br>
+  </li>
 <li>
-    <span style="text-decoration: underline">Do not perform</span> an <i>"Import * from System"</i> in your test fixtures - it will clober the native Python Exception type, and may give you odd behaviour.<br /><br />
-  </li><br />
-</ul></p>
+    <span style="text-decoration: underline">Do not perform</span> an <i>"Import * from System"</i> in your test fixtures - it will clober the native Python Exception type, and may give you odd behaviour.<br><br>
+  </li><br>
+</ul>
 <h2>
-  <br /><br />
-</h2></p>
+  <br><br>
+</h2>
 <h2>
-  Implementation<br />
-</h2>There are 8 classes and one python script which make up the implementation, the 8 classes are split between the "model"<br />
-(basically the python-side of the equation and the "NUnit extension" which are the necessary extensions to expose the model to NUnit...) - let's run through it quickly:<br /><br />
-<br /><br />
-First we have the <b>AbstractPythonSuite</b> which hosts the python engine, and handles configuring and running the scripts containing the test fixtures.&nbsp; Then we have a couple of classes which form the "model" consisting of a <b>PythonFixture</b>, representing a fixture, and <b>PythonTestCase</b>, representing a single test method in the fixture.<br /><br />
-<br /><br />
-To build the model we have a <b>PythonFixtureBuilder</b> which is passed the python engine (from within the <b>AbstractPythonSuite</b>) and spits out all the fixture models, with the test cases assigned... this also assigns the various delegates for the setup/teardown/setupFixture/teardownFixture methods.<br /><br />
-<br /><br />
-At this point the model is complete, it's just a matter of integrating it with NUnit - for this we have some more classes.<br /><br />
-<br /><br />
-First of we need the <b>PythonSuiteExtension</b>, which represents the overall test suite, this contains <b>PythonFixtureExtension</b>'s, for the fixtures, and finally <b>PythonTestMethod</b> for the individual test methods - the python extensions take care of running the tests in the model and calling the setup and tear down methods at the right times, and recording the results of course.<br /><br />
-<br /><br />
-Last of all we have the <b>PythonSuiteExtensionBuilder</b> as mentioned in the last post, which takes care of creating the <b>PythonSuiteExtension</b>'s for each class derived from <b>AbstractPythonSuite</b> it discovers in the target assembly.<br /><br />
-<br /><br />
-Last of all we have a small python script which provides the necessary implementation for the base <b>NUnitFixture</b> class that all test fixtures are derived from... and a helper method we use in the <b>PythonFixtureBuilder</b> to identify the test methods in a class.<br /><br />
-<br /></p>
+  Implementation<br>
+</h2>There are 8 classes and one python script which make up the implementation, the 8 classes are split between the "model"<br>
+(basically the python-side of the equation and the "NUnit extension" which are the necessary extensions to expose the model to NUnit...) - let's run through it quickly:<br><br>
+<br><br>
+First we have the <b>AbstractPythonSuite</b> which hosts the python engine, and handles configuring and running the scripts containing the test fixtures.&nbsp; Then we have a couple of classes which form the "model" consisting of a <b>PythonFixture</b>, representing a fixture, and <b>PythonTestCase</b>, representing a single test method in the fixture.<br><br>
+<br><br>
+To build the model we have a <b>PythonFixtureBuilder</b> which is passed the python engine (from within the <b>AbstractPythonSuite</b>) and spits out all the fixture models, with the test cases assigned... this also assigns the various delegates for the setup/teardown/setupFixture/teardownFixture methods.<br><br>
+<br><br>
+At this point the model is complete, it's just a matter of integrating it with NUnit - for this we have some more classes.<br><br>
+<br><br>
+First of we need the <b>PythonSuiteExtension</b>, which represents the overall test suite, this contains <b>PythonFixtureExtension</b>'s, for the fixtures, and finally <b>PythonTestMethod</b> for the individual test methods - the python extensions take care of running the tests in the model and calling the setup and tear down methods at the right times, and recording the results of course.<br><br>
+<br><br>
+Last of all we have the <b>PythonSuiteExtensionBuilder</b> as mentioned in the last post, which takes care of creating the <b>PythonSuiteExtension</b>'s for each class derived from <b>AbstractPythonSuite</b> it discovers in the target assembly.<br><br>
+<br><br>
+Last of all we have a small python script which provides the necessary implementation for the base <b>NUnitFixture</b> class that all test fixtures are derived from... and a helper method we use in the <b>PythonFixtureBuilder</b> to identify the test methods in a class.<br><br>
+<br>
 <pre>
-class NUnitFixture:<br />
-    def __init__(self):<br />
-        pass<br />
-    def setUp(self):<br />
-        pass<br />
-    def tearDown(self):<br />
-        pass<br />
-    def setUpFixture(self):<br />
-        pass<br />
-    def tearDownFixture(self):<br />
-        pass<br />
-    def failUnlessRaises(self, excClass, callableObj, *args, **kwargs):<br />
-        if issubclass(excClass, System.Exception):<br />
-            try:<br />
-                callableObj(*args, **kwargs)</p>
+class NUnitFixture:<br>
+    def __init__(self):<br>
+        pass<br>
+    def setUp(self):<br>
+        pass<br>
+    def tearDown(self):<br>
+        pass<br>
+    def setUpFixture(self):<br>
+        pass<br>
+    def tearDownFixture(self):<br>
+        pass<br>
+    def failUnlessRaises(self, excClass, callableObj, *args, **kwargs):<br>
+        if issubclass(excClass, System.Exception):<br>
+            try:<br>
+                callableObj(*args, **kwargs)
 <p>    except Exception, e:   </p>
-<p>        if hasattr(e, "clsException") and<br />
-(type(e.clsException) == excClass):<br />
-                    return<br />
-        else:<br />
-            try:<br />
-                callableObj(*args, **kwargs)<br />
-            except excClass:<br />
-                return<br />
-        if hasattr(excClass,'__name__'):<br />
-            excName = excClass.__name__<br />
+<p>        if hasattr(e, "clsException") and<br>
+(type(e.clsException) == excClass):<br>
+                    return<br>
+        else:<br>
+            try:<br>
+                callableObj(*args, **kwargs)<br>
+            except excClass:<br>
+                return<br>
+        if hasattr(excClass,'__name__'):<br>
+            excName = excClass.__name__<br>
         else: </p>
 <p>    excName = str(excClass)   </p>
 <p>        raise AssertionException("%s not raised" % excName)</p>
-<p>def getTestCaseNames(testCaseClass, prefix):<br />
-    def isTestMethod(attrname, testCaseClass=testCaseClass, prefix=prefix):<br />
-        return attrname.startswith(prefix) and callable(getattr(testCaseClass, attrname))<br />
-    testFnNames = filter(isTestMethod, dir(testCaseClass))<br />
-    for baseclass in testCaseClass.__bases__:<br />
-        for testFnName in getTestCaseNames(baseclass, prefix):<br />
-            if testFnName not in testFnNames:<br />
-                testFnNames.append(testFnName)<br />
-    testFnNames.sort(cmp)<br />
-    return testFnNames<br />
-</pre><br /><br />
-And that's all there is to it...&nbsp; If anyone actually finds this useful and wants to build on from it, please feel free, and if at all possible keep it open source (though you don't have to...)<br /><br />
-<br /><br />
-Something to keep in mind is that at the moment if your test fixture can't actually be parsed and executed by the python engine, that exception will bubble up, eventually stopping the test assembly from being loaded at all... I think the nicer solution to this would be to add a custom NUnit test case for each script that failed to load, which in turn fails when executed as part of the assembly - dumping out the exception raised during construction.<br /><br />
-<br /><br />
-At least then a tool like TestDriven.Net would quickly notify the developer of their mistake, instead of just falling over.<br /><br />
-<br /><br />
-And very last of all, though I've been manually specifying the names of the script files.. using a class declaration like this:<br /><br />
-<br /></p>
+<p>def getTestCaseNames(testCaseClass, prefix):<br>
+    def isTestMethod(attrname, testCaseClass=testCaseClass, prefix=prefix):<br>
+        return attrname.startswith(prefix) and callable(getattr(testCaseClass, attrname))<br>
+    testFnNames = filter(isTestMethod, dir(testCaseClass))<br>
+    for baseclass in testCaseClass.__bases__:<br>
+        for testFnName in getTestCaseNames(baseclass, prefix):<br>
+            if testFnName not in testFnNames:<br>
+                testFnNames.append(testFnName)<br>
+    testFnNames.sort(cmp)<br>
+    return testFnNames<br>
+</p></pre><br><br>
+And that's all there is to it...&nbsp; If anyone actually finds this useful and wants to build on from it, please feel free, and if at all possible keep it open source (though you don't have to...)<br><br>
+<br><br>
+Something to keep in mind is that at the moment if your test fixture can't actually be parsed and executed by the python engine, that exception will bubble up, eventually stopping the test assembly from being loaded at all... I think the nicer solution to this would be to add a custom NUnit test case for each script that failed to load, which in turn fails when executed as part of the assembly - dumping out the exception raised during construction.<br><br>
+<br><br>
+At least then a tool like TestDriven.Net would quickly notify the developer of their mistake, instead of just falling over.<br><br>
+<br><br>
+And very last of all, though I've been manually specifying the names of the script files.. using a class declaration like this:<br><br>
+<br>
 <pre>
-public class MyPythonSuite : AbstractPythonSuite<br />
-{<br />
-    public MyPythonSuite()<br />
-        : base("MyPythonFixture.py")<br />
-    {<br />
-    }<br />
-}<br />
-</pre><br /><br />
-You could make it a little more dynamic and do something like this:<br /><br />
-<br /></p>
+public class MyPythonSuite : AbstractPythonSuite<br>
+{<br>
+    public MyPythonSuite()<br>
+        : base("MyPythonFixture.py")<br>
+    {<br>
+    }<br>
+}<br>
+</pre><br><br>
+You could make it a little more dynamic and do something like this:<br><br>
+<br>
 <pre>
-public class DynamicPythonSuite : AbstractPythonSuite<br />
-{<br />
-    public DynamicPythonSuite()<br />
-        : base(FindSuitablePythonScripts())<br />
-    {<br />
-    }</p>
-<p>    private static string[] FindSuitablePythonScripts()<br />
-    {<br />
-        List<string> scripts = new List<string>();<br />
-        Assembly assembly = typeof (DynamicPythonSuite).Assembly;<br />
-        string indication = "#test";<br />
-        foreach (string potentialScript in assembly.GetManifestResourceNames())<br />
-        {<br />
-            using (StreamReader reader =<br />
-                new StreamReader(assembly.GetManifestResourceStream(potentialScript)))<br />
-            {<br />
-                if (reader.ReadLine().Trim().StartsWith(indication,<br />
-                    true, CultureInfo.InvariantCulture))<br />
-                {<br />
-                    scripts.Add(potentialScript);<br />
-                }<br />
-            }<br />
-        }<br />
-        return scripts.ToArray();<br />
-    }<br />
-}<br />
-</pre><br /><br />
-Which will load all scripts with "<b>#test</b>" in the first line, which seem'is a little easier to me (not having to spell out the path to the script, and only having to create the test file to make things happen) - YMMV of course.</p>
+public class DynamicPythonSuite : AbstractPythonSuite<br>
+{<br>
+    public DynamicPythonSuite()<br>
+        : base(FindSuitablePythonScripts())<br>
+    {<br>
+    }
+<p>    private static string[] FindSuitablePythonScripts()<br>
+    {<br>
+        List<string> scripts = new List<string>();<br>
+        Assembly assembly = typeof (DynamicPythonSuite).Assembly;<br>
+        string indication = "#test";<br>
+        foreach (string potentialScript in assembly.GetManifestResourceNames())<br>
+        {<br>
+            using (StreamReader reader =<br>
+                new StreamReader(assembly.GetManifestResourceStream(potentialScript)))<br>
+            {<br>
+                if (reader.ReadLine().Trim().StartsWith(indication,<br>
+                    true, CultureInfo.InvariantCulture))<br>
+                {<br>
+                    scripts.Add(potentialScript);<br>
+                }<br>
+            }<br>
+        }<br>
+        return scripts.ToArray();<br>
+    }<br>
+}<br>
+</string></string></p></pre><br><br>
+Which will load all scripts with "<b>#test</b>" in the first line, which seem'is a little easier to me (not having to spell out the path to the script, and only having to create the test file to make things happen) - YMMV of course.

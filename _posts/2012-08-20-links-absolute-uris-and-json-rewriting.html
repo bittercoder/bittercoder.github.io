@@ -20,199 +20,200 @@ categories:
 tags: []
 comments: []
 ---
-<h2>Serialization</h2><br />
-As part of the design for the resources being returned from our API we wanted to ensure they included some useful information:</p>
+
+<h2>Serialization</h2><br>
+As part of the design for the resources being returned from our API we wanted to ensure they included some useful information:
 <ul>
 <li>An absolute link to themselves</li>
 <li>Links to other entities</li>
-<li>List of available expansions, and expanded properties (<a href="/?p=83489876">covered in the next part of this series</a>)</li><br />
-</ul><br />
-So we are looking to return entities that look like this:</p>
-<pre>{<br />
-  "Id": "5b2b0ad0-5371-4abf-a661-9f410088925f",<br />
-  "UserName": "joeb",<br />
-  "Email": "joe.bloggs@test.com",<br />
-  "FirstName": "Joe",<br />
-  "LastName": "Bloggs",<br />
-  "Expands": [<br />
-    "Groups"<br />
-  ],<br />
-  "Self": "http://localhost:29840/api/user/5b2b0ad0-5371-4abf-a661-9f410088925f",<br />
-  "Links": [<br />
-    {<br />
-      "Title": "Group Memberships",<br />
-      "Href": "http://localhost:29840/api/user/5b2b0ad0-5371-4abf-a661-9f410088925f/groups",<br />
-      "Rel": "Groups"<br />
-    }<br />
-  ]<br />
-}</pre><br />
-This inevitably means creating some kind of view model that you return from your API as the representation of the underlying resource (entity, aggregate etc.)</p>
+<li>List of available expansions, and expanded properties (<a href="/?p=83489876">covered in the next part of this series</a>)</li><br>
+</ul><br>
+So we are looking to return entities that look like this:
+<pre>{<br>
+  "Id": "5b2b0ad0-5371-4abf-a661-9f410088925f",<br>
+  "UserName": "joeb",<br>
+  "Email": "joe.bloggs@test.com",<br>
+  "FirstName": "Joe",<br>
+  "LastName": "Bloggs",<br>
+  "Expands": [<br>
+    "Groups"<br>
+  ],<br>
+  "Self": "http://localhost:29840/api/user/5b2b0ad0-5371-4abf-a661-9f410088925f",<br>
+  "Links": [<br>
+    {<br>
+      "Title": "Group Memberships",<br>
+      "Href": "http://localhost:29840/api/user/5b2b0ad0-5371-4abf-a661-9f410088925f/groups",<br>
+      "Rel": "Groups"<br>
+    }<br>
+  ]<br>
+}</pre><br>
+This inevitably means creating some kind of view model that you return from your API as the representation of the underlying resource (entity, aggregate etc.)
 <p>After some experimentation we landed on the idea of leveraging the capabilities of JSON.Net to perform on-the-fly JSON rewriting of our serialized entities.</p>
 <p>This meant deriving our view models from this base class, and implementing the abstract "Self" property (to return a link to the entity itself) as well as supporting the links and expansions.</p>
-<pre>public abstract class AbstractModel<br />
-{<br />
-    public const string ExpansionsProperty = "__expansions__";<br />
-    public const string SelfProperty = "__self__";<br />
-    public const string LinksProperty = "__links__";</p>
-<p>    protected AbstractModel()<br />
-    {<br />
-        Expansions = new Dictionary();<br />
-        Links = new List();<br />
+<pre>public abstract class AbstractModel<br>
+{<br>
+    public const string ExpansionsProperty = "__expansions__";<br>
+    public const string SelfProperty = "__self__";<br>
+    public const string LinksProperty = "__links__";
+<p>    protected AbstractModel()<br>
+    {<br>
+        Expansions = new Dictionary();<br>
+        Links = new List();<br>
     }</p>
-<p>    [JsonProperty(SelfProperty, NullValueHandling = NullValueHandling.Ignore)]<br />
+<p>    [JsonProperty(SelfProperty, NullValueHandling = NullValueHandling.Ignore)]<br>
     public abstract string Self { get; }</p>
-<p>    [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]<br />
+<p>    [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]<br>
     public string[] Expands { get; set; }</p>
-<p>    [JsonProperty(ExpansionsProperty, NullValueHandling = NullValueHandling.Ignore)]<br />
+<p>    [JsonProperty(ExpansionsProperty, NullValueHandling = NullValueHandling.Ignore)]<br>
     public IDictionary Expansions { get; set; }</p>
-<p>    [JsonProperty(LinksProperty, NullValueHandling = NullValueHandling.Ignore)]<br />
-    public IList Links { get; set; }<br />
-}</pre><br />
-Each link, was then also represented by a LinkModel, which was a very simple class:</p>
-<pre>public class LinkModel<br />
-{<br />
-    [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]<br />
-    public string Title { get; set; }<br />
-    public bool Inline { get; set; }<br />
-    public string Href { get; set; }<br />
-    public string Rel { get; set; }<br />
-}</pre><br />
-If you look closely at the abstract model class above you will see the properties use the names __expansions__, __self__ and __links__ - so initially when JSON.Net is used to serialize the entity, that's the name we get.</p>
+<p>    [JsonProperty(LinksProperty, NullValueHandling = NullValueHandling.Ignore)]<br>
+    public IList Links { get; set; }<br>
+}</p></pre><br>
+Each link, was then also represented by a LinkModel, which was a very simple class:
+<pre>public class LinkModel<br>
+{<br>
+    [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]<br>
+    public string Title { get; set; }<br>
+    public bool Inline { get; set; }<br>
+    public string Href { get; set; }<br>
+    public string Rel { get; set; }<br>
+}</pre><br>
+If you look closely at the abstract model class above you will see the properties use the names __expansions__, __self__ and __links__ - so initially when JSON.Net is used to serialize the entity, that's the name we get.
 <p>We then extend the existing JsonMediaTypeFormatter to perform serialization to JToken and then rewrite the token. This is an abstract class:</p>
-<pre>public abstract class AbstractRewritingJsonMediaTypeFormatter : JsonMediaTypeFormatter<br />
-{<br />
-    protected abstract JToken Rewrite(JToken content);</p>
-<p>    public override Task WriteToStreamAsync(Type type, object value, Stream writeStream, HttpContent content, TransportContext transportContext)<br />
-    {<br />
-        if (type == null) throw new ArgumentNullException("type");<br />
+<pre>public abstract class AbstractRewritingJsonMediaTypeFormatter : JsonMediaTypeFormatter<br>
+{<br>
+    protected abstract JToken Rewrite(JToken content);
+<p>    public override Task WriteToStreamAsync(Type type, object value, Stream writeStream, HttpContent content, TransportContext transportContext)<br>
+    {<br>
+        if (type == null) throw new ArgumentNullException("type");<br>
         if (writeStream == null) throw new ArgumentNullException("writeStream");</p>
-<p>        if (UseDataContractJsonSerializer)<br />
-        {<br />
-            return base.WriteToStreamAsync(type, value, writeStream, content, transportContext);<br />
+<p>        if (UseDataContractJsonSerializer)<br>
+        {<br>
+            return base.WriteToStreamAsync(type, value, writeStream, content, transportContext);<br>
         }</p>
-<p>        return TaskHelpers.RunSynchronously(() =><br />
-            {<br />
+<p>        return TaskHelpers.RunSynchronously(() =><br>
+            {<br>
                 Encoding effectiveEncoding = SelectCharacterEncoding(content == null ? null : content.Headers);</p>
 <p>                JsonSerializer jsonSerializer = JsonSerializer.Create(SerializerSettings);</p>
-<p>                using (var tokenWriter = new JTokenWriter())<br />
-                {<br />
+<p>                using (var tokenWriter = new JTokenWriter())<br>
+                {<br>
                     jsonSerializer.Serialize(tokenWriter, value);</p>
 <p>                    JToken token = tokenWriter.Token;</p>
 <p>                    JToken rewrittenToken = Rewrite(token);</p>
-<p>                    using (var jsonTextWriter = new JsonTextWriter(new StreamWriter(writeStream, effectiveEncoding)) {CloseOutput = false})<br />
-                    {<br />
-                        if (Indent)<br />
-                        {<br />
-                            jsonTextWriter.Formatting = Formatting.Indented;<br />
+<p>                    using (var jsonTextWriter = new JsonTextWriter(new StreamWriter(writeStream, effectiveEncoding)) {CloseOutput = false})<br>
+                    {<br>
+                        if (Indent)<br>
+                        {<br>
+                            jsonTextWriter.Formatting = Formatting.Indented;<br>
                         }</p>
 <p>                        rewrittenToken.WriteTo(jsonTextWriter);</p>
-<p>                        jsonTextWriter.Flush();<br />
-                    }<br />
-                }<br />
-            });<br />
-    }<br />
-}</pre><br />
-Which we then have a concrete implementation of:</p>
-<pre>public class JsonNetFormatter : AbstractRewritingJsonMediaTypeFormatter<br />
-{<br />
-    readonly IUrlTransformer _urlTransformer;<br />
-    readonly ExpandsRewriter _expandsRewriter;<br />
-    readonly SelfRewriter _selfRewriter;<br />
-    readonly LinksRewriter _linksRewriter;</p>
-<p>    public JsonNetFormatter(IUrlTransformer urlTransformer)<br />
-    {<br />
-        if (urlTransformer == null) throw new ArgumentNullException("urlTransformer");<br />
-        _urlTransformer = urlTransformer;<br />
-        _expandsRewriter = new ExpandsRewriter();<br />
-        _selfRewriter = new SelfRewriter(_urlTransformer);<br />
-        _linksRewriter = new LinksRewriter(_urlTransformer);<br />
+<p>                        jsonTextWriter.Flush();<br>
+                    }<br>
+                }<br>
+            });<br>
+    }<br>
+}</p></pre><br>
+Which we then have a concrete implementation of:
+<pre>public class JsonNetFormatter : AbstractRewritingJsonMediaTypeFormatter<br>
+{<br>
+    readonly IUrlTransformer _urlTransformer;<br>
+    readonly ExpandsRewriter _expandsRewriter;<br>
+    readonly SelfRewriter _selfRewriter;<br>
+    readonly LinksRewriter _linksRewriter;
+<p>    public JsonNetFormatter(IUrlTransformer urlTransformer)<br>
+    {<br>
+        if (urlTransformer == null) throw new ArgumentNullException("urlTransformer");<br>
+        _urlTransformer = urlTransformer;<br>
+        _expandsRewriter = new ExpandsRewriter();<br>
+        _selfRewriter = new SelfRewriter(_urlTransformer);<br>
+        _linksRewriter = new LinksRewriter(_urlTransformer);<br>
     }</p>
-<p>    protected override JToken Rewrite(JToken token)<br />
-    {<br />
+<p>    protected override JToken Rewrite(JToken token)<br>
+    {<br>
         _expandsRewriter.Rewrite(token);</p>
 <p>        _selfRewriter.Rewrite(token);</p>
 <p>        _linksRewriter.Rewrite(token);</p>
-<p>        return token;<br />
-    }<br />
-}</pre><br />
-By doing this we can then implement simple visitors which can rewrite the JSON on the fly looking for those special token names - so for example, in our links above we have a property </p>
+<p>        return token;<br>
+    }<br>
+}</p></pre><br>
+By doing this we can then implement simple visitors which can rewrite the JSON on the fly looking for those special token names - so for example, in our links above we have a property 
 <p><code>public bool Inline { get; set; }</code></p>
 <p>If Inline is true, we actually "in-line" the link into the body of the representation (using Rel as the name of the property), but if the link is not inline, we include in the set of links.</p>
 <p>This rewriting process also takes care of rewriting relative API URL's to be absolute, so controllers largely don't need to care about resolving absolute URLs within representations themselves.</p>
 <p>JSON Rewriting does bring a cost with it, but so far we have found the cost to be very low (as we are not transforming JSON strings, but just serializing directly to tokens first, then converting the tokens to a string - this avoids the need to delve into reflection to achieve the same results.</p>
-<h2>Links</h2><br />
-Our linking implementation is largely bespoke, but mirror's that of a hyperlink within a web page. Initially we just had a Rel and Href property, but after a while adopted a Title as well (<a href="http://developer.netflix.com/docs/REST_API_Conventions">So similar to The netflix links representation in XML</a>).</p>
+<h2>Links</h2><br>
+Our linking implementation is largely bespoke, but mirror's that of a hyperlink within a web page. Initially we just had a Rel and Href property, but after a while adopted a Title as well (<a href="http://developer.netflix.com/docs/REST_API_Conventions">So similar to The netflix links representation in XML</a>).
 <p>Though REST as a term is used to describe the "type" of API that is implemented, in fact the API (like most) falls into the camp of "REST'ish" as opposed to RESTful - though personally a fan of <a href="http://en.wikipedia.org/wiki/HATEOAS">HATEOAS</a>, in this case it's a trait we would like to move closer towards, but is certainly not a constraint our API must fulfill before we make it available for consumption.</p>
 <p>There are some standards/proposals out there for links within JSON responses, but largely the impact would have been mostly negative to the consumption of the API, by making the representations more internally inconsistent in naming style etc. and for little gain, as the proposed standards don't make implementing the client any simpler at this stage.</p>
 <p>The Links collection can be populated by external resources, but largely we have the the model itself populate the set of available links upon construct.</p>
-<h2>Collection results</h2></p>
+<h2>Collection results</h2>
 <p>When returning collection results, if a collection was page (more on paging in a future post we we look at querying/OData) we also aimed to return the following links as part of the response:</p>
-<p>* First page<br />
-* Last page<br />
-* Next page<br />
+<p>* First page<br>
+* Last page<br>
+* Next page<br>
 * Previous page</p>
 <p>The <a href="http://www.iana.org/assignments/link-relations/link-relations.xml">IANA provides a list of well-known link relationships</a> including "first", "next", "last" and "prev" - so we adopted those values for the links in the API.</p>
 <pre>
-public class QueryResults<T> : AbstractModel<br />
-{<br />
-    public override string Self<br />
-    {<br />
-        get;<br />
-    }</p>
+public class QueryResults<t> : AbstractModel<br>
+{<br>
+    public override string Self<br>
+    {<br>
+        get;<br>
+    }
 <p>    public int? Skip { get; set; }</p>
 <p>    public int? Top { get; set; }</p>
 <p>    public int? Total { get; set; }</p>
-<p>    public IList<T> Items { get; set; }</p>
-<p>    public QueryResults<T> SetSelfAndGenerateLinks(string self)<br />
-    {<br />
-    ...<br />
-    }</p>
-<p>    public QueryResults<T> SetSelfAndGenerateLinks(Uri uri)<br />
-    {<br />
-        ..<br />
-    }</p>
-<p>    protected void AddLink(string rel, Uri uri, int start)<br />
-    {<br />
-        ..<br />
-    }<br />
-}<br />
-</pre></p>
+<p>    public IList<t> Items { get; set; }</t></p>
+<p>    public QueryResults<t> SetSelfAndGenerateLinks(string self)<br>
+    {<br>
+    ...<br>
+    }</t></p>
+<p>    public QueryResults<t> SetSelfAndGenerateLinks(Uri uri)<br>
+    {<br>
+        ..<br>
+    }</t></p>
+<p>    protected void AddLink(string rel, Uri uri, int start)<br>
+    {<br>
+        ..<br>
+    }<br>
+}<br>
+</p></t></pre>
 <p>Notice we have a method for setting the Self URL in this case - this is because in the case of a query result the code returning the set of query results may be decoupled from the controller where knowledge of the current request URI exists.</p>
 <p>Within the call to SetSelfAndGenerateLinks we have this code for adding the links, based on where we are at in the set of results.</p>
 <pre>
-if (inMiddle || atStart)<br />
-{<br />
-    AddLink(StandardRelations.Next, uri, Math.Max(0, Skip.Value + Top.Value));<br />
-    AddLink(StandardRelations.Last, uri, Math.Max(0, Total.Value - Top.Value));<br />
-}</p>
-<p>if (inMiddle || atEnd)<br />
-{<br />
-    AddLink(StandardRelations.Previous, uri, Math.Max(0, Skip.Value - Top.Value));<br />
-    AddLink(StandardRelations.First, uri, 0);<br />
-}<br />
-</pre></p>
+if (inMiddle || atStart)<br>
+{<br>
+    AddLink(StandardRelations.Next, uri, Math.Max(0, Skip.Value + Top.Value));<br>
+    AddLink(StandardRelations.Last, uri, Math.Max(0, Total.Value - Top.Value));<br>
+}
+<p>if (inMiddle || atEnd)<br>
+{<br>
+    AddLink(StandardRelations.Previous, uri, Math.Max(0, Skip.Value - Top.Value));<br>
+    AddLink(StandardRelations.First, uri, 0);<br>
+}<br>
+</p></pre>
 <p>And then when the request is rendered we might end up with a response that looks like this:</p>
 <pre>
-{<br />
-  "Skip": 20,<br />
-  "Top": 25,<br />
-  "Total": 45,<br />
-  "Items": [<br />
-    ...<br />
-  ],<br />
-  "Self": "http://localhost:29840/api/search?tql=Name+~+test&$skip=20&$top=25",<br />
-  "Links": [<br />
-    {<br />
-      "Href": "http://localhost:29840/api/search?tql=Name+~+test&$skip=0&$top=25",<br />
-      "Rel": "prev"<br />
-    },<br />
-    {<br />
-      "Href": "http://localhost:29840/api/search?tql=Name+~+test&$skip=0&$top=25",<br />
-      "Rel": "first"<br />
-    }<br />
-  ]<br />
-}<br />
-</pre></p>
+{<br>
+  "Skip": 20,<br>
+  "Top": 25,<br>
+  "Total": 45,<br>
+  "Items": [<br>
+    ...<br>
+  ],<br>
+  "Self": "http://localhost:29840/api/search?tql=Name+~+test&$skip=20&$top=25",<br>
+  "Links": [<br>
+    {<br>
+      "Href": "http://localhost:29840/api/search?tql=Name+~+test&$skip=0&$top=25",<br>
+      "Rel": "prev"<br>
+    },<br>
+    {<br>
+      "Href": "http://localhost:29840/api/search?tql=Name+~+test&$skip=0&$top=25",<br>
+      "Rel": "first"<br>
+    }<br>
+  ]<br>
+}<br>
+</pre>
 <p>Providing links like this can really simplify the implementation of clients and allows us to potentially change URI structure without causing as many headaches for API consumers.</p>
-<h2>Next</h2></p>
-<p><a href="/?p=83489876">Next, in part 2 of this series we take a look at the implementation of <b>Expand</b></a> in the API</a>, and how we mapped our entities to View models for the API.</p>
+<h2>Next</h2>
+<p><a href="/?p=83489876">Next, in part 2 of this series we take a look at the implementation of <b>Expand</b></a> in the API, and how we mapped our entities to View models for the API.</p>

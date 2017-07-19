@@ -20,21 +20,22 @@ categories:
 tags: []
 comments: []
 ---
+
 <pre>
-    [Test]<br />
-   public void ExtendingClass()<br />
-{<br />
-    PythonEngine engine = new PythonEngine();</p>
-<p>    engine.Import("clr");<br />
-    engine.LoadAssembly(GetType().Assembly);<br />
+    [Test]<br>
+   public void ExtendingClass()<br>
+{<br>
+    PythonEngine engine = new PythonEngine();
+<p>    engine.Import("clr");<br>
+    engine.LoadAssembly(GetType().Assembly);<br>
     engine.ExecuteToConsole("from IronPythonLib.Tests import *");</p>
-<p>    engine.Execute(@"class MyTransformer(IStringTransformer):<br />
-def Transform(self, input):<br />
+<p>    engine.Execute(@"class MyTransformer(IStringTransformer):<br>
+def Transform(self, input):<br>
 return input + "" is now transformed""");</p>
-<p>    IStringTransformer transformer = engine.EvaluateAs<IStringTransformer>("MyTransformer()");<br />
-    Assert.AreEqual("input is now transformed", transformer.Transform("input"));<br />
-}<br />
-</pre><br /><br />
-hmmm?<br /><br />
-<br /><br />
-<b>edit:</b> seems better now, swapped to a simpler layout though I doub't it will work well for people with lower resolutions... most people will (hopefully) read this via RSS at any rate.<br /></p>
+<p>    IStringTransformer transformer = engine.EvaluateAs<istringtransformer>("MyTransformer()");<br>
+    Assert.AreEqual("input is now transformed", transformer.Transform("input"));<br>
+}<br>
+</istringtransformer></p></pre><br><br>
+hmmm?<br><br>
+<br><br>
+<b>edit:</b> seems better now, swapped to a simpler layout though I doub't it will work well for people with lower resolutions... most people will (hopefully) read this via RSS at any rate.<br>

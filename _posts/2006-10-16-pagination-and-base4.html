@@ -32,374 +32,375 @@ comments:
     is still a problem ;o) - so I might revisit this at the end of the month, if Ivan
     hasn't jumped on the idea by then.
 ---
+
 <h1>
-  Monorail Pagination with Base4.Net </h1>So, part of today was spent building "digg" style pagination for data I'm pulling out of base4... if you don't use digg, then what I mean is stuff like this:<br /><br />
-<br /><br />
-<img src="http://blog.bittercoder.com/content/binary/digg_pagination.png"<br />
-border="0" /><br /><br />
-<br /><br />
-Flickr and plenty of other sites use the same layout... and it does seem quite a convenient way to work your way through large result sets...<br /><br />
-<br /><br />
-Fairly standard stuff, because I'm using monorail my first pit stop was the <a href="http://www.castleproject.org/index.php/MonoRail:PaginationHelper">pagination helper</a> - however there's a bit of an impedance mismatch here, as the pagination helper is geared towards paging through an <b>IList</b> containing all the records, where as generally speaking you're working with <b>IItemList<T></b> and wanting to make use of the inherent paging support in base4.net... hmmm... at any rate, this isn't exactly "brilliant" code - but it might prove useful if you messing around with <a href="http://www.castleproject.org/index.php/MonoRail">Monorail</a> at home - something I think you should do.<br /></p>
+  Monorail Pagination with Base4.Net </h1>So, part of today was spent building "digg" style pagination for data I'm pulling out of base4... if you don't use digg, then what I mean is stuff like this:<br><br>
+<br><br>
+<img src="http://blog.bittercoder.com/content/binary/digg_pagination.png"><br>
+border="0" /><br><br>
+<br><br>
+Flickr and plenty of other sites use the same layout... and it does seem quite a convenient way to work your way through large result sets...<br><br>
+<br><br>
+Fairly standard stuff, because I'm using monorail my first pit stop was the <a href="http://www.castleproject.org/index.php/MonoRail:PaginationHelper">pagination helper</a> - however there's a bit of an impedance mismatch here, as the pagination helper is geared towards paging through an <b>IList</b> containing all the records, where as generally speaking you're working with <b>IItemList<t></t></b> and wanting to make use of the inherent paging support in base4.net... hmmm... at any rate, this isn't exactly "brilliant" code - but it might prove useful if you messing around with <a href="http://www.castleproject.org/index.php/MonoRail">Monorail</a> at home - something I think you should do.<br>
 <h2>
-  Paging and base4.net<br />
-</h2>So, first off, I built a small class to represent a "page" from a larger set of query results in my application... it looks like this...<br /><br />
-<br /></p>
+  Paging and base4.net<br>
+</h2>So, first off, I built a small class to represent a "page" from a larger set of query results in my application... it looks like this...<br><br>
+<br>
 <pre>
-///<br />
+///<br>
 <summary>
-/// Represents a page from a query<br />
-/// </summary><br />
-/// <typeparam name="T"></typeparam><br />
-public class PagedItemList<T> : IEnumerable<T><br />
-    where T: class, IItem<br />
-{<br />
-    private IItemList<T> _items;<br />
-    private int _pageNumber;<br />
-    private int _pageSize;<br />
-    private int _totalCount;</p>
-<p>    public PagedItemList(IItemList<T> items, int pageSize, int pageNumber, int totalCount)<br />
-    {<br />
-        if (items == null) throw new ArgumentNullException("items");<br />
-        if (pageNumber <= 0) throw new ArgumentOutOfRangeException("pageNumber", "pageNumber must be greater then 0");<br />
-        if (pageSize <= 0) throw new ArgumentOutOfRangeException("pageSize", "pageSize must be greater then 0");<br />
-        if (totalCount < 0) throw new ArgumentOutOfRangeException("totalCount", "totalCount must be greater then or equal to 0");</p>
-<p>        _items = items;<br />
-        _pageNumber = pageNumber;<br />
+/// Represents a page from a query<br>
+/// </summary><br>
+/// <typeparam name="T"></typeparam><br>
+public class PagedItemList<t> : IEnumerable<t><br>
+    where T: class, IItem<br>
+{<br>
+    private IItemList<t> _items;<br>
+    private int _pageNumber;<br>
+    private int _pageSize;<br>
+    private int _totalCount;
+<p>    public PagedItemList(IItemList<t> items, int pageSize, int pageNumber, int totalCount)<br>
+    {<br>
+        if (items == null) throw new ArgumentNullException("items");<br>
+        if (pageNumber <= 0)="" throw="" new="" argumentoutofrangeexception("pagenumber",="" "pagenumber="" must="" be="" greater="" then=""></=><br>
+        if (pageSize <= 0)="" throw="" new="" argumentoutofrangeexception("pagesize",="" "pagesize="" must="" be="" greater="" then=""></=><br>
+        if (totalCount < 0)="" throw="" new="" argumentoutofrangeexception("totalcount",="" "totalcount="" must="" be="" greater="" then="" or="" equal="" to=""></t></p>
+<p>        _items = items;<br>
+        _pageNumber = pageNumber;<br>
         _pageSize = pageSize;</p>
 <p>_totalCount = totalCount;       </p>
 <p>    }</p>
-<p>    ///<br />
+<p>    ///<br>
 <summary>
-    /// The count of items on this page<br />
-    /// </summary><br />
-    public int PageCount<br />
-    {<br />
-        get { return (int)Math.Ceiling(((double)TotalCount) / ((double)PageSize)); }<br />
+    /// The count of items on this page<br>
+    /// </summary><br>
+    public int PageCount<br>
+    {<br>
+        get { return (int)Math.Ceiling(((double)TotalCount) / ((double)PageSize)); }<br>
     }</p>
-<p>    ///<br />
+<p>    ///<br>
 <summary>
-    /// Index of the first item on this page<br />
-    /// </summary><br />
-    public int FirstItemIndex<br />
-    {<br />
-        get<br />
-        {<br />
-            return PageSize * (PageNumber-1);<br />
-        }<br />
+    /// Index of the first item on this page<br>
+    /// </summary><br>
+    public int FirstItemIndex<br>
+    {<br>
+        get<br>
+        {<br>
+            return PageSize * (PageNumber-1);<br>
+        }<br>
     }</p>
-<p>    ///<br />
+<p>    ///<br>
 <summary>
-    /// Index of the last item on this page<br />
-    /// </summary><br />
-    public int LastItemIndex<br />
-    {<br />
-        get<br />
-        {<br />
-            return Math.Min(FirstItemIndex + (PageSize - 1), TotalCount - 1);<br />
-        }<br />
+    /// Index of the last item on this page<br>
+    /// </summary><br>
+    public int LastItemIndex<br>
+    {<br>
+        get<br>
+        {<br>
+            return Math.Min(FirstItemIndex + (PageSize - 1), TotalCount - 1);<br>
+        }<br>
     }</p>
-<p>    ///<br />
+<p>    ///<br>
 <summary>
-    /// 1-relative page number index<br />
-    /// </summary><br />
-    public int PageNumber<br />
-    {<br />
-        get<br />
-        {<br />
-             return _pageNumber;<br />
-        }<br />
+    /// 1-relative page number index<br>
+    /// </summary><br>
+    public int PageNumber<br>
+    {<br>
+        get<br>
+        {<br>
+             return _pageNumber;<br>
+        }<br>
     }</p>
-<p>    ///<br />
+<p>    ///<br>
 <summary>
-    /// The size of each page<br />
-    /// </summary><br />
-    public int PageSize<br />
-    {<br />
-        get { return _pageSize; }<br />
+    /// The size of each page<br>
+    /// </summary><br>
+    public int PageSize<br>
+    {<br>
+        get { return _pageSize; }<br>
     }</p>
-<p>    ///<br />
+<p>    ///<br>
 <summary>
-    /// Total number of results returned from the query<br />
-    /// </summary><br />
-    public int TotalCount<br />
-    {<br />
-        get { return _totalCount; }<br />
+    /// Total number of results returned from the query<br>
+    /// </summary><br>
+    public int TotalCount<br>
+    {<br>
+        get { return _totalCount; }<br>
     }</p>
-<p>    ///<br />
+<p>    ///<br>
 <summary>
-    /// Number of items on this page<br />
-    /// </summary><br />
-    public int Count<br />
-    {<br />
-        get { return _items.Count; }<br />
+    /// Number of items on this page<br>
+    /// </summary><br>
+    public int Count<br>
+    {<br>
+        get { return _items.Count; }<br>
     }</p>
-<p>    ///<br />
+<p>    ///<br>
 <summary>
-    /// the underlying list of items<br />
-    /// </summary><br />
-    public IItemList<T> Items<br />
-    {<br />
-        get { return _items; }<br />
-    }</p>
-<p>    public IEnumerator<T> GetEnumerator()<br />
-    {<br />
-        return _items.GetEnumerator();<br />
-    }</p>
-<p>    System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()<br />
-    {<br />
-        return ((IEnumerable)_items).GetEnumerator();<br />
-    }<br />
-}<br />
-</pre><br /><br />
-Pretty mundane, next we just extend my existing repository with a new method for returning a <b>PagedItemList<T></b>... here's how it looks:<br /><br />
-<br /></p>
+    /// the underlying list of items<br>
+    /// </summary><br>
+    public IItemList<t> Items<br>
+    {<br>
+        get { return _items; }<br>
+    }</t></p>
+<p>    public IEnumerator<t> GetEnumerator()<br>
+    {<br>
+        return _items.GetEnumerator();<br>
+    }</t></p>
+<p>    System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()<br>
+    {<br>
+        return ((IEnumerable)_items).GetEnumerator();<br>
+    }<br>
+}<br>
+</p></t></t></t></pre><br><br>
+Pretty mundane, next we just extend my existing repository with a new method for returning a <b>PagedItemList<t></t></b>... here's how it looks:<br><br>
+<br>
 <pre>
-public virtual PagedItemList<T> Find(ObjectQuery query, int pageSize, int pageNumber)<br />
-{<br />
-    if (query == null) throw new ArgumentNullException("query");<br />
-    if (pageSize <= 0) throw new ArgumentException("pageSize must be greater then 0");<br />
-    if (pageNumber <= 0) throw new ArgumentException("pageNumber must be greater then 0");</p>
+public virtual PagedItemList<t> Find(ObjectQuery query, int pageSize, int pageNumber)<br>
+{<br>
+    if (query == null) throw new ArgumentNullException("query");<br>
+    if (pageSize <= 0)="" throw="" new="" argumentexception("pagesize="" must="" be="" greater="" then=""></=><br>
+    if (pageNumber <= 0)="" throw="" new="" argumentexception("pagenumber="" must="" be="" greater="" then=""></=>
 <p>    int count = Convert.ToInt32(_context.ExecuteScalar(query.Compile().SELECT_COUNT()));</p>
-<p>    query.Path.PageSize = pageSize;<br />
+<p>    query.Path.PageSize = pageSize;<br>
     query.Path.PageNumber = pageNumber;</p>
-<p>    return new PagedItemList<T>(Find(query), pageSize, pageNumber, count);<br />
-}<br />
-</pre><br /><br />
-For our query we first estabilsh the total count of results, then we just run the query again and return the results for the selected page.<br /></p>
+<p>    return new PagedItemList<t>(Find(query), pageSize, pageNumber, count);<br>
+}<br>
+</t></p></t></pre><br><br>
+For our query we first estabilsh the total count of results, then we just run the query again and return the results for the selected page.<br>
 <h2>
-  From Base4.Net to Monorail<br />
-</h2>Now, our <b>PagedItemList<T></b> is useful by itself, but there's a more feature-complete interface in monorail for representing a "page" of informaton for display logic, used by the pagination helper, it's called <b>IPaginatedPage</b>.<br /><br />
-<br /></p>
+  From Base4.Net to Monorail<br>
+</h2>Now, our <b>PagedItemList<t></t></b> is useful by itself, but there's a more feature-complete interface in monorail for representing a "page" of informaton for display logic, used by the pagination helper, it's called <b>IPaginatedPage</b>.<br><br>
+<br>
 <pre>
-public interface IPaginatedPage : IEnumerable<br />
-{<br />
-    int CurrentIndex { get; }<br />
-    int LastIndex { get; }<br />
-    int NextIndex { get; }<br />
-    int PreviousIndex { get; }<br />
-    int FirstIndex { get; }<br />
-    int FirstItem { get; }<br />
-    int LastItem { get; }<br />
-    int TotalItems { get; }<br />
-    bool HasPrevious { get; }<br />
-    bool HasNext { get; }<br />
-    bool HasFirst { get; }<br />
-    bool HasLast { get; }<br />
-}<br />
-</pre><br /><br />
-...so, we just build a little adaptor object, using the abstract base page that implementes <b>IPaginatedPage</b>, called "<b>AbstractPage</b>" funnily enough - here I've called my adaptor <b>Base4Page</b>.<br /><br />
-<br /></p>
+public interface IPaginatedPage : IEnumerable<br>
+{<br>
+    int CurrentIndex { get; }<br>
+    int LastIndex { get; }<br>
+    int NextIndex { get; }<br>
+    int PreviousIndex { get; }<br>
+    int FirstIndex { get; }<br>
+    int FirstItem { get; }<br>
+    int LastItem { get; }<br>
+    int TotalItems { get; }<br>
+    bool HasPrevious { get; }<br>
+    bool HasNext { get; }<br>
+    bool HasFirst { get; }<br>
+    bool HasLast { get; }<br>
+}<br>
+</pre><br><br>
+...so, we just build a little adaptor object, using the abstract base page that implementes <b>IPaginatedPage</b>, called "<b>AbstractPage</b>" funnily enough - here I've called my adaptor <b>Base4Page</b>.<br><br>
+<br>
 <pre>
-public class Base4Page<T> : AbstractPage<br />
-    where T: class, IItem<br />
-{<br />
-    private PagedItemList<T> _items;</p>
-<p>    public Base4Page(PagedItemList<T> items)<br />
-    {<br />
-        if (items == null) throw new ArgumentNullException("items");<br />
-        _items = items;</p>
-<p>CalculatePaginationInfo(items.FirstItemIndex, items.LastItemIndex,<br />
-items.TotalCount, items.PageSize, items.PageNumber);<br />
+public class Base4Page<t> : AbstractPage<br>
+    where T: class, IItem<br>
+{<br>
+    private PagedItemList<t> _items;
+<p>    public Base4Page(PagedItemList<t> items)<br>
+    {<br>
+        if (items == null) throw new ArgumentNullException("items");<br>
+        _items = items;</t></p>
+<p>CalculatePaginationInfo(items.FirstItemIndex, items.LastItemIndex,<br>
+items.TotalCount, items.PageSize, items.PageNumber);<br>
     }</p>
-<p>    public override System.Collections.IEnumerator GetEnumerator()<br />
-    {<br />
-        return _items.GetEnumerator();<br />
-    }<br />
-}<br />
-</pre><br /><br />
-Soo... last of all, where's the pay off?<br /><br />
-<br /><br />
-Well, first thing's first, now you can do this in your controller:<br /><br />
-<br /></p>
+<p>    public override System.Collections.IEnumerator GetEnumerator()<br>
+    {<br>
+        return _items.GetEnumerator();<br>
+    }<br>
+}<br>
+</p></t></t></pre><br><br>
+Soo... last of all, where's the pay off?<br><br>
+<br><br>
+Well, first thing's first, now you can do this in your controller:<br><br>
+<br>
 <pre>
-public void Users(int pageSize, int page)<br />
-{<br />
-    ObjectQuery query = new ObjectQuery(typeof(Car));<br />
-    // not enough set some further critiera...</p>
-<p>    PropertyBag.Add("Cars", new Base4Page<Car>(_carRepository.Find(query, pageSize, page)));<br />
-}<br />
-</pre><br /><br />
-At which point, you could do some simple pagination in your views (and pagination examples for existing Monorail websites can be cut 'n' pasted in to give you a head start)...<br /><br />
-<br /></p>
+public void Users(int pageSize, int page)<br>
+{<br>
+    ObjectQuery query = new ObjectQuery(typeof(Car));<br>
+    // not enough set some further critiera...
+<p>    PropertyBag.Add("Cars", new Base4Page<car>(_carRepository.Find(query, pageSize, page)));<br>
+}<br>
+</car></p></pre><br><br>
+At which point, you could do some simple pagination in your views (and pagination examples for existing Monorail websites can be cut 'n' pasted in to give you a head start)...<br><br>
+<br>
 <pre>
 <table cellpadding="4">
 <tr>
-<th>Make</th></p>
-<th>Model</th></p>
-<th>Year</th><br />
-	</tr><br />
-	#foreach($Car in $Cars)</p>
+<th>Make</th>
+<th>Model</th>
+<th>Year</th><br>
+	</tr><br>
+	#foreach($Car in $Cars)
 <tr>
-<td>$!Car.Make</td></p>
-<td>$!Car.Model</td></p>
-<td>$!Car.Year</td><br />
-	</tr><br />
-	#end<br />
-</table></p>
+<td>$!Car.Make</td>
+<td>$!Car.Model</td>
+<td>$!Car.Year</td><br>
+	</tr><br>
+	#end<br>
+</table>
 <div class="pagination" id="pagination">
 <table width="90%" border="0">
 <tr>
-<td>Showing $Cars.FirstItem - $Cars.LastItem of $Cars.TotalItems</td></p>
+<td>Showing $Cars.FirstItem - $Cars.LastItem of $Cars.TotalItems</td>
 <td align="right">
-			#if($Cars.HasFirst) $PaginationHelper.CreatePageLink( 1, "first", null, null) ) #end<br />
-			#if(!$Cars.HasFirst) first #end<br />
-			#if($Cars.HasPrevious) | $PaginationHelper.CreatePageLink( $Cars.PreviousIndex, "prev", null, null) ) #end<br />
-			#if(!$Cars.HasPrevious) | prev #end<br />
-			#if($Cars.HasNext) | $PaginationHelper.CreatePageLink( $Cars.NextIndex, "next",null, null) ) #end<br />
-			#if(!$Cars.HasNext) | next #end<br />
-			#if($Cars.HasLast) | $PaginationHelper.CreatePageLink( $Cars.LastIndex, "last",null, null) ) #end<br />
-			#if(!$Cars.HasLast) | last #end<br />
-		</td><br />
-	</tr><br />
-	</table><br />
-</div></p>
-<p></pre></p>
-<p><br /><br />
-And of course it's not much harder to write the logic for displaying "digg" style pagination.... I decided to write it as a helper in C#, because after messing with it for 15 minutes in <a href="http://www.castleproject.org/index.php/MonoRail:Brail">brail</a> it pissed me off too much (some things in brail are quite annoying compared to normal <a href="http://boo.codehaus.org/">boo</a>, for instance I couldn't seem to use the "range(...)" builtin, and if your view doesn't have any content after the last <% ... %> block it throws up a compile time exception... Admittedly I haven't done a get latest from the Castle site in a couple of weeks... so this might not actually be a problem any more, or maybe I just don't have the brail engine configure "just right".<br /><br />
-<br /></p>
+			#if($Cars.HasFirst) $PaginationHelper.CreatePageLink( 1, "first", null, null) ) #end<br>
+			#if(!$Cars.HasFirst) first #end<br>
+			#if($Cars.HasPrevious) | $PaginationHelper.CreatePageLink( $Cars.PreviousIndex, "prev", null, null) ) #end<br>
+			#if(!$Cars.HasPrevious) | prev #end<br>
+			#if($Cars.HasNext) | $PaginationHelper.CreatePageLink( $Cars.NextIndex, "next",null, null) ) #end<br>
+			#if(!$Cars.HasNext) | next #end<br>
+			#if($Cars.HasLast) | $PaginationHelper.CreatePageLink( $Cars.LastIndex, "last",null, null) ) #end<br>
+			#if(!$Cars.HasLast) | last #end<br>
+		</td><br>
+	</tr><br>
+	</table><br>
+</div>
+<p></p></pre>
+<p><br><br>
+And of course it's not much harder to write the logic for displaying "digg" style pagination.... I decided to write it as a helper in C#, because after messing with it for 15 minutes in <a href="http://www.castleproject.org/index.php/MonoRail:Brail">brail</a> it pissed me off too much (some things in brail are quite annoying compared to normal <a href="http://boo.codehaus.org/">boo</a>, for instance I couldn't seem to use the "range(...)" builtin, and if your view doesn't have any content after the last <% ... %> block it throws up a compile time exception... Admittedly I haven't done a get latest from the Castle site in a couple of weeks... so this might not actually be a problem any more, or maybe I just don't have the brail engine configure "just right".<br><br>
+<br></p>
 <pre>
-public abstract class AbstractDiggPaginationHelper : AbstractHelper<br />
-{<br />
-    public string CreateDiggPagination(IPaginatedPage page, int adjacents)<br />
-    {<br />
-        return CreateDiggPagination(page, adjacents, null);<br />
-    }</p>
-<p>    public string CreateDiggPagination(IPaginatedPage page, int adjacents, IDictionary queryStringParams)<br />
-    {<br />
-        StringBuilder output = new StringBuilder();<br />
+public abstract class AbstractDiggPaginationHelper : AbstractHelper<br>
+{<br>
+    public string CreateDiggPagination(IPaginatedPage page, int adjacents)<br>
+    {<br>
+        return CreateDiggPagination(page, adjacents, null);<br>
+    }
+<p>    public string CreateDiggPagination(IPaginatedPage page, int adjacents, IDictionary queryStringParams)<br>
+    {<br>
+        StringBuilder output = new StringBuilder();<br>
         WriteLink(output, page.PreviousIndex, "? prev", !page.HasPrevious, queryStringParams);</p>
-<p>        if (page.LastIndex < (4 + (adjacents * 2))) // not enough links to make it worth breaking up<br />
-        {<br />
-            WriteNumberedLinks(output, page, 1, page.LastIndex, queryStringParams);<br />
-        }<br />
-        else<br />
-        {<br />
+<p>        if (page.LastIndex < (4="" +="" (adjacents="" *="" 2)))="" not="" enough="" links="" to="" make="" it="" worth="" breaking=""><br>
+        {<br>
+            WriteNumberedLinks(output, page, 1, page.LastIndex, queryStringParams);<br>
+        }<br>
+        else<br>
+        {<br>
             if ((page.LastIndex - (adjacents * 2) > page.CurrentIndex) &amp;&amp; // in the middle</p>
-<p>(page.CurrentIndex > (adjacents * 2)))<br />
+<p>(page.CurrentIndex > (adjacents * 2)))<br>
             {</p>
-<p>        WriteNumberedLinks(output, page,<br />
-1, 2, queryStringParams);<br />
+<p>        WriteNumberedLinks(output, page,<br>
+1, 2, queryStringParams);<br>
                 WriteElipsis(output);</p>
-<p>        WriteNumberedLinks(output, page,<br />
-page.CurrentIndex - adjacents, page.CurrentIndex + adjacents,<br />
-queryStringParams);<br />
+<p>        WriteNumberedLinks(output, page,<br>
+page.CurrentIndex - adjacents, page.CurrentIndex + adjacents,<br>
+queryStringParams);<br>
                 WriteElipsis(output);</p>
-<p>        WriteNumberedLinks(output, page,<br />
-page.LastIndex - 1, page.LastIndex, queryStringParams);<br />
-            }<br />
-            else if (page.CurrentIndex < (page.LastIndex /2))<br />
+<p>        WriteNumberedLinks(output, page,<br>
+page.LastIndex - 1, page.LastIndex, queryStringParams);<br>
+            }<br>
+            else if (page.CurrentIndex < (page.lastindex=""><br>
             {</p>
-<p>        WriteNumberedLinks(output, page,<br />
-1, 2 + (adjacents * 2), queryStringParams);<br />
+<p>        WriteNumberedLinks(output, page,<br>
+1, 2 + (adjacents * 2), queryStringParams);<br>
                 WriteElipsis(output);</p>
-<p>        WriteNumberedLinks(output, page,<br />
+<p>        WriteNumberedLinks(output, page,<br>
 page.LastIndex - 1, page.LastIndex, queryStringParams);</p>
 <p>    }       </p>
-<p>            else // at the end<br />
+<p>            else // at the end<br>
             {</p>
-<p>        WriteNumberedLinks(output, page,<br />
+<p>        WriteNumberedLinks(output, page,<br>
 1, 2, queryStringParams);       </p>
 <p>                WriteElipsis(output);</p>
-<p>        WriteNumberedLinks(output, page,<br />
-page.LastIndex - (2 + (adjacents * 2)), page.LastIndex,<br />
-queryStringParams);<br />
-            }<br />
+<p>        WriteNumberedLinks(output, page,<br>
+page.LastIndex - (2 + (adjacents * 2)), page.LastIndex,<br>
+queryStringParams);<br>
+            }<br>
         }</p>
-<p>        WriteLink(output, page.NextIndex, "next ?", !page.HasNext, queryStringParams);<br />
-        return output.ToString();<br />
+<p>        WriteLink(output, page.NextIndex, "next ?", !page.HasNext, queryStringParams);<br>
+        return output.ToString();<br>
     }</p>
-<p>    private void WriteElipsis(StringBuilder builder)<br />
-    {<br />
-        builder.Append("...");<br />
+<p>    private void WriteElipsis(StringBuilder builder)<br>
+    {<br>
+        builder.Append("...");<br>
     }</p>
-<p>    private void WriteNumberedLinks(StringBuilder builder, IPaginatedPage page, int startIndex, int endIndex, IDictionary queryStringParams)<br />
-    {<br />
-        for (int i=startIndex; i<= endIndex; i++)<br />
-        {<br />
-            WriteNumberedLink(builder, page, i, queryStringParams);<br />
-        }<br />
+<p>    private void WriteNumberedLinks(StringBuilder builder, IPaginatedPage page, int startIndex, int endIndex, IDictionary queryStringParams)<br>
+    {<br>
+        for (int i=startIndex; i<= endindex;=""></=><br>
+        {<br>
+            WriteNumberedLink(builder, page, i, queryStringParams);<br>
+        }<br>
     }</p>
-<p>    private void WriteLink(StringBuilder builder, int index, string text, bool disabled, IDictionary queryStringParams)<br />
-    {<br />
-        if (disabled)<br />
-        {<br />
-            builder.AppendFormat("<span class="disabled">{0}</span>", text);<br />
-        }<br />
-        else<br />
-        {<br />
-            WritePageLink(builder, index, text, null, queryStringParams);<br />
-        }<br />
+<p>    private void WriteLink(StringBuilder builder, int index, string text, bool disabled, IDictionary queryStringParams)<br>
+    {<br>
+        if (disabled)<br>
+        {<br>
+            builder.AppendFormat("<span class="disabled">{0}</span>", text);<br>
+        }<br>
+        else<br>
+        {<br>
+            WritePageLink(builder, index, text, null, queryStringParams);<br>
+        }<br>
     }</p>
-<p>    private void WriteNumberedLink(StringBuilder builder, IPaginatedPage page, int index, IDictionary queryStringParams)<br />
-    {<br />
-        if (index == page.CurrentIndex)<br />
-        {<br />
-            builder.AppendFormat("<span class="current">{0}</span>", index);<br />
-        }<br />
-        else<br />
-        {<br />
-            WritePageLink(builder, index, index.ToString(), null, queryStringParams);<br />
-        }<br />
+<p>    private void WriteNumberedLink(StringBuilder builder, IPaginatedPage page, int index, IDictionary queryStringParams)<br>
+    {<br>
+        if (index == page.CurrentIndex)<br>
+        {<br>
+            builder.AppendFormat("<span class="current">{0}</span>", index);<br>
+        }<br>
+        else<br>
+        {<br>
+            WritePageLink(builder, index, index.ToString(), null, queryStringParams);<br>
+        }<br>
     }</p>
 <p>    protected abstract void WritePageLink(StringBuilder builder, int page, String text, IDictionary htmlAttributes, IDictionary queryStringParams);</p>
-<p>}<br />
-</pre><br /><br />
-The guts of the helper is in an abstract class, simply so I could test the numbering logic without having to worry about creating a controller &amp; http context (just implement the WritePageLink method with some simple text output ... the implementation is here:<br /><br />
-<br /></p>
+<p>}<br>
+</p></pre><br><br>
+The guts of the helper is in an abstract class, simply so I could test the numbering logic without having to worry about creating a controller &amp; http context (just implement the WritePageLink method with some simple text output ... the implementation is here:<br><br>
+<br>
 <pre>
-public class DiggPaginationHelper : AbstractDiggPaginationHelper<br />
-{</p>
-<p>    protected override void WritePageLink(StringBuilder builder, int page, String text, IDictionary htmlAttributes, IDictionary queryStringParams)<br />
-    {<br />
+public class DiggPaginationHelper : AbstractDiggPaginationHelper<br>
+{
+<p>    protected override void WritePageLink(StringBuilder builder, int page, String text, IDictionary htmlAttributes, IDictionary queryStringParams)<br>
+    {<br>
         string filePath = "";</p>
-<p>        if (CurrentContext != null)<br />
-        {<br />
-            filePath = CurrentContext.Request.FilePath;<br />
+<p>        if (CurrentContext != null)<br>
+        {<br>
+            filePath = CurrentContext.Request.FilePath;<br>
         }</p>
-<p>        if (queryStringParams == null)<br />
-        {<br />
-            queryStringParams = new Hashtable();<br />
+<p>        if (queryStringParams == null)<br>
+        {<br>
+            queryStringParams = new Hashtable();<br>
         }</p>
 <p>        queryStringParams["page"] = page.ToString();</p>
-<p>        builder.AppendFormat("<a href="{0}?{1}" {2}>{3}</a>", filePath, BuildQueryString(queryStringParams), GetAttributes(htmlAttributes), text);<br />
-    }<br />
-}<br />
-</pre><br /><br />
-At which point you can just register it on the controller, and call it with something like <b>${DiggPaginationHelper.CreateDiggPagination(tracks, 3)}</b> and get yourself a nice little paging display.&nbsp; The second parameter is the "adjacent" - which can be used to control how many pages are displayed either side of the selected page when dealing with lots of results.<br /><br />
-<br /><br />
-Oh, and of course you might want some CSS to go with it...<br /><br />
-<br /></p>
+<p>        builder.AppendFormat("<a href="{0}?{1}" {2}="">{3}</a>", filePath, BuildQueryString(queryStringParams), GetAttributes(htmlAttributes), text);<br>
+    }<br>
+}<br>
+</p></pre><br><br>
+At which point you can just register it on the controller, and call it with something like <b>${DiggPaginationHelper.CreateDiggPagination(tracks, 3)}</b> and get yourself a nice little paging display.&nbsp; The second parameter is the "adjacent" - which can be used to control how many pages are displayed either side of the selected page when dealing with lots of results.<br><br>
+<br><br>
+Oh, and of course you might want some CSS to go with it...<br><br>
+<br>
 <pre>
-/* pagination */</p>
-<p>div.pagination {<br />
-    padding: 3px;<br />
-    margin: 3px;<br />
+/* pagination */
+<p>div.pagination {<br>
+    padding: 3px;<br>
+    margin: 3px;<br>
 }</p>
-<p>div.pagination a {<br />
-    color: #000099;<br />
-    text-decoration: none;<br />
-    padding: 2px 5px 2px 5px;<br />
-    margin: 2px;<br />
-    border: 1px solid #AAAFEE;<br />
+<p>div.pagination a {<br>
+    color: #000099;<br>
+    text-decoration: none;<br>
+    padding: 2px 5px 2px 5px;<br>
+    margin: 2px;<br>
+    border: 1px solid #AAAFEE;<br>
 }</p>
-<p>div.pagination a:hover, div.pagination a:active {<br />
-    color: #000;<br />
-    border: 1px solid #000099;<br />
+<p>div.pagination a:hover, div.pagination a:active {<br>
+    color: #000;<br>
+    border: 1px solid #000099;<br>
 }</p>
-<p>div.pagination span.current {<br />
-    font-weight: bold;<br />
-    background-color: #000099;<br />
-    color: #FFF;<br />
-    padding: 2px 5px 2px 5px;<br />
-    margin: 2px;<br />
-    border: 1px solid #000099;<br />
+<p>div.pagination span.current {<br>
+    font-weight: bold;<br>
+    background-color: #000099;<br>
+    color: #FFF;<br>
+    padding: 2px 5px 2px 5px;<br>
+    margin: 2px;<br>
+    border: 1px solid #000099;<br>
 }</p>
-<p>div.pagination span.disabled {<br />
-    color: #DDD;<br />
-    padding: 2px 5px 2px 5px;<br />
-    margin: 2px;<br />
-    border: 1px solid #EEE;<br />
-}<br />
-</pre><br /><br />
-<br /></p>
+<p>div.pagination span.disabled {<br>
+    color: #DDD;<br>
+    padding: 2px 5px 2px 5px;<br>
+    margin: 2px;<br>
+    border: 1px solid #EEE;<br>
+}<br>
+</p></pre><br><br>
+<br>

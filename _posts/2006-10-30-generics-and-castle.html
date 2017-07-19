@@ -22,75 +22,76 @@ tags:
 - WCF
 comments: []
 ---
+
 <p>
-Though I knew you could do it, I never have till today... and that's supplying a type for a generic parameter in another type, which is registered in a container... Of course I didn't <span style="text-decoration: underline">have</span> to do it that way, but it it kept the configuration a little thinner.<br />
-</p></p>
+Though I knew you could do it, I never have till today... and that's supplying a type for a generic parameter in another type, which is registered in a container... Of course I didn't <span style="text-decoration: underline">have</span> to do it that way, but it it kept the configuration a little thinner.<br>
+</p>
 <p>
-  Basically I have some simple WCF services I wanted to host in a container.. here's the service's interface...<br />
-</p></p>
+  Basically I have some simple WCF services I wanted to host in a container.. here's the service's interface...<br>
+</p>
 <pre>
-[ServiceContract(Namespace="http://localhost/schemas/testrunner/", SessionMode=SessionMode.Required)]<br />
-public interface ITestRunner<br />
-{<br />
-    [OperationContract]<br />
-    Guid StartTestRun(Guid testSuiteId);</p>
-<p>    [OperationContract]<br />
-    TestRunStatus GetRunStatus(Guid testRunId);<br />
-}<br />
-</pre></p>
+[ServiceContract(Namespace="http://localhost/schemas/testrunner/", SessionMode=SessionMode.Required)]<br>
+public interface ITestRunner<br>
+{<br>
+    [OperationContract]<br>
+    Guid StartTestRun(Guid testSuiteId);
+<p>    [OperationContract]<br>
+    TestRunStatus GetRunStatus(Guid testRunId);<br>
+}<br>
+</p></pre>
 <p>
-  To get this to work for my implementation I had to do one thing, which was set the InstanceContextMode to "single" for&nbsp;the service implementations behaviour, otherwise the service host would die when I tried to pass in an instance (it expects a type for any other mode)... I haven't dug&nbsp;very&nbsp;deep into WCF, but it would be nice if they supported a mechanism for supplying a component activator instead...<br />
-</p></p>
+  To get this to work for my implementation I had to do one thing, which was set the InstanceContextMode to "single" for&nbsp;the service implementations behaviour, otherwise the service host would die when I tried to pass in an instance (it expects a type for any other mode)... I haven't dug&nbsp;very&nbsp;deep into WCF, but it would be nice if they supported a mechanism for supplying a component activator instead...<br>
+</p>
 <pre>
-[ServiceBehavior(InstanceContextMode = InstanceContextMode.Single)]<br />
-public class TestRunner : ITestRunner<br />
-{<br />
-</pre></p>
+[ServiceBehavior(InstanceContextMode = InstanceContextMode.Single)]<br>
+public class TestRunner : ITestRunner<br>
+{<br>
+</pre>
 <p>
-  Now, I build a component for hosting my service... it implements <a href="http://www.castleproject.org/index.php/Facility:Startable">IStartable</a>...<br />
-</p></p>
+  Now, I build a component for hosting my service... it implements <a href="http://www.castleproject.org/index.php/Facility:Startable">IStartable</a>...<br>
+</p>
 <pre>
-public class HostingWrapper<T> : IStartable<br />
-    where T: class<br />
-{<br />
-    private ServiceHost _host;<br />
-    private T _service;<br />
-    private ILogger _log;</p>
-<p>    public HostingWrapper(ILogger log, T service)<br />
-    {<br />
-        if (log == null) throw new ArgumentNullException("log");<br />
+public class HostingWrapper<t> : IStartable<br>
+    where T: class<br>
+{<br>
+    private ServiceHost _host;<br>
+    private T _service;<br>
+    private ILogger _log;
+<p>    public HostingWrapper(ILogger log, T service)<br>
+    {<br>
+        if (log == null) throw new ArgumentNullException("log");<br>
         if (service == null) throw new ArgumentNullException("service");</p>
-<p>        _log = log;<br />
-        _service = service;<br />
+<p>        _log = log;<br>
+        _service = service;<br>
     }</p>
-<p>    public void Start()<br />
-    {<br />
-        _host = new ServiceHost(_service);<br />
-        if (_log.IsDebugEnabled) _log.Debug("Opening ServiceHost for service: {0}", _service.GetType());<br />
-        _host.Open();<br />
-        if (_log.IsInfoEnabled) _log.Info("Opened ServiceHost for service: {0}", _service.GetType());<br />
+<p>    public void Start()<br>
+    {<br>
+        _host = new ServiceHost(_service);<br>
+        if (_log.IsDebugEnabled) _log.Debug("Opening ServiceHost for service: {0}", _service.GetType());<br>
+        _host.Open();<br>
+        if (_log.IsInfoEnabled) _log.Info("Opened ServiceHost for service: {0}", _service.GetType());<br>
     }</p>
-<p>    public void Stop()<br />
-    {<br />
-        if (_log.IsDebugEnabled) _log.Debug("Closing ServiceHost for service: {0}", _service.GetType());<br />
-        _host.Close();<br />
-        ((IDisposable)_host).Dispose();<br />
-        if (_log.IsInfoEnabled) _log.Info("Closed ServiceHost for service: {0}", _service.GetType());<br />
-        _host = null;<br />
-    }<br />
-}<br />
-</pre></p>
+<p>    public void Stop()<br>
+    {<br>
+        if (_log.IsDebugEnabled) _log.Debug("Closing ServiceHost for service: {0}", _service.GetType());<br>
+        _host.Close();<br>
+        ((IDisposable)_host).Dispose();<br>
+        if (_log.IsInfoEnabled) _log.Info("Closed ServiceHost for service: {0}", _service.GetType());<br>
+        _host = null;<br>
+    }<br>
+}<br>
+</p></t></pre>
 <p>
-  And then you just need to regsiter it in the container's configuration:<br />
-</p></p>
+  And then you just need to regsiter it in the container's configuration:<br>
+</p>
 <pre>
-<components><br />
-    <component id="testRunnerService.default"<br />
-        service="BoatsForGoats.Services.Testing.ITestRunner, BoatsForGoats.Services"<br />
-        type="BoatsForGoats.Services.Testing.TestRunner, BoatsForGoats.Services" /></p>
-<p>    <component id="testRunnerHost.default"<br />
-        type="BoatsForGoats.Services.HostingWrapper`1[[BoatsForGoats.Services.Testing.ITestRunner, BoatsForGoats.Services]], BoatsForGoats.Services" /><br />
-</pre></p>
+<components><br>
+    <component id="testRunnerService.default"></component><br>
+        service="BoatsForGoats.Services.Testing.ITestRunner, BoatsForGoats.Services"<br>
+        type="BoatsForGoats.Services.Testing.TestRunner, BoatsForGoats.Services" />
+<p>    <component id="testRunnerHost.default"></component><br>
+        type="BoatsForGoats.Services.HostingWrapper`1[[BoatsForGoats.Services.Testing.ITestRunner, BoatsForGoats.Services]], BoatsForGoats.Services" /><br>
+</p></components></pre>
 <p>
-  About the only tricky thing is that I guessed (incorrectly) that I would only need a single set of square brackets around the generic parameter.<br />
-</p></p>
+  About the only tricky thing is that I guessed (incorrectly) that I would only need a single set of square brackets around the generic parameter.<br>
+</p>

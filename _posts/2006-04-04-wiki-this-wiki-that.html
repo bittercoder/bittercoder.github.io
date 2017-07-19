@@ -21,63 +21,64 @@ tags:
 - Syzmk
 comments: []
 ---
+
 <p>
-  With the first release of our COM interop SDK for the Syzmk Rich Media Processor (<i>yes, we have clients who want to integrate with the Rich Media Processor from legacy apps</i>) suite coming out last week, I felt it necessary to put some documentation together... internally we've been using FlexWiki sporadically to document what's happening development-wise, iteration feature sets etc. So It made sense to release our documentation on the platform, and offer our clients that ability to augment the documentation where appropriate.<br />
-</p></p>
+  With the first release of our COM interop SDK for the Syzmk Rich Media Processor (<i>yes, we have clients who want to integrate with the Rich Media Processor from legacy apps</i>) suite coming out last week, I felt it necessary to put some documentation together... internally we've been using FlexWiki sporadically to document what's happening development-wise, iteration feature sets etc. So It made sense to release our documentation on the platform, and offer our clients that ability to augment the documentation where appropriate.<br>
+</p>
 <h1>
-  Mixed Reactions<br />
-</h1></p>
+  Mixed Reactions<br>
+</h1>
 <p>
-  Wiki's get mixed reactions from a lot of developers - some love them, others loathe them. I think it's generally related to two problems:<br />
-</p></p>
+  Wiki's get mixed reactions from a lot of developers - some love them, others loathe them. I think it's generally related to two problems:<br>
+</p>
 <ul>
-<li>Lack of refactoring<br />
-  </li></p>
-<li>Ignoring beautification<br />
-  </li><br />
-</ul></p>
+<li>Lack of refactoring<br>
+  </li>
+<li>Ignoring beautification<br>
+  </li><br>
+</ul>
 <p>
-A wiki is a living document, its structure should develop in-line with your understanding on the topics - this includes revisiting old topics, pulling content and moving it into new topics etc. If it attempts to document a product then it must be aligned with releases, otherwise you will forever be chasing your tale... If you can't get commitment to this time allocation from management, just don't even bother.<br />
-</p></p>
+A wiki is a living document, its structure should develop in-line with your understanding on the topics - this includes revisiting old topics, pulling content and moving it into new topics etc. If it attempts to document a product then it must be aligned with releases, otherwise you will forever be chasing your tale... If you can't get commitment to this time allocation from management, just don't even bother.<br>
+</p>
 <p>
-  Stale documentation is often worse then no documentation.<br />
-</p></p>
+  Stale documentation is often worse then no documentation.<br>
+</p>
 <p>
-Second to that, if the wiki is clunky, poorly formatted, disorganised and generally lacking in beauty... Then it's not a   compelling resource for consumers - getting a wiki clean, well organised and aligned with the rest of your web branding seems to go a long way towards encouraging use.<br />
-</p></p>
+Second to that, if the wiki is clunky, poorly formatted, disorganised and generally lacking in beauty... Then it's not a   compelling resource for consumers - getting a wiki clean, well organised and aligned with the rest of your web branding seems to go a long way towards encouraging use.<br>
+</p>
 <h1>
-  Goodbye FlexWiki<br />
-</h1></p>
+  Goodbye FlexWiki<br>
+</h1>
 <p>
-We've been using FlexWiki partly through a loyalty to the .Net platform (http://www.flexwiki.com/) and because internally it's<br />
-  what we feel most comfortable with when it comes to have to modify or extend products but the project has stalled for now and just doesn't reach our needs for a commercially capable collaboration tool... (for instance it doesn't support attachments) ... so I decided to go find a new wiki... of which there are many... to many you might say!<br />
-</p></p>
+We've been using FlexWiki partly through a loyalty to the .Net platform (http://www.flexwiki.com/) and because internally it's<br>
+  what we feel most comfortable with when it comes to have to modify or extend products but the project has stalled for now and just doesn't reach our needs for a commercially capable collaboration tool... (for instance it doesn't support attachments) ... so I decided to go find a new wiki... of which there are many... to many you might say!<br>
+</p>
 <h1>
-  WikiMatrix to the rescue<br />
-</h1></p>
+  WikiMatrix to the rescue<br>
+</h1>
 <p>
-At which point I discovered wikimatrix: <a href="http://www.wikimatrix.org/">http://www.wikimatrix.org/</a> - What a great little site! Especially there new <a href="http://www.wikimatrix.org/wizard.php">Wiki Choice Wizard.</a>.  In about 5 minutes I managed to narrow down what I was looking for, and eventually selected TWiki (<a ref="http://www.twiki.org/">http://www.twiki.org/</a>) as our prime candidate (<a href="http://www.atlassian.com/software/confluence/">Confluence</a> also looked very good, but the entry cost didn't seem justifiable at this point).<br />
-</p></p>
+At which point I discovered wikimatrix: <a href="http://www.wikimatrix.org/">http://www.wikimatrix.org/</a> - What a great little site! Especially there new <a href="http://www.wikimatrix.org/wizard.php">Wiki Choice Wizard.</a>.  In about 5 minutes I managed to narrow down what I was looking for, and eventually selected TWiki (<a ref="http://www.twiki.org/">http://www.twiki.org/</a>) as our prime candidate (<a href="http://www.atlassian.com/software/confluence/">Confluence</a> also looked very good, but the entry cost didn't seem justifiable at this point).<br>
+</p>
 <h1>
-  Hello TWiki<br />
-</h1><img src="http://twiki.org/p/pub/TWiki04/TWikiLogos/T-logo-158x45-t.gif" /><br /></p>
+  Hello TWiki<br>
+</h1><img src="http://twiki.org/p/pub/TWiki04/TWikiLogos/T-logo-158x45-t.gif"><br>
 <p>
-TWiki does have some pitfalls for a Microsoft-focused house, mainly that hosting it on windows is possible but going to cause<br />
-  tears before bed time... luckily they have a debian vmware installation... so we have avoided all the grief involved with<br />
-  windows, and gained a tasty performance bonus over running it on windows (Because the project would have required the cygwin tools &amp; apache for windows... not necessarily a high-performance combination)<br />
-</p></p>
+TWiki does have some pitfalls for a Microsoft-focused house, mainly that hosting it on windows is possible but going to cause<br>
+  tears before bed time... luckily they have a debian vmware installation... so we have avoided all the grief involved with<br>
+  windows, and gained a tasty performance bonus over running it on windows (Because the project would have required the cygwin tools &amp; apache for windows... not necessarily a high-performance combination)<br>
+</p>
 <h1>
-  The second best thing since sliced bread<br />
-</h1></p>
+  The second best thing since sliced bread<br>
+</h1>
 <p>
-VMWare server being free has to be probably the best thing since sliced bread (Though I guess unbundling supersedes that for most IT people in NZ of late) - as we're seeing a host of Linux based products being released as pre-configured VM's - suitable as drop in "software appliances" - with a lot less support problems then the normal process of installing Linux onto a virtual machine and setting up the software itself... and Often the memory foot print of the Linux distro + product is half that of an empty windows 2003 standard install, before you've deployed any applications onto it.<br />
-</p></p>
+VMWare server being free has to be probably the best thing since sliced bread (Though I guess unbundling supersedes that for most IT people in NZ of late) - as we're seeing a host of Linux based products being released as pre-configured VM's - suitable as drop in "software appliances" - with a lot less support problems then the normal process of installing Linux onto a virtual machine and setting up the software itself... and Often the memory foot print of the Linux distro + product is half that of an empty windows 2003 standard install, before you've deployed any applications onto it.<br>
+</p>
 <p>
-  So within 15 minutes I had downloaded the 220mb virtual image, booted it up and started editing wiki documents... It's not all quite that easy though, you still need to get your hands dirty doing a little shell based configuration if you want to securely host it on the web - but it's all pretty painless especially if youve dabbled with Linux in the past.<br />
-</p></p>
+  So within 15 minutes I had downloaded the 220mb virtual image, booted it up and started editing wiki documents... It's not all quite that easy though, you still need to get your hands dirty doing a little shell based configuration if you want to securely host it on the web - but it's all pretty painless especially if youve dabbled with Linux in the past.<br>
+</p>
 <p>
-  As for TWiki itself - so far it seems very very good, my only dislike is some of the wiki-text conventions it uses, such as the elaborate header mark-up... though FlexWiki was no better - why they couldn't use the Confluence style mark-up of "h1. " through "h6." I'll never know still the wysiwyg editor takes away most of the mark-up pain for new users.<br />
-</p></p>
+  As for TWiki itself - so far it seems very very good, my only dislike is some of the wiki-text conventions it uses, such as the elaborate header mark-up... though FlexWiki was no better - why they couldn't use the Confluence style mark-up of "h1. " through "h6." I'll never know still the wysiwyg editor takes away most of the mark-up pain for new users.<br>
+</p>
 <p>
-  I've managed to avoid doing any <a href="http://en.wikipedia.org/wiki/Kris_Kross">Kriss Kross</a> "wickety whack" references for the whole post too - be grateful ;o)<br />
-</p></p>
+  I've managed to avoid doing any <a href="http://en.wikipedia.org/wiki/Kris_Kross">Kriss Kross</a> "wickety whack" references for the whole post too - be grateful ;o)<br>
+</p>

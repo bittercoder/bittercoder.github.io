@@ -33,6 +33,7 @@ comments:
     the container level would probably solve the problem - though that defeats convention
     over configuration.
 ---
+
 <p>If you recall many moons ago I posted a <a href="http://wiki.bittercoder.com/Default.aspx?Page=ContainerTutorials">series&nbsp;of articles</a> on the <a href="http://www.castleproject.org/container/index.html">Castle&nbsp;Project's IOC Container</a> "Windsor" teaching the fundamentals of&nbsp;IoC with a practical bent - lots of people liked them, and I still&nbsp;get feedback every now and then from people starting to use windsor&nbsp;and finding them useful.</p>
 <p>At any rate <a href="http://aardvarkblogs.wordpress.com/">Michael&nbsp;McGuire</a> was once such person who read those tutorials a year or&nbsp;so ago and has now started a series of his own - mirroring my&nbsp;castle container tutorials but with the P&amp;P <a href="http://www.codeplex.com/unity">Unity</a> container instead - you&nbsp;can find it <a href="http://aardvarkblogs.wordpress.com/">here</a>.</p>
 <p>As someone who has not given Unity much more then a brief skim it's&nbsp;a nice way to quickly get up to speed on some of the key&nbsp;differences.</p>
@@ -41,7 +42,7 @@ comments:
 <li>You need to implement your own type converters for things&nbsp;like arrays or dictionaries in configuration.</li>
 <li>Configuration syntax is not particularly human-friendly,&nbsp;obviously designed for management via a tool&nbsp; - requiring&nbsp;the entry of full types all over the spot like&nbsp;"Microsoft.Practices.Unity.Configuration.TypeInjectionElement,&nbsp;Microsoft.Practices.Unity.Configuration" - just to register a&nbsp;component!</li>
 <li>Default lifestyle is transient... hmmm.. personally I think&nbsp;singleton is more-often the norm for me when writing&nbsp;applications, but it really depends on how the container is being&nbsp;used/abused I guess.</li>
-<li>Support for multiple configurations looks a little more baked&nbsp;in - but this is trivial stuff to implement in most&nbsp;containers.</li><br />
-</ul><br />
-I'll be interested to see how decorator chains etc. are&nbsp;implemented in Unity.</p>
+<li>Support for multiple configurations looks a little more baked&nbsp;in - but this is trivial stuff to implement in most&nbsp;containers.</li><br>
+</ul><br>
+I'll be interested to see how decorator chains etc. are&nbsp;implemented in Unity.
 <p>Good work Michael.</p>

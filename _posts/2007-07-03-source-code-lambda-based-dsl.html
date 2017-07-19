@@ -34,121 +34,122 @@ comments:
 
     If you still have trouble grabbing the source code using TortoiseSVN, then let me know what error it's returning - ie. PROPFIND failure etc.  - the SVN repository is proxied from inside my network, and I'm still tweaking a few things to get it working right.
 ---
+
 <p>
-  So I've tidied up the source for the DSL from my <a href="http://blog.bittercoder.com/PermaLink,guid,f962b2b9-38ba-4dec-8305-50501e0e21f0.aspx">last post</a> a little... though my "test" was to represent a DSL<br />
-  similar to the one <a href="http://ayende.com/Blog/Default.aspx">Ayende</a> displayed in<br />
-  <a href="http://ayende.com/Blog/archive/2007/06/30/Brail-DSL-Support-Information.aspx">Brail</a> - I haven't implemented any monorail view engine<br />
-  integration, there's little point I feel, I was more interested<br />
-  in being able to display a nested DSL-like syntax, and parse the<br />
-  necessary information out of it as required.&nbsp;<br /><br />
-  <br /><br />
-  You can grab it from&nbsp;SVN repository <a href="http://svn.devdefined.com/public/svn/tools.devdefined.com/trunk/Orcas/src/"<br />
-  target="_blank">here</a> (edit: I've now fix the PROPFIND proxy<br />
-  issue, so the link should work)<br /><br />
-  <br /><br />
-  At any rate, probably the most interesting example is the one<br />
-  that takes <a href="http://svn.devdefined.com/public/svn/tools.devdefined.com/trunk/Orcas/src/DevDefined.Common.Tests/Dsl/ComponentDslTests.cs">this code</a>:<br /><br />
-</p></p>
+  So I've tidied up the source for the DSL from my <a href="http://blog.bittercoder.com/PermaLink,guid,f962b2b9-38ba-4dec-8305-50501e0e21f0.aspx">last post</a> a little... though my "test" was to represent a DSL<br>
+  similar to the one <a href="http://ayende.com/Blog/Default.aspx">Ayende</a> displayed in<br>
+  <a href="http://ayende.com/Blog/archive/2007/06/30/Brail-DSL-Support-Information.aspx">Brail</a> - I haven't implemented any monorail view engine<br>
+  integration, there's little point I feel, I was more interested<br>
+  in being able to display a nested DSL-like syntax, and parse the<br>
+  necessary information out of it as required.&nbsp;<br><br>
+  <br><br>
+  You can grab it from&nbsp;SVN repository <a href="http://svn.devdefined.com/public/svn/tools.devdefined.com/trunk/Orcas/src/"></a><br>
+  target="_blank">here (edit: I've now fix the PROPFIND proxy<br>
+  issue, so the link should work)<br><br>
+  <br><br>
+  At any rate, probably the most interesting example is the one<br>
+  that takes <a href="http://svn.devdefined.com/public/svn/tools.devdefined.com/trunk/Orcas/src/DevDefined.Common.Tests/Dsl/ComponentDslTests.cs">this code</a>:<br><br>
+</p>
 <pre>
-var people = new List<Person>()<br />
-{<br />
-    new Person() { FirstName = "Alex", LastName = "Henderson"},<br />
-    new Person() { FirstName = "Joe", LastName = "Bloggs"}<br />
-};</p>
+var people = new List<person>()<br>
+{<br>
+    new Person() { FirstName = "Alex", LastName = "Henderson"},<br>
+    new Person() { FirstName = "Joe", LastName = "Bloggs"}<br>
+};
 <p>var compDsl = new ComponentDsl();</p>
-<p>compDsl.Add<br />
-(<br />
-    GridComponent => compDsl.Component<br />
-    (<br />
-        compDsl.Parameters<br />
-        (<br />
-            source => people<br />
-        ),<br />
-        header => compDsl.Section<br />
-        (<br />
-            tr => compDsl.As<br />
-            (<br />
-                th => compDsl.As<br />
-                (<br />
-                    compDsl.Text("Names")<br />
-                )<br />
-            )<br />
-        ),<br />
-        item => compDsl.Section<br />
-        (<br />
-            tr => compDsl.As<br />
-            (<br />
-                td => compDsl.As<br />
-                (<br />
-                    compDsl.Item<Person>(p => p.FirstName + " " + p.LastName)<br />
-                )<br />
-            )<br />
-        )<br />
-    )<br />
-);</p>
+<p>compDsl.Add<br>
+(<br>
+    GridComponent => compDsl.Component<br>
+    (<br>
+        compDsl.Parameters<br>
+        (<br>
+            source => people<br>
+        ),<br>
+        header => compDsl.Section<br>
+        (<br>
+            tr => compDsl.As<br>
+            (<br>
+                th => compDsl.As<br>
+                (<br>
+                    compDsl.Text("Names")<br>
+                )<br>
+            )<br>
+        ),<br>
+        item => compDsl.Section<br>
+        (<br>
+            tr => compDsl.As<br>
+            (<br>
+                td => compDsl.As<br>
+                (<br>
+                    compDsl.Item<person>(p => p.FirstName + " " + p.LastName)<br>
+                )<br>
+            )<br>
+        )<br>
+    )<br>
+);</person></p>
 <p>var dsl = new StandardDsl();</p>
-<p>dsl.Add<br />
-(<br />
-    html => dsl.As<br />
-    (<br />
-        body => compDsl<br />
-    )<br />
-);<br />
-</pre></p>
+<p>dsl.Add<br>
+(<br>
+    html => dsl.As<br>
+    (<br>
+        body => compDsl<br>
+    )<br>
+);<br>
+</p></person></pre>
 <p>
-  And converts it to this xhtml...<br /><br />
-</p></p>
+  And converts it to this xhtml...<br><br>
+</p>
 <pre>
-<html><br />
-  <body></p>
+<html><br>
+  <body>
 <table>
 <tr>
-<th>Names</th><br />
-      </tr></p>
+<th>Names</th><br>
+      </tr>
 <tr>
-<td>Alex Henderson</td><br />
-      </tr></p>
+<td>Alex Henderson</td><br>
+      </tr>
 <tr>
-<td>Joe Bloggs</td><br />
-      </tr><br />
-    </table><br />
-  </body><br />
-</html><br />
-</pre></p>
+<td>Joe Bloggs</td><br>
+      </tr><br>
+    </table><br>
+  </body><br>
+</html><br>
+</pre>
 <p>
-  You can pretty quickly figure out what's going on by placing a<br />
-  breakpoint on the Execute() method of the <a href="http://svn.devdefined.com/public/svn/tools.devdefined.com/trunk/Orcas/src/DevDefined.Common/Dsl/StandardDsl.cs">StandardDsl class</a> and tracing through all the calls - in<br />
-  essence all the nodes are emitted by calling the top-level Batch<br />
-  delegate which causes a recursive call down the "tree", with the<br />
-  information being emitted as a side-effect to an evaluation<br />
-  scope.<br /><br />
-  <br /><br />
-  Though I used nodes - effectively creating a structure that's<br />
-  easier to parse, there's no reason why you couldn't make<br />
-  immediate calls to some kind of object, avoiding the need for a<br />
-  second round of parsing - the only trick is that you'd still need<br />
-  to use some kind of scoped stack to push/pop the names of the<br />
-  components because in a statement like this:<br /><br />
-</p></p>
+  You can pretty quickly figure out what's going on by placing a<br>
+  breakpoint on the Execute() method of the <a href="http://svn.devdefined.com/public/svn/tools.devdefined.com/trunk/Orcas/src/DevDefined.Common/Dsl/StandardDsl.cs">StandardDsl class</a> and tracing through all the calls - in<br>
+  essence all the nodes are emitted by calling the top-level Batch<br>
+  delegate which causes a recursive call down the "tree", with the<br>
+  information being emitted as a side-effect to an evaluation<br>
+  scope.<br><br>
+  <br><br>
+  Though I used nodes - effectively creating a structure that's<br>
+  easier to parse, there's no reason why you couldn't make<br>
+  immediate calls to some kind of object, avoiding the need for a<br>
+  second round of parsing - the only trick is that you'd still need<br>
+  to use some kind of scoped stack to push/pop the names of the<br>
+  components because in a statement like this:<br><br>
+</p>
 <pre>
-dsl.As<br />
-(<br />
-    GridComponent => dsl.Component<br />
-    (<br />
-      // etc. etc.<br />
-    )<br />
-)<br />
-</pre></p>
+dsl.As<br>
+(<br>
+    GridComponent => dsl.Component<br>
+    (<br>
+      // etc. etc.<br>
+    )<br>
+)<br>
+</pre>
 <p>
-  <br /><br />
-  the call to <em>dsl.Component</em> needs some way to inspect the<br />
-  stack of names and pull <em>"GridComponent</em>" off the<br />
-  top.<br /><br />
-  <br /><br />
-  I'd love to hear from anyone who could see a use for this kind of<br />
-  thing... it'd be nice to get a more realistic example... I'm<br />
-  struggling to think of anything practical myself.<br />
-</p><i>[Edit: I Noticed the code formatting was pretty awful, so<br />
-I've tidied it up a little... anyone got a good solution for<br />
-copy/pasting code out of orcas (CopyAsHtml2005 doesn't appear to<br />
-install under Orcas)]</i><br /></p>
+  <br><br>
+  the call to <em>dsl.Component</em> needs some way to inspect the<br>
+  stack of names and pull <em>"GridComponent</em>" off the<br>
+  top.<br><br>
+  <br><br>
+  I'd love to hear from anyone who could see a use for this kind of<br>
+  thing... it'd be nice to get a more realistic example... I'm<br>
+  struggling to think of anything practical myself.<br>
+</p><i>[Edit: I Noticed the code formatting was pretty awful, so<br>
+I've tidied it up a little... anyone got a good solution for<br>
+copy/pasting code out of orcas (CopyAsHtml2005 doesn't appear to<br>
+install under Orcas)]</i><br>

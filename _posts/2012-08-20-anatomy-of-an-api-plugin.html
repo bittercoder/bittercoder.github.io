@@ -20,96 +20,97 @@ categories:
 tags: []
 comments: []
 ---
+
 <p>The Enterprise Tester application is extensible - so not only the core plugin, but other plugins, need to contribute to the overall API exposed.</p>
 <p>This wasn't particularly complex to implement - but we did have a few issues we had to circumvent.</p>
-<h2>Controller Registration</h2></p>
+<h2>Controller Registration</h2>
 <p>We took a pretty restrictive approach to registration of API controllers - plugin developers are able to register the controller along with a name and a route (optionally you could also specify defaults and constraints, but this generally wasn't necessary) - but we don't allow one route to service multiple controllers.</p>
 <pre>
-public class CoreRestResourcesPluginInstaller : AbstractPluginInstaller<br />
-{<br />
-  const string ApiPath = "api/";</p>
-<p>  public override void Install(InstallationHelper helper)<br />
-  {<br />
-    helper.RegisterRestService<ProjectController>("project", ApiPath + "project/{id}");<br />
-    helper.RegisterRestService<ProjectsController>("projects", ApiPath + "projects");<br />
-    ...<br />
-  }<br />
-}<br />
-</pre></p>
+public class CoreRestResourcesPluginInstaller : AbstractPluginInstaller<br>
+{<br>
+  const string ApiPath = "api/";
+<p>  public override void Install(InstallationHelper helper)<br>
+  {<br>
+    helper.RegisterRestService<projectcontroller>("project", ApiPath + "project/{id}");<br>
+    helper.RegisterRestService<projectscontroller>("projects", ApiPath + "projects");<br>
+    ...<br>
+  }<br>
+}<br>
+</projectscontroller></projectcontroller></p></pre>
 <p>This approach makes the process of writing the API for your plugin alot easier in many ways as you can be generally assured your plugin's routes wont clash with other plugins (and where a clash exists we can throw up a meaningful error/warning, describing where the conflict exists) - but it won't win any fans with the convention over configuration purest crew.</p>
 <p>Notice also that registering a REST service does not restrict the route to start with /api - we did originally enforce that convention, but then relaxed it because not all WCF WebAPI controllers being registered would necessarily be part of the API for a plugin.</p>
 <p>As a result of these decisions, you end up often with 2 controllers - one for the resource representing an individual entity, and another for the collection resource - there was an <a href="http://codebetter.com/glennblock/2012/02/28/why-are-there-2-controllers-in-the-asp-net-web-api-contactmanager-example-rest-has-nothing-to-with-it-2/" target="_blank">interesting discussion about this in February of this year between Rob Conery, some of the more Zealous members of the REST community and eventually Glenn Block</a> - which is well worth a read.</p>
 <p>In a future post I'm going to cover how I demo REST API's to customers (and strongly encourage feedback on if anybody knows better ways to do this - short of writing sample clients for your API) - as this can be another one of those exercises where going through the process of demonstrating the API interactively (even with non-developers) hilights issues with your API design you won't necessarily discover through testing.</p>
-<h2>Delayed Registration</h2></p>
+<h2>Delayed Registration</h2>
 <p>One of the other challenges we faced is that in our implementation we expose the methods for registering REST services as part of our plugin framework (so it's part of the core) - but our REST framework (which exists in it's own plugin) takes dependencies on all sorts of thing such as our OAuth, Search, Custom Field etc. plugins - and some of those plugins may even want to register their own API controllers (causing circular reference issues).</p>
 <p>To get around this the RegisterRestService extension method adds the registration to a static "ServiceManager" instance, which then takes care of either registering the route etc. immediately if the REST infrastructure is in-place, or collects the registration information awaiting the REST infrastructure being ready as part of application start-up process.</p>
 <pre>
-public static class RestServiceRegistrationExtensions<br />
-{<br />
-    public static InstallationHelper RegisterRestService<T>(this InstallationHelper helper, string name, string routeTemplate, object defaults = null, object constraints = null)<br />
-        where T : class<br />
-    {<br />
-        helper.Register(Component.For<T>().LifeStyle.Transient);</p>
-<p>        ServiceManager.Instance.RegisterService<T>(name, routeTemplate, defaults, constraints);</p>
-<p>        return helper;<br />
-    }<br />
-}<br />
-</pre></p>
+public static class RestServiceRegistrationExtensions<br>
+{<br>
+    public static InstallationHelper RegisterRestService<t>(this InstallationHelper helper, string name, string routeTemplate, object defaults = null, object constraints = null)<br>
+        where T : class<br>
+    {<br>
+        helper.Register(Component.For<t>().LifeStyle.Transient);
+<p>        ServiceManager.Instance.RegisterService<t>(name, routeTemplate, defaults, constraints);</t></p>
+<p>        return helper;<br>
+    }<br>
+}<br>
+</p></t></t></pre>
 <p>Here's the ServiceManager:</p>
 <pre>
-public class ServiceManager : IServiceManager<br />
-{<br />
-    static IServiceManager _serviceManager = new ServiceManager();<br />
-    readonly IList<ServiceMetadata> _services = new List<ServiceMetadata>();<br />
-    Action<ServiceMetadata> _callback;</p>
-<p>    public static IServiceManager Instance<br />
-    {<br />
-        get { return _serviceManager; }<br />
+public class ServiceManager : IServiceManager<br>
+{<br>
+    static IServiceManager _serviceManager = new ServiceManager();<br>
+    readonly IList<servicemetadata> _services = new List<servicemetadata>();<br>
+    Action<servicemetadata> _callback;
+<p>    public static IServiceManager Instance<br>
+    {<br>
+        get { return _serviceManager; }<br>
     }</p>
-<p>    public void RegisterService<T>(string name, string routeTemplate, object defaults = null, object constraints = null)<br />
-    {<br />
-        var metadata = new ServiceMetadata {RouteTemplate = routeTemplate, ControllerType = typeof (T), Defaults = defaults, Constraints = constraints, Name = name};</p>
+<p>    public void RegisterService<t>(string name, string routeTemplate, object defaults = null, object constraints = null)<br>
+    {<br>
+        var metadata = new ServiceMetadata {RouteTemplate = routeTemplate, ControllerType = typeof (T), Defaults = defaults, Constraints = constraints, Name = name};</t></p>
 <p>        _services.Add(metadata);</p>
-<p>        if (_callback != null)<br />
-        {<br />
-            _callback(metadata);<br />
-        }<br />
+<p>        if (_callback != null)<br>
+        {<br>
+            _callback(metadata);<br>
+        }<br>
     }</p>
-<p>    public IList<ServiceMetadata> GetAllServices()<br />
-    {<br />
-        return _services;<br />
-    }</p>
-<p>    public void SetServiceRegisteredCallback(Action<ServiceMetadata> callback)<br />
-    {<br />
-        if (callback == null) throw new ArgumentNullException("callback");</p>
-<p>        if (_callback == null)<br />
-        {<br />
-            foreach (ServiceMetadata service in _services) callback(service);<br />
+<p>    public IList<servicemetadata> GetAllServices()<br>
+    {<br>
+        return _services;<br>
+    }</servicemetadata></p>
+<p>    public void SetServiceRegisteredCallback(Action<servicemetadata> callback)<br>
+    {<br>
+        if (callback == null) throw new ArgumentNullException("callback");</servicemetadata></p>
+<p>        if (_callback == null)<br>
+        {<br>
+            foreach (ServiceMetadata service in _services) callback(service);<br>
         }</p>
-<p>        _callback = callback;<br />
+<p>        _callback = callback;<br>
     }</p>
-<p>    public static void Reset()<br />
-    {<br />
-        _serviceManager = new ServiceManager();<br />
-    }<br />
-}<br />
-</pre></p>
+<p>    public static void Reset()<br>
+    {<br>
+        _serviceManager = new ServiceManager();<br>
+    }<br>
+}<br>
+</p></servicemetadata></servicemetadata></servicemetadata></pre>
 <p>Nothing particular exciting here but it's something to consider if trying to support WebAPI in a pluggable application. Also notice the Reset() method which is necessary to support the end-to-end tests.</p>
-<h2>Mapping Installers</h2></p>
+<h2>Mapping Installers</h2>
 <p>As well as controllers, we have classes which register any necessary functionality against the ViewModelMapper - we normally have one of these per resource type.</p>
 <p>Instances of the mapping installer are automatically registered into the IoC container, and implement an <a href="http://blog.bittercoder.com/?p=83488761">IStartable lifestyle in Windsor</a> (so will be immediately created once all the dependencies are satisfied).</p>
 <pre>
-public class SomeMappingInstaller : AbstractViewModelMappingInstaller<br />
-{<br />
-  public override void Install(IViewModelMapper mapper)<br />
-  {<br />
-    ...<br />
-  }<br />
-}<br />
-</pre></p>
+public class SomeMappingInstaller : AbstractViewModelMappingInstaller<br>
+{<br>
+  public override void Install(IViewModelMapper mapper)<br>
+  {<br>
+    ...<br>
+  }<br>
+}<br>
+</pre>
 <p>This is necessary (Rather then registering the mappings directly in the plugin installation method) because often the mapping logic will need to get access to other services to be able to complete an expansion from one Entity type or another (in which case you would add a constructor where the necessary services could be injected upon creation of the mapping installer).</p>
-<h2>And that's it...</h2></p>
+<h2>And that's it...</h2>
 <p>As you can see we have tried to keep the number of moving parts to a minimum when adding an API controller to a plugin for Enterprise Tester as a 3rd party developer.</p>
 <p>The other desirable trait that comes from this minimalism is that 3rd party developers can't introduce side-effects into other API controllers accidentally (i.e. by adding a new DelegatingHandler, or removing an existing one - such as Authentication).</p>
-<h2>Next</h2></p>
+<h2>Next</h2>
 <p><a href="/?p=83490005">Next in part 9 of this series (The final part) - I give my thoughts on how developing the API using ASP.Net Web API went</a>, including the experience of transition from preview/RC/Beta bits and the recent upgrade to RTM, plus what we didn't get to implement/will be implementing in the future for the API in Enterprise Tester.</p>

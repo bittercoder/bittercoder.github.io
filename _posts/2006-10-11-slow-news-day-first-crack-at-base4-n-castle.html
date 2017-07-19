@@ -58,217 +58,218 @@ comments:
     for you, infact they are probably ideal, they allow you to inject your own ItemContext.
     I use this to store the ItemContext in a Asp.NET Session.\n\nAlex"
 ---
+
 <h2>
-  Base4 &amp; Castle<br />
-</h2></p>
+  Base4 &amp; Castle<br>
+</h2>
 <p>
-  Well I've been working with HTML &amp; style sheets today (mostly) - It's be a long while since I've done web development, so it was a little tedious, and it did briefly cross my mind that life might be easier if we lived in some kind of dictatorship where style sheets and layout were provided for me by the "man"... at any rate I also managed to fit in a bit of monorail and base4 to keep my brain from freezing over.<br /><br />
-  <br /><br />
-I think for this post I might just talk about the way I'm using base4... basically I prototyped some stuff and came to the conclusion that I didn't like the smell of the static <b>StorageContext</b> class in base4 and it's default connection - too hard to test against - not to say that it's a bad idea, just that I couldn't see any easy way to test and mock code&nbsp; for code that used/consumed it... so I decided to work up a simple alternative using castle's IoC and some generic interfaces...<br /><br />
-  <br /><br />
-  <b>At this point</b>... If you've been using Castle for more then a couple of week this is all old news I'm sure, so probably better off finding something else to read ;o)<br /><br />
-</p></p>
+  Well I've been working with HTML &amp; style sheets today (mostly) - It's be a long while since I've done web development, so it was a little tedious, and it did briefly cross my mind that life might be easier if we lived in some kind of dictatorship where style sheets and layout were provided for me by the "man"... at any rate I also managed to fit in a bit of monorail and base4 to keep my brain from freezing over.<br><br>
+  <br><br>
+I think for this post I might just talk about the way I'm using base4... basically I prototyped some stuff and came to the conclusion that I didn't like the smell of the static <b>StorageContext</b> class in base4 and it's default connection - too hard to test against - not to say that it's a bad idea, just that I couldn't see any easy way to test and mock code&nbsp; for code that used/consumed it... so I decided to work up a simple alternative using castle's IoC and some generic interfaces...<br><br>
+  <br><br>
+  <b>At this point</b>... If you've been using Castle for more then a couple of week this is all old news I'm sure, so probably better off finding something else to read ;o)<br><br>
+</p>
 <h3>
-  The facility<br />
-</h3></p>
+  The facility<br>
+</h3>
 <p>
-  First off we have a facility:<br />
-</p></p>
+  First off we have a facility:<br>
+</p>
 <pre>
-public class Base4StorageFacility : AbstractFacility<br />
-{<br />
-    protected override void Init()<br />
-    {<br />
-        string url = FacilityConfig.Attributes["url"];<br />
-        if (string.IsNullOrEmpty(url))<br />
-        {<br />
-            throw new StorageException("The Base4StorageFacility requires a "url" attribute to be set");<br />
-        }</p>
-<p>        Kernel.AddComponentInstance("base4.defaultContext", typeof (IItemContext), StorageContext.NewContext(url));<br />
-        Kernel.AddComponent("base4.repository", typeof (IRepository<>), typeof (Base4Repository<>));<br />
-    }<br />
-}<br />
-</pre><br /><br />
-A facility extends the container with additional functionality, in this case the only reason we're using a facility (instead of registering the components themselves individually) is because we're using a <b>static</b> method to create our context for a specific base4 connection url.<br /><br />
-<br /><br />
-Moving on from here we can register the facility in the containers configuration, incidentally now I have somewhere pleasant to configure what base4 server I connect to by default in my application.<br /><br />
-<br /></p>
+public class Base4StorageFacility : AbstractFacility<br>
+{<br>
+    protected override void Init()<br>
+    {<br>
+        string url = FacilityConfig.Attributes["url"];<br>
+        if (string.IsNullOrEmpty(url))<br>
+        {<br>
+            throw new StorageException("The Base4StorageFacility requires a "url" attribute to be set");<br>
+        }
+<p>        Kernel.AddComponentInstance("base4.defaultContext", typeof (IItemContext), StorageContext.NewContext(url));<br>
+        Kernel.AddComponent("base4.repository", typeof (IRepository<>), typeof (Base4Repository<>));<br>
+    }<br>
+}<br>
+</p></pre><br><br>
+A facility extends the container with additional functionality, in this case the only reason we're using a facility (instead of registering the components themselves individually) is because we're using a <b>static</b> method to create our context for a specific base4 connection url.<br><br>
+<br><br>
+Moving on from here we can register the facility in the containers configuration, incidentally now I have somewhere pleasant to configure what base4 server I connect to by default in my application.<br><br>
+<br>
 <pre>
-<facility id="base4.storageFacility"<br />
-    type="MyProject.Core.Base4StorageFacility, MyProject.Core"<br />
-    url="tcp://Server:@localhost:999/Base4_default" /><br />
-</pre></p>
+<facility id="base4.storageFacility"></facility><br>
+    type="MyProject.Core.Base4StorageFacility, MyProject.Core"<br>
+    url="tcp://Server:@localhost:999/Base4_default" /><br>
+</pre>
 <h3>
-  <br /><br />
-  The Repository<br />
-</h3></p>
+  <br><br>
+  The Repository<br>
+</h3>
 <p>
-  Now what about the IRepository<> ? well here's the interface:<br />
-</p></p>
+  Now what about the IRepository<> ? well here's the interface:<br>
+</p>
 <pre>
-public interface IRepository<T><br />
-    where T : class, IItem, new()<br />
-{<br />
-    IItemListProxy<T> List();<br />
-    IItemList<T> FindAll();<br />
-    IItemList<T> Find(ObjectQuery query);<br />
-    IItemList<T> Find(string path);<br />
-    IItemList<T> Find(string path, params string[] replaces);<br />
-    IItemList<T> Find(ObjectPath path);<br />
-    IItemList<T> Find(ObjectPath path, ObjectScope scope);<br />
-    IItemList<T> FindUsingSQL(string SQL);<br />
-    IItemList<T> FindUsingSQL(string SQL, ObjectScope scope);<br />
-    T Get(T previous);<br />
-    T Get(object id);<br />
-    T Get(ItemKey<T> key);<br />
-    T Get(string relativeUri);<br />
-    T FindOne(ObjectQuery query);<br />
-    T FindOne(string opath);<br />
-    T FindOne(string path, params string[] replaces);<br />
-    T FindOne(ObjectPath path);<br />
-    T FindOneUsingSQL(string SQL);<br />
-    T FindOneUsingSQL(string SQL, ObjectScope scope);<br />
-    T FindOne(string opath, ObjectScope scope);<br />
-    T FindOne(ObjectPath path, ObjectScope scope);<br />
-    void DeleteAll();<br />
-    void Delete(ObjectPath path);<br />
-    void Delete(string path);<br />
-    void Delete(string path, params string[] replaces);<br />
-    void Delete(T item);<br />
-    void Save(T item);<br />
-    T Create(string Xml);<br />
-    T Create(XmlReader reader);<br />
-    T Create();<br />
-}<br />
-</pre><br /><br />
-It's pretty much works like <b>IItemContext</b>, except that you avoid having to pass generic parameters to the individual methods because the interface itself has a generic parameter... there's a couple of extras there that I'll cover at the end of this post too.<br /><br />
-<br /><br />
-Conversely, the class <b>Base4Repository<T></b> implements this interface... which looks like this (or at least the first few methods, I've left the rest out for brevity) - this is similar to what <a href="http://www.flanders.co.nz/Blog/2006/09/23/Base4AndCastle.aspx">Ivan has done</a>.<br /><br />
-<br /></p>
+public interface IRepository<t><br>
+    where T : class, IItem, new()<br>
+{<br>
+    IItemListProxy<t> List();<br>
+    IItemList<t> FindAll();<br>
+    IItemList<t> Find(ObjectQuery query);<br>
+    IItemList<t> Find(string path);<br>
+    IItemList<t> Find(string path, params string[] replaces);<br>
+    IItemList<t> Find(ObjectPath path);<br>
+    IItemList<t> Find(ObjectPath path, ObjectScope scope);<br>
+    IItemList<t> FindUsingSQL(string SQL);<br>
+    IItemList<t> FindUsingSQL(string SQL, ObjectScope scope);<br>
+    T Get(T previous);<br>
+    T Get(object id);<br>
+    T Get(ItemKey<t> key);<br>
+    T Get(string relativeUri);<br>
+    T FindOne(ObjectQuery query);<br>
+    T FindOne(string opath);<br>
+    T FindOne(string path, params string[] replaces);<br>
+    T FindOne(ObjectPath path);<br>
+    T FindOneUsingSQL(string SQL);<br>
+    T FindOneUsingSQL(string SQL, ObjectScope scope);<br>
+    T FindOne(string opath, ObjectScope scope);<br>
+    T FindOne(ObjectPath path, ObjectScope scope);<br>
+    void DeleteAll();<br>
+    void Delete(ObjectPath path);<br>
+    void Delete(string path);<br>
+    void Delete(string path, params string[] replaces);<br>
+    void Delete(T item);<br>
+    void Save(T item);<br>
+    T Create(string Xml);<br>
+    T Create(XmlReader reader);<br>
+    T Create();<br>
+}<br>
+</t></t></t></t></t></t></t></t></t></t></t></pre><br><br>
+It's pretty much works like <b>IItemContext</b>, except that you avoid having to pass generic parameters to the individual methods because the interface itself has a generic parameter... there's a couple of extras there that I'll cover at the end of this post too.<br><br>
+<br><br>
+Conversely, the class <b>Base4Repository<t></t></b> implements this interface... which looks like this (or at least the first few methods, I've left the rest out for brevity) - this is similar to what <a href="http://www.flanders.co.nz/Blog/2006/09/23/Base4AndCastle.aspx">Ivan has done</a>.<br><br>
+<br>
 <pre>
-public class Base4Repository<T> : IRepository<T><br />
-    where T : class, IItem, new()<br />
-{<br />
-    private IItemContext _context;</p>
-<p>    public Base4Repository(IItemContext context)<br />
-    {<br />
-        if (context == null) throw new ArgumentNullException("context");<br />
-        _context = context;<br />
+public class Base4Repository<t> : IRepository<t><br>
+    where T : class, IItem, new()<br>
+{<br>
+    private IItemContext _context;
+<p>    public Base4Repository(IItemContext context)<br>
+    {<br>
+        if (context == null) throw new ArgumentNullException("context");<br>
+        _context = context;<br>
     }</p>
-<p>    public virtual IItemListProxy<T> List()<br />
-    {<br />
-        return _context.List<T>();<br />
-    }</p>
-<p>    public virtual IItemList<T> FindAll()<br />
-    {<br />
-        return _context.FindAll<T>();<br />
-    }<br />
-</pre></p>
+<p>    public virtual IItemListProxy<t> List()<br>
+    {<br>
+        return _context.List<t>();<br>
+    }</t></t></p>
+<p>    public virtual IItemList<t> FindAll()<br>
+    {<br>
+        return _context.FindAll<t>();<br>
+    }<br>
+</t></t></p></t></t></pre>
 <p>
-  <br /><br />
-  Notice that it doesn't have a parameterless constructor, we rely on the container to inject the default <b>IItemContext</b> when creating instances of the <b>Base4Repository</b>...<br /><br />
-</p></p>
+  <br><br>
+  Notice that it doesn't have a parameterless constructor, we rely on the container to inject the default <b>IItemContext</b> when creating instances of the <b>Base4Repository</b>...<br><br>
+</p>
 <h3>
-  The Container<br />
-</h3></p>
+  The Container<br>
+</h3>
 <p>
-Now, by default the container assumes a component has a "<b>singleton</b>" lifestyle, thankfully for a type with a<br />
-generic parameter it is per that parameter, so this test case below passes - incidentally if you tend to use <b>lifecycles</b> other then the default, I would strongly suggest adding tests to make sure the lifecycle is actually applied... you can just imagine what happens in a multi-threaded app when a "Message" class has a <b>singleton</b> lifecycle when you expected a <b>transient</b> ;o) you end up with some bizarre behavior that might not be picked up in normal unit tests.<br />
-</p></p>
+Now, by default the container assumes a component has a "<b>singleton</b>" lifestyle, thankfully for a type with a<br>
+generic parameter it is per that parameter, so this test case below passes - incidentally if you tend to use <b>lifecycles</b> other then the default, I would strongly suggest adding tests to make sure the lifecycle is actually applied... you can just imagine what happens in a multi-threaded app when a "Message" class has a <b>singleton</b> lifecycle when you expected a <b>transient</b> ;o) you end up with some bizarre behavior that might not be picked up in normal unit tests.<br>
+</p>
 <pre>
-[Test]<br />
-public void IsSingleton()<br />
-{<br />
-    IRepository<FileBase> fileRepository1 = container.Resolve<IRepository<FileBase>>();<br />
-    IRepository<FileBase> fileRepository2 = container.Resolve<IRepository<FileBase>>();<br />
-    Assert.AreSame(fileRepository1, fileRepository2);</p>
-<p>    IRepository<TypeImpl> typeRepository1 = container.Resolve<IRepository<TypeImpl>>();<br />
-    IRepository<TypeImpl> typeRepository2 = container.Resolve<IRepository<TypeImpl>>();<br />
-    Assert.AreSame(typeRepository1, typeRepository2);<br />
-}<br />
-</pre><br /><br />
-cool, clear as mud?<br /><br />
-<br /><br />
-Right... so moving on from there, in my own components when I need to access data I now use the repository... so I could, for instance, create a monorail controller like this:<br /><br />
-<br /></p>
+[Test]<br>
+public void IsSingleton()<br>
+{<br>
+    IRepository<filebase> fileRepository1 = container.Resolve<><filebase>>();<br>
+    IRepository<filebase> fileRepository2 = container.Resolve<><filebase>>();<br>
+    Assert.AreSame(fileRepository1, fileRepository2);
+<p>    IRepository<typeimpl> typeRepository1 = container.Resolve<><typeimpl>>();<br>
+    IRepository<typeimpl> typeRepository2 = container.Resolve<><typeimpl>>();<br>
+    Assert.AreSame(typeRepository1, typeRepository2);<br>
+}<br>
+</typeimpl></typeimpl></typeimpl></typeimpl></p></filebase></filebase></filebase></filebase></pre><br><br>
+cool, clear as mud?<br><br>
+<br><br>
+Right... so moving on from there, in my own components when I need to access data I now use the repository... so I could, for instance, create a monorail controller like this:<br><br>
+<br>
 <pre>
-public class FileController : BaseController<br />
-{<br />
-    private IRepository<FileBase> _repository;</p>
-<p>    public FileController(IRepository<FileBase> repository)<br />
-    {<br />
-        if (repository == null) throw new ArgumentNullException("repository");<br />
-        _repository = repository;<br />
-    }</p>
-<p>    public void Fetch(Guid fileId)<br />
-    {<br />
-        CancelLayout();<br />
-        CancelView(); // very important<br />
+public class FileController : BaseController<br>
+{<br>
+    private IRepository<filebase> _repository;
+<p>    public FileController(IRepository<filebase> repository)<br>
+    {<br>
+        if (repository == null) throw new ArgumentNullException("repository");<br>
+        _repository = repository;<br>
+    }</filebase></p>
+<p>    public void Fetch(Guid fileId)<br>
+    {<br>
+        CancelLayout();<br>
+        CancelView(); // very important<br>
         Response.Clear(); // ensure the response is empty</p>
-<p>        FileBase file = _repository.Get(fileId);<br />
-        if (file != null)<br />
-        {<br />
-            Response.ContentType = file.MimeType;<br />
-            file.FileContent.CopyTo(Response.OutputStream);<br />
-        }<br />
-        else<br />
-        {<br />
-            Response.StatusCode = 404;<br />
-        }<br />
-    }<br />
-}<br />
-</pre><br /><br />
-And everything will just work - now in some cases this isn't convenient (the dependency injection model) so I broke down and<br />
-created a static repository class as well, which accesses the default container for the application... basically it has the same interface as IRepository, but they're static methods.. so you can code like this:<br /><br />
-<br /></p>
+<p>        FileBase file = _repository.Get(fileId);<br>
+        if (file != null)<br>
+        {<br>
+            Response.ContentType = file.MimeType;<br>
+            file.FileContent.CopyTo(Response.OutputStream);<br>
+        }<br>
+        else<br>
+        {<br>
+            Response.StatusCode = 404;<br>
+        }<br>
+    }<br>
+}<br>
+</p></filebase></pre><br><br>
+And everything will just work - now in some cases this isn't convenient (the dependency injection model) so I broke down and<br>
+created a static repository class as well, which accesses the default container for the application... basically it has the same interface as IRepository, but they're static methods.. so you can code like this:<br><br>
+<br>
 <pre>
-Track track = Repository<Track>.Get(id);<br />
-</pre></p>
+Track track = Repository<track>.Get(id);<br>
+</track></pre>
 <p>
-  <br /><br />
-Personally I'm not actually that keen on this approach - The Syzmk RMP product I've worked on uses the container everywhere, but avoids ever having to access the default container statically...&nbsp; and if you end up with a class being injected with a large number of dependencies it's often (but not always) a good indication that there's some violation of <a href="http://en.wikipedia.org/wiki/Orthogonal#Computer_science">orthogonality</a> - if only because a class consuming that many dependencies is probably doing more then one thing... a little difficult to pick up on otherwise.<br /><br />
-  <br /><br />
-But at any rate It seems pretty good for a website, where I can't see me using more the one container (or even child containers) within the same app domain.<br /><br />
-</p></p>
+  <br><br>
+Personally I'm not actually that keen on this approach - The Syzmk RMP product I've worked on uses the container everywhere, but avoids ever having to access the default container statically...&nbsp; and if you end up with a class being injected with a large number of dependencies it's often (but not always) a good indication that there's some violation of <a href="http://en.wikipedia.org/wiki/Orthogonal#Computer_science">orthogonality</a> - if only because a class consuming that many dependencies is probably doing more then one thing... a little difficult to pick up on otherwise.<br><br>
+  <br><br>
+But at any rate It seems pretty good for a website, where I can't see me using more the one container (or even child containers) within the same app domain.<br><br>
+</p>
 <h3>
-  Wrinkles...<br />
-</h3></p>
+  Wrinkles...<br>
+</h3>
 <p>
-Moving beyond that, the last thing I have to say is that originally I was creating new instances and then saving them with a repository like this:<br />
-</p></p>
+Moving beyond that, the last thing I have to say is that originally I was creating new instances and then saving them with a repository like this:<br>
+</p>
 <pre>
-Group group = new Group();<br />
-...Repository<Group>.Save(group);<br />
-...<br />
-User user = new User();<br />
-...user.Groups.Add(group);<br />
-...Repository<User>.Save(user);<br />
-</pre><br /><br />
-However, it all turns to <a href="http://www.imdb.com/title/tt0342636/">4 shades of brown</a> when we go to add to a many-to-many collection, like this:<br /><br />
-<br /></p>
+Group group = new Group();<br>
+...Repository<group>.Save(group);<br>
+...<br>
+User user = new User();<br>
+...user.Groups.Add(group);<br>
+...Repository<user>.Save(user);<br>
+</user></group></pre><br><br>
+However, it all turns to <a href="http://www.imdb.com/title/tt0342636/">4 shades of brown</a> when we go to add to a many-to-many collection, like this:<br><br>
+<br>
 <pre>
-Goat goat = new Goat();<br />
-goat.Name = "junk";<br />
-Repository<Goat>.Save(goat);</p>
-<p>BoatOfGoats boat = new BoatOfGoats();<br />
-boat.Name = "track";<br />
-boat.Goats.Add(goat); // <-- "StorageException : Default is not available, as no default has been set"<br />
-Repository<BoatOfGoats>.Save(track);<br />
-</pre><br /><br />
-As far as I can tell the event handling for the Add(item) method expects a default context to be assigned... now I'd be tempted to call this a bug, but that's a bit rash till I understand the in's and out's of base4, however there's an easy way round it... and that's to assign the context yourself :) so a fix would be to add this line before the one that bombs:<br /><br />
-<br /></p>
+Goat goat = new Goat();<br>
+goat.Name = "junk";<br>
+Repository<goat>.Save(goat);
+<p>BoatOfGoats boat = new BoatOfGoats();<br>
+boat.Name = "track";<br>
+boat.Goats.Add(goat); // <-- "storageexception="" :="" default="" is="" not="" available,="" as="" no="" default="" has="" been=""></--><br>
+Repository<boatofgoats>.Save(track);<br>
+</boatofgoats></p></goat></pre><br><br>
+As far as I can tell the event handling for the Add(item) method expects a default context to be assigned... now I'd be tempted to call this a bug, but that's a bit rash till I understand the in's and out's of base4, however there's an easy way round it... and that's to assign the context yourself :) so a fix would be to add this line before the one that bombs:<br><br>
+<br>
 <pre>
-track.Context = container.Resolve<IItemContext>();<br />
-</pre><br /><br />
-But that's pretty kludgey, so instead of using:<br /><br />
-<br /></p>
+track.Context = container.Resolve<iitemcontext>();<br>
+</iitemcontext></pre><br><br>
+But that's pretty kludgey, so instead of using:<br><br>
+<br>
 <pre>
-Goat goat = new Goat();<br />
-</pre><br /><br />
-I added some Create(...) overloads to the repository to take care of it... and do this:<br /><br />
-<br /></p>
+Goat goat = new Goat();<br>
+</pre><br><br>
+I added some Create(...) overloads to the repository to take care of it... and do this:<br><br>
+<br>
 <pre>
-Genre genre = Repository<Genre>.Create();<br />
-</pre></p>
+Genre genre = Repository<genre>.Create();<br>
+</genre></pre>
 <p>
-Last of all, though I haven't drawn on the entire implementation, I'm hoping to follow (At least in spirit) some of the work Ayende has done with his <a href="http://www.ayende.com/Blog/ThinkingAboutTheRepositoryAPI.aspx">NHibernate repository</a> concept as the project progresses, I think it will add a more natural "feel" combined with the repositories for implementing transactions vs. interacting with base4's <a href="http://www.base4.net/quickstarts/gettingstarted/Transaction.aspx">ObjectTransaction</a> directly, not to mention providing something I can test and mock out easily...&nbsp; We shall&nbsp;see what actually happens as the project progresses.</p></p>
+Last of all, though I haven't drawn on the entire implementation, I'm hoping to follow (At least in spirit) some of the work Ayende has done with his <a href="http://www.ayende.com/Blog/ThinkingAboutTheRepositoryAPI.aspx">NHibernate repository</a> concept as the project progresses, I think it will add a more natural "feel" combined with the repositories for implementing transactions vs. interacting with base4's <a href="http://www.base4.net/quickstarts/gettingstarted/Transaction.aspx">ObjectTransaction</a> directly, not to mention providing something I can test and mock out easily...&nbsp; We shall&nbsp;see what actually happens as the project progresses.</p>

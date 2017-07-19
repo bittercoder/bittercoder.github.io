@@ -40,102 +40,103 @@ comments:
 
 
 ---
-<p>If you recall when configuring the container via xml you can do a<br />
+
+<p>If you recall when configuring the container via xml you can do a<br>
 service override like so:</p>
-<pre><configuration></p>
-<p>    <components><br />
-        <component id="smtp.sender"<br />
-            service="Namespace.IEmailSender, AssemblyName"<br />
-            type="Namespace.SmtpMailSender, AssemblyName" /></p>
-<p>        <component id="sendmail.sender"<br />
-            service="Namespace.IEmailSender, AssemblyName"<br />
+<pre><configuration>
+<p>    <components><br>
+        <component id="smtp.sender"></component><br>
+            service="Namespace.IEmailSender, AssemblyName"<br>
+            type="Namespace.SmtpMailSender, AssemblyName" /></components></p>
+<p>        <component id="sendmail.sender"></component><br>
+            service="Namespace.IEmailSender, AssemblyName"<br>
             type="Namespace.SendMailEmailSender, AssemblyName" /></p>
-<p>        <component id="newsletter"<br />
+<p>        <component id="newsletter"></component><br>
             type="Namespace.NewsLetterSenderService, AssemblyName"></p>
 <parameters>
-                <sender>${smtp.sender}</sender><br />
-            </parameters></p>
-<p>        </components></p>
-<p>    </components></p>
-<p></configuration></pre><br />
-Check out the documentation on the <a href="http://www.castleproject.org/container/documentation/trunk/usersguide/compparams.html"><br />
-castle site</a> for some more details.</p>
-<p>I recently got an email question around how to do this with the<br />
-fluent interface - unfortunately with the XML, Binsor and Fluent<br />
-interfaces all being used for registering and configuring the<br />
-MicroKernel/Windsor Container the documentation is a little patchy<br />
-across all three (with XML of course having the best coverage) - so<br />
-here's an example of service override for the fluent<br />
+                <sender>${smtp.sender}</sender><br>
+            </parameters>
+<p>        </p>
+<p>    </p>
+<p></p></configuration></pre><br>
+Check out the documentation on the <a href="http://www.castleproject.org/container/documentation/trunk/usersguide/compparams.html"><br>
+castle site</a> for some more details.
+<p>I recently got an email question around how to do this with the<br>
+fluent interface - unfortunately with the XML, Binsor and Fluent<br>
+interfaces all being used for registering and configuring the<br>
+MicroKernel/Windsor Container the documentation is a little patchy<br>
+across all three (with XML of course having the best coverage) - so<br>
+here's an example of service override for the fluent<br>
 interface.</p>
-<p>First off the various services we'll be wiring up in this<br />
+<p>First off the various services we'll be wiring up in this<br>
 example.</p>
-<pre>public interface IStaffService<br />
-{<br />
+<pre>public interface IStaffService<br>
+{<br>
+}
+<p>public class StaffService : IStaffService<br>
+{<br>
+  public IStaffRepository Repository { get; set; }<br>
 }</p>
-<p>public class StaffService : IStaffService<br />
-{<br />
-  public IStaffRepository Repository { get; set; }<br />
+<p>public interface IStaffRepository<br>
+{<br>
 }</p>
-<p>public interface IStaffRepository<br />
-{<br />
+<p>public class StaffRepositoryA : IStaffRepository<br>
+{<br>
 }</p>
-<p>public class StaffRepositoryA : IStaffRepository<br />
-{<br />
-}</p>
-<p>public class StaffRepositoryB : IStaffRepository<br />
-{<br />
-}</pre><br />
-And now the actual tests..</p>
-<pre>public class ServiceOverrideTests<br />
-{<br />
-  private WindsorContainer container;</p>
-<p>  public ServiceOverrideTests()<br />
-  {<br />
-    container = new WindsorContainer();<br />
-    container.Register(Component.For<IStaffRepository>().Named("repository.staff.a").ImplementedBy<StaffRepositoryA>().LifeStyle.Transient);<br />
-    container.Register(Component.For<IStaffRepository>().Named("repository.staff.b").ImplementedBy<StaffRepositoryB>().LifeStyle.Transient);<br />
-  }</p>
-<p>  [Fact]<br />
-  public void ByDefaultStaffServiceWiredUpToFirstServiceRegistered()<br />
-  {<br />
-    container.Register(Component.For<IStaffService>().Named("service.staff").ImplementedBy<StaffService>().LifeStyle.Transient);</p>
-<p>    var staffService = (StaffService)container.Resolve<IStaffService>();</p>
-<p>    Assert.IsType<StaffRepositoryA>(staffService.Repository);<br />
-  }    </p>
-<p>  [Fact]<br />
-  public void WithServiceOverrideCanPickImplmentationByKey()<br />
-  {<br />
-    container.Register(Component.For<IStaffService>().Named("service.staff").ImplementedBy<StaffService>()<br />
-                         .ServiceOverrides(ServiceOverride.ForKey("Repository").Eq("repository.staff.b")).LifeStyle.Transient);</p>
-<p>    var staffService = (StaffService)container.Resolve<IStaffService>();</p>
-<p>    Assert.IsType<StaffRepositoryB>(staffService.Repository);<br />
-  }<br />
-}</pre><br />
-With<br />
-<strong>.ServiceOverrides(ServiceOverride.ForKey("Repository").Eq("repository.staff.b"))</strong><br />
-being the code we're interested in... obviously if it was a<br />
-constructor override we'd be using the name of the parameter in the<br />
-constructor.</p>
-<p>The <strong>Eq</strong> method can also take of an array of strings... which,<br />
-you guessed it, means we can handle arrays of services as well ...<br />
-which can be quite handy if order is important to some kind of<br />
-service you're building where there are multiple contributors or<br />
+<p>public class StaffRepositoryB : IStaffRepository<br>
+{<br>
+}</p></pre><br>
+And now the actual tests..
+<pre>public class ServiceOverrideTests<br>
+{<br>
+  private WindsorContainer container;
+<p>  public ServiceOverrideTests()<br>
+  {<br>
+    container = new WindsorContainer();<br>
+    container.Register(Component.For<istaffrepository>().Named("repository.staff.a").ImplementedBy<staffrepositorya>().LifeStyle.Transient);<br>
+    container.Register(Component.For<istaffrepository>().Named("repository.staff.b").ImplementedBy<staffrepositoryb>().LifeStyle.Transient);<br>
+  }</staffrepositoryb></istaffrepository></staffrepositorya></istaffrepository></p>
+<p>  [Fact]<br>
+  public void ByDefaultStaffServiceWiredUpToFirstServiceRegistered()<br>
+  {<br>
+    container.Register(Component.For<istaffservice>().Named("service.staff").ImplementedBy<staffservice>().LifeStyle.Transient);</staffservice></istaffservice></p>
+<p>    var staffService = (StaffService)container.Resolve<istaffservice>();</istaffservice></p>
+<p>    Assert.IsType<staffrepositorya>(staffService.Repository);<br>
+  }    </staffrepositorya></p>
+<p>  [Fact]<br>
+  public void WithServiceOverrideCanPickImplmentationByKey()<br>
+  {<br>
+    container.Register(Component.For<istaffservice>().Named("service.staff").ImplementedBy<staffservice>()<br>
+                         .ServiceOverrides(ServiceOverride.ForKey("Repository").Eq("repository.staff.b")).LifeStyle.Transient);</staffservice></istaffservice></p>
+<p>    var staffService = (StaffService)container.Resolve<istaffservice>();</istaffservice></p>
+<p>    Assert.IsType<staffrepositoryb>(staffService.Repository);<br>
+  }<br>
+}</staffrepositoryb></p></pre><br>
+With<br>
+<strong>.ServiceOverrides(ServiceOverride.ForKey("Repository").Eq("repository.staff.b"))</strong><br>
+being the code we're interested in... obviously if it was a<br>
+constructor override we'd be using the name of the parameter in the<br>
+constructor.
+<p>The <strong>Eq</strong> method can also take of an array of strings... which,<br>
+you guessed it, means we can handle arrays of services as well ...<br>
+which can be quite handy if order is important to some kind of<br>
+service you're building where there are multiple contributors or<br>
 some form of pipeline, lets take a look at that:</p>
-<pre>public class StaffService : IStaffService<br />
-{<br />
-  public IStaffRepository[] Repositories { get; set; } // <- is now an array of staff repository...<br />
-}</pre><br />
-And the associated test - notice we just pass in a list of the<br />
-service names...</p>
-<pre>[Fact]<br />
-public void WithServiceOverrideCanPickImplmentationByKey()<br />
-{<br />
-  container.Register(Component.For<IStaffService>().Named("service.staff").ImplementedBy<StaffService>()<br />
-                       .ServiceOverrides(ServiceOverride.ForKey("Repositories").Eq("repository.staff.b", "repository.staff.a")).LifeStyle.Transient);</p>
-<p>  var staffService = (StaffService)container.Resolve<IStaffService>();</p>
-<p>  Assert.IsType<StaffRepositoryB>(staffService.Repositories[0]);<br />
-  Assert.IsType<StaffRepositoryA>(staffService.Repositories[1]);<br />
-}</pre><br />
-Hopefully this proves useful to Jason (who sent me the email) and<br />
-anyone else who's getting started with windsor and strugling a<br />
-little to setup their container.</p>
+<pre>public class StaffService : IStaffService<br>
+{<br>
+  public IStaffRepository[] Repositories { get; set; } // <- is="" now="" an="" array="" of="" staff=""></-><br>
+}</pre><br>
+And the associated test - notice we just pass in a list of the<br>
+service names...
+<pre>[Fact]<br>
+public void WithServiceOverrideCanPickImplmentationByKey()<br>
+{<br>
+  container.Register(Component.For<istaffservice>().Named("service.staff").ImplementedBy<staffservice>()<br>
+                       .ServiceOverrides(ServiceOverride.ForKey("Repositories").Eq("repository.staff.b", "repository.staff.a")).LifeStyle.Transient);
+<p>  var staffService = (StaffService)container.Resolve<istaffservice>();</istaffservice></p>
+<p>  Assert.IsType<staffrepositoryb>(staffService.Repositories[0]);<br>
+  Assert.IsType<staffrepositorya>(staffService.Repositories[1]);<br>
+}</staffrepositorya></staffrepositoryb></p></staffservice></istaffservice></pre><br>
+Hopefully this proves useful to Jason (who sent me the email) and<br>
+anyone else who's getting started with windsor and strugling a<br>
+little to setup their container.

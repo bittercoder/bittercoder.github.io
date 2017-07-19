@@ -20,100 +20,101 @@ categories:
 tags: []
 comments: []
 ---
+
 <h2>
-  The evil designer attribute ;o)<br />
-</h2></p>
+  The evil designer attribute ;o)<br>
+</h2>
 <p>
-  I'm working on a project at the moment where the client want's an<br />
-  "Add-in" for an existing piece of software... it's a COM interop<br />
-  project, .Net 2.0 (and yes, it uses <a href="http://www.castleproject.org/">Castle</a>,&nbsp;IoC sits in<br />
-  nicely with<br />
-  the&nbsp;<strong>IServiceProvider</strong>&nbsp;:)&nbsp;and it<br />
-  hosts a custom designer, and the add-ins must exist in their own<br />
-  directory, outside of the host applications base directory.<br />
-</p></p>
+  I'm working on a project at the moment where the client want's an<br>
+  "Add-in" for an existing piece of software... it's a COM interop<br>
+  project, .Net 2.0 (and yes, it uses <a href="http://www.castleproject.org/">Castle</a>,&nbsp;IoC sits in<br>
+  nicely with<br>
+  the&nbsp;<strong>IServiceProvider</strong>&nbsp;:)&nbsp;and it<br>
+  hosts a custom designer, and the add-ins must exist in their own<br>
+  directory, outside of the host applications base directory.<br>
+</p>
 <p>
-  At any rate, it's been working just fine so far, but today I was<br />
-  trying to introduce some custom designers... and they weren't<br />
-  being constructed... which highlighted some odd behaviour in the<br />
-  design time support - I have 6 or so&nbsp;assemblies,&nbsp;most<br />
-  are support assemblies, some containing&nbsp;controls and their<br />
-  associated designers, something like this:<br />
-</p></p>
+  At any rate, it's been working just fine so far, but today I was<br>
+  trying to introduce some custom designers... and they weren't<br>
+  being constructed... which highlighted some odd behaviour in the<br>
+  design time support - I have 6 or so&nbsp;assemblies,&nbsp;most<br>
+  are support assemblies, some containing&nbsp;controls and their<br>
+  associated designers, something like this:<br>
+</p>
 <p>
-  public class <strong>MyButtonDesigner</strong> :<br />
-  <strong>ControlDesigner</strong> { ..}<br />
-</p></p>
+  public class <strong>MyButtonDesigner</strong> :<br>
+  <strong>ControlDesigner</strong> { ..}<br>
+</p>
 <p>
-  [<strong>Designer</strong>(typeof(<strong>MyButtonDesigner</strong>))]<br /></p>
-<p>  public class <strong>MyCustomButton</strong> :<br />
-  <strong>ButtonBase</strong> { .. }<br />
-</p></p>
+  [<strong>Designer</strong>(typeof(<strong>MyButtonDesigner</strong>))]<br></p>
+<p>  public class <strong>MyCustomButton</strong> :<br>
+  <strong>ButtonBase</strong> { .. }<br>
+</p>
 <p>
-  And then there is the core assembly which hosts the design<br />
-  surface etc. and contains a number of&nbsp; COM-visible classes<br />
-  -&nbsp;one of these&nbsp;class in the core assembly is<br />
-  constructed via Com interop by it's Name, and everything starts<br />
-  it's life from there in their Add-in, much like a Main class in a<br />
-  WinForms project.<br />
-</p></p>
+  And then there is the core assembly which hosts the design<br>
+  surface etc. and contains a number of&nbsp; COM-visible classes<br>
+  -&nbsp;one of these&nbsp;class in the core assembly is<br>
+  constructed via Com interop by it's Name, and everything starts<br>
+  it's life from there in their Add-in, much like a Main class in a<br>
+  WinForms project.<br>
+</p>
 <p>
-  So the core assembly references the support assemblies, and has<br />
-  no problem creating controls at runtime within these<br />
-  assemblies...<br />
-</p></p>
+  So the core assembly references the support assemblies, and has<br>
+  no problem creating controls at runtime within these<br>
+  assemblies...<br>
+</p>
 <h2>
-  But then...<br />
-</h2></p>
+  But then...<br>
+</h2>
 <p>
-  However, the design time support fails to construct or make use<br />
-  of the custom designers... and doesn't blow up, it just<br />
-  fails&nbsp;silently - personally I hate this kind of behaviour...<br />
-  I like things to fail fast, in your face :)<br />
-</p></p>
+  However, the design time support fails to construct or make use<br>
+  of the custom designers... and doesn't blow up, it just<br>
+  fails&nbsp;silently - personally I hate this kind of behaviour...<br>
+  I like things to fail fast, in your face :)<br>
+</p>
 <p>
-  It appears&nbsp;the custom designer is never constructed because<br />
-  the design time infrastructure&nbsp;fails to&nbsp;locate the<br />
-  assembly it's held within, even though&nbsp;my code has<br />
-  just&nbsp;created an instance of a control from the same said<br />
-  assembly not an instant before... arghh!<br />
-</p></p>
+  It appears&nbsp;the custom designer is never constructed because<br>
+  the design time infrastructure&nbsp;fails to&nbsp;locate the<br>
+  assembly it's held within, even though&nbsp;my code has<br>
+  just&nbsp;created an instance of a control from the same said<br>
+  assembly not an instant before... arghh!<br>
+</p>
 <p>
-  To my mind this is madness... I'm not passing a string reference<br />
-  to the type, and the assembly is already loaded, it should be as<br />
-  simple as using the Type in the attribute to create an instance<br />
-  of the designer&nbsp;- looking at the internal implementation of<br />
-  this attribute, I can see where it all goes terribly wrong:<br />
-</p></p>
+  To my mind this is madness... I'm not passing a string reference<br>
+  to the type, and the assembly is already loaded, it should be as<br>
+  simple as using the Type in the attribute to create an instance<br>
+  of the designer&nbsp;- looking at the internal implementation of<br>
+  this attribute, I can see where it all goes terribly wrong:<br>
+</p>
 <p>
-  public <strong>DesignerAttribute</strong>(Type<br />
-  designerType)<br /><br />
-  {<br /><br />
-  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; this.designerTypeName =<br />
-  designerType.AssemblyQualifiedName;<br /><br />
-  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; this.designerBaseTypeName =<br />
-  typeof(IDesigner).FullName;<br /><br />
-  }<br />
-</p></p>
+  public <strong>DesignerAttribute</strong>(Type<br>
+  designerType)<br><br>
+  {<br><br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; this.designerTypeName =<br>
+  designerType.AssemblyQualifiedName;<br><br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; this.designerBaseTypeName =<br>
+  typeof(IDesigner).FullName;<br><br>
+  }<br>
+</p>
 <p>
-  It's still a puzzle as to why this isn't being resolved... the<br />
-  assembly is already loaded against the current AppDomain -&nbsp;I<br />
-  guess I could mess with the fusion logger to figure it out, there<br />
-  must be some subtle different - but I didn't have the time to<br />
-  waste, so I just cheated, implementing an<br />
-  <strong>AppDomain.AssemblyResolve</strong> event handler to take<br />
-  care of returning the assembly that's already loaded when<br />
-  matching against a set of pre-loaded assemblies.<br />
-</p></p>
+  It's still a puzzle as to why this isn't being resolved... the<br>
+  assembly is already loaded against the current AppDomain -&nbsp;I<br>
+  guess I could mess with the fusion logger to figure it out, there<br>
+  must be some subtle different - but I didn't have the time to<br>
+  waste, so I just cheated, implementing an<br>
+  <strong>AppDomain.AssemblyResolve</strong> event handler to take<br>
+  care of returning the assembly that's already loaded when<br>
+  matching against a set of pre-loaded assemblies.<br>
+</p>
 <p>
-  I think the silent failure is what annoys me the most, this is<br />
-  something which could be easily introduced and might not be<br />
-  imediately detected when performing a minor update... I'm still<br />
-  not sure how I could write a test to detect it...<br />
-</p></p>
+  I think the silent failure is what annoys me the most, this is<br>
+  something which could be easily introduced and might not be<br>
+  imediately detected when performing a minor update... I'm still<br>
+  not sure how I could write a test to detect it...<br>
+</p>
 <p>
-  Speaking of custom designers... I'm unimpressed by how most<br />
-  custom designers are marked internal... especially for classes<br />
-  that are designed to be subclassed... why the hell is the<br />
-  <strong>ButtonBaseDesigner</strong> marked internal?<br />
-</p></p>
+  Speaking of custom designers... I'm unimpressed by how most<br>
+  custom designers are marked internal... especially for classes<br>
+  that are designed to be subclassed... why the hell is the<br>
+  <strong>ButtonBaseDesigner</strong> marked internal?<br>
+</p>

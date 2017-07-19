@@ -22,164 +22,165 @@ tags:
 - rhinomocks
 comments: []
 ---
+
 <h2>
-  More mocking...<br />
-</h2></p>
+  More mocking...<br>
+</h2>
 <p>
-  The title for this entry should probably be "<strong>more IRepository<T> mocking</strong>"&nbsp;- as that's what I'm mocking out... but at any rate, let's get down and dirty... In this entry I will cover mocking out a "complex" method, incidentally I think the size of this test suggests that our test&nbsp;isn't fine grained enough (and that individual features within the data loader should be exposed&nbsp;so we can test them better)&nbsp;- but that's my problem,&nbsp;not yours ;o)<br />
-</p></p>
+  The title for this entry should probably be "<strong>more IRepository<t> mocking</t></strong>"&nbsp;- as that's what I'm mocking out... but at any rate, let's get down and dirty... In this entry I will cover mocking out a "complex" method, incidentally I think the size of this test suggests that our test&nbsp;isn't fine grained enough (and that individual features within the data loader should be exposed&nbsp;so we can test them better)&nbsp;- but that's my problem,&nbsp;not yours ;o)<br>
+</p>
 <h2>
-  Background<br />
-</h2></p>
+  Background<br>
+</h2>
 <p>
-  So, as some background, this is a test for a class called "DataLoader" - a most unimaginative name for a class that loads data...&nbsp;it's used for loading an XML file which has a bunch of info for different entities... if your recall the last entry, I was talking about simplistic music information, well this class can be used to load musical data into the store, including something not mentioned so far, which is the "test suite" - the test suite defines tests which can be run against the music in the store, the details aren't really up for discussion, but it's for executing customer acceptance tests, not unit tests.<br />
-</p></p>
+  So, as some background, this is a test for a class called "DataLoader" - a most unimaginative name for a class that loads data...&nbsp;it's used for loading an XML file which has a bunch of info for different entities... if your recall the last entry, I was talking about simplistic music information, well this class can be used to load musical data into the store, including something not mentioned so far, which is the "test suite" - the test suite defines tests which can be run against the music in the store, the details aren't really up for discussion, but it's for executing customer acceptance tests, not unit tests.<br>
+</p>
 <p>
-The test below checks one of the primary paths, where by no pre-existing data is available, so it must all be created by the data loader first, before creating the customer acceptance test, which references the track, release etc. data (the definition for customer acceptance test suites are also stored in the store, as are the results from run the customer acceptance tests).<br />
-</p></p>
+The test below checks one of the primary paths, where by no pre-existing data is available, so it must all be created by the data loader first, before creating the customer acceptance test, which references the track, release etc. data (the definition for customer acceptance test suites are also stored in the store, as are the results from run the customer acceptance tests).<br>
+</p>
 <h2>
-  Diving In...<br />
-</h2></p>
+  Diving In...<br>
+</h2>
 <p>
-So here is&nbsp;the test&nbsp;for loading a "test&nbsp;suite" for a single track, the song "Dirty Harry" by the "Gorillaz", we are testing the behavior of loading the file when the track, release and artist do not already exist in the store - most of this is basic RhinoMock's usage (though I'm no expert, I'm probably misusing dome of the features...).<br />
-</p></p>
+So here is&nbsp;the test&nbsp;for loading a "test&nbsp;suite" for a single track, the song "Dirty Harry" by the "Gorillaz", we are testing the behavior of loading the file when the track, release and artist do not already exist in the store - most of this is basic RhinoMock's usage (though I'm no expert, I'm probably misusing dome of the features...).<br>
+</p>
 <pre>
-[Test]<br />
-public void LoadDataFreshForSingleTrack()<br />
-{<br />
-    /**** RECORD ****/</p>
-<p>    Environment environment = new Environment();<br />
-    SourceDevice sourceDevice = new SourceDevice();<br />
-    RecordingDevice recordingDevice = new RecordingDevice();<br />
+[Test]<br>
+public void LoadDataFreshForSingleTrack()<br>
+{<br>
+    /**** RECORD ****/
+<p>    Environment environment = new Environment();<br>
+    SourceDevice sourceDevice = new SourceDevice();<br>
+    RecordingDevice recordingDevice = new RecordingDevice();<br>
     Track track = new Track();</p>
-<p>    ObjectPath artistPath = (Artist.Fields.Name == "Gorillaz");<br />
+<p>    ObjectPath artistPath = (Artist.Fields.Name == "Gorillaz");<br>
     Expect.Call(_artistRepository.FindOne(artistPath)).Constraints(Base4Query.PathEqual(artistPath)).Return(null);</p>
-<p>    _artistRepository.Save(null);<br />
+<p>    _artistRepository.Save(null);<br>
     LastCall.Constraints(Property.Value("Name", "Gorillaz"));</p>
-<p>    ObjectPath releasePath = (Release.Fields.Name == "Demon Days");<br />
+<p>    ObjectPath releasePath = (Release.Fields.Name == "Demon Days");<br>
     Expect.Call(_releaseRepository.FindOne(releasePath)).Constraints(Base4Query.PathEqual(releasePath)).Return(null);</p>
-<p>    _releaseRepository.Save(null);<br />
-    LastCall.Constraints(Property.Value("Name", "Demon Days") &amp;&amp;<br />
+<p>    _releaseRepository.Save(null);<br>
+    LastCall.Constraints(Property.Value("Name", "Demon Days") &amp;&amp;<br>
                         Property.ValueConstraint("Artist", Property.Value("Name", "Gorillaz")));</p>
-<p>    _trackRepository.Save(null);<br />
-    LastCall.Constraints(Property.Value("Name", "Dirty Harry") &amp;&amp;<br />
+<p>    _trackRepository.Save(null);<br>
+    LastCall.Constraints(Property.Value("Name", "Dirty Harry") &amp;&amp;<br>
                         Property.ValueConstraint("Release", Property.Value("Name", "Demon Days")));</p>
-<p>    ObjectPath encodingPath = (TrackContentEncoding.Fields.Name == "MP3");<br />
-    Expect.Call(_encodingRepository.FindOne(encodingPath)).Constraints(Base4Query.PathEqual(encodingPath)).<br />
+<p>    ObjectPath encodingPath = (TrackContentEncoding.Fields.Name == "MP3");<br>
+    Expect.Call(_encodingRepository.FindOne(encodingPath)).Constraints(Base4Query.PathEqual(encodingPath)).<br>
         Return(null);</p>
-<p>    _trackContentRepository.Save(null);<br />
+<p>    _trackContentRepository.Save(null);<br>
     LastCall.Constraints(Property.ValueConstraint("Track", Property.Value("Name", "Dirty Harry")));                       </p>
-<p>    ObjectPath trackReferencePath = (Track.Fields.Name == "Dirty Harry" &amp;&amp;<br />
-                                    Track.Fields.Release.Name == "Demon Days" &amp;&amp;<br />
+<p>    ObjectPath trackReferencePath = (Track.Fields.Name == "Dirty Harry" &amp;&amp;<br>
+                                    Track.Fields.Release.Name == "Demon Days" &amp;&amp;<br>
                                     Track.Fields.Release.Artist.Name == "Gorillaz");</p>
-<p>    Expect.Call(_trackRepository.FindOne(trackReferencePath)).Constraints(<br />
+<p>    Expect.Call(_trackRepository.FindOne(trackReferencePath)).Constraints(<br>
         Base4Query.PathEqual(trackReferencePath)).Return(track);</p>
-<p>    Expect.Call(_trackRepository.FindOne(trackReferencePath)).Constraints(<br />
+<p>    Expect.Call(_trackRepository.FindOne(trackReferencePath)).Constraints(<br>
         Base4Query.PathEqual(trackReferencePath)).Return(track);</p>
-<p>    ObjectPath environmentPath = (Environment.Fields.Name == "Indoors");<br />
-    Expect.Call(_environmentRepository.FindOne(environmentPath)).Constraints(<br />
+<p>    ObjectPath environmentPath = (Environment.Fields.Name == "Indoors");<br>
+    Expect.Call(_environmentRepository.FindOne(environmentPath)).Constraints(<br>
         Base4Query.PathEqual(environmentPath)).Return(environment);</p>
-<p>    ObjectPath sourceDevicePath = (SourceDevice.Fields.Name == "Loopback");<br />
-    Expect.Call(_sourceDeviceRepository.FindOne(sourceDevicePath)).Constraints(<br />
+<p>    ObjectPath sourceDevicePath = (SourceDevice.Fields.Name == "Loopback");<br>
+    Expect.Call(_sourceDeviceRepository.FindOne(sourceDevicePath)).Constraints(<br>
         Base4Query.PathEqual(sourceDevicePath)).Return(sourceDevice);</p>
-<p>    ObjectPath recordingDevicePath = (SourceDevice.Fields.Name == "Loopback");<br />
-    Expect.Call(_recordingDeviceRepository.FindOne(recordingDevicePath)).Constraints(<br />
+<p>    ObjectPath recordingDevicePath = (SourceDevice.Fields.Name == "Loopback");<br>
+    Expect.Call(_recordingDeviceRepository.FindOne(recordingDevicePath)).Constraints(<br>
         Base4Query.PathEqual(recordingDevicePath)).Return(recordingDevice);</p>
-<p>    _testSuiteRepository.Save(null);<br />
-    LastCall.Constraints(Property.Value("Name", "One track, one loopback sample") &amp;&amp;<br />
-                        Property.Value("Description",<br />
-                                        "Testing with 30 second snippets pulled from the source files with audacity (Loopback)") &amp;&amp;<br />
-                        Property.ValueConstraint("Tracks",<br />
-                            ItemListOf<Track>.NumberOfItems(1) &amp;&amp; ItemListOf<Track>.IndexedItemConstraint(0, Is.Same(track))));</p>
+<p>    _testSuiteRepository.Save(null);<br>
+    LastCall.Constraints(Property.Value("Name", "One track, one loopback sample") &amp;&amp;<br>
+                        Property.Value("Description",<br>
+                                        "Testing with 30 second snippets pulled from the source files with audacity (Loopback)") &amp;&amp;<br>
+                        Property.ValueConstraint("Tracks",<br>
+                            ItemListOf<track>.NumberOfItems(1) &amp;&amp; ItemListOf<track>.IndexedItemConstraint(0, Is.Same(track))));</track></track></p>
 <p>    /***** REPLAY *****/</p>
 <p>    _mockRepository.ReplayAll();</p>
 <p>    DataLoader loader = CreateLoader();</p>
 <p>    loader.LoadData(OneTrackFile, ContentPath);</p>
-<p>    _mockRepository.VerifyAll();<br />
-}<br />
-</pre></p>
+<p>    _mockRepository.VerifyAll();<br>
+}<br>
+</p></pre>
 <p>
-First you'll probably see that the callback and anonymous delegates from the last post are absent, they've been replaced with constraints... which has made the syntax a lot more concise - so far the rhino mocks support is pretty basic, we have&nbsp;two static classes being used for creating the constraints:<br />
-</p></p>
+First you'll probably see that the callback and anonymous delegates from the last post are absent, they've been replaced with constraints... which has made the syntax a lot more concise - so far the rhino mocks support is pretty basic, we have&nbsp;two static classes being used for creating the constraints:<br>
+</p>
 <ul>
-<li>Base4Query - for constraints on ObjectQuery and ObjectPath arguments/properties.<br />
-  </li></p>
-<li>ItemListOf<T> - for constraints on IItemList<T> arguments/properties.<br />
-  </li><br />
-</ul></p>
+<li>Base4Query - for constraints on ObjectQuery and ObjectPath arguments/properties.<br>
+  </li>
+<li>ItemListOf<t> - for constraints on IItemList<t> arguments/properties.<br>
+  </t></t></li><br>
+</ul>
 <p>
-  The constraints method in RhinoMocks expects the same number of arguments as the associated method call on the mock object, constraints work on the arguments value, however you can apply constraints to the value of single property of an argument, and those constraints can be logically AND or OR'd together -&nbsp;for instance here:<br />
-</p></p>
+  The constraints method in RhinoMocks expects the same number of arguments as the associated method call on the mock object, constraints work on the arguments value, however you can apply constraints to the value of single property of an argument, and those constraints can be logically AND or OR'd together -&nbsp;for instance here:<br>
+</p>
 <pre>
-_testSuiteRepository.Save(null);<br />
-LastCall.Constraints(Property.Value("Name", "One track, one loopback sample") &amp;&amp;<br />
-                    Property.Value("Description",<br />
-                                    "Testing with 30 second snippets pulled from the source files with audacity (Loopback)") &amp;&amp;<br />
-                    Property.ValueConstraint("Tracks",<br />
-                        ItemListOf<Track>.NumberOfItems(1) &amp;&amp; ItemListOf<Track>.IndexedItemConstraint(0, Is.Same(track))));<br />
-</pre></p>
+_testSuiteRepository.Save(null);<br>
+LastCall.Constraints(Property.Value("Name", "One track, one loopback sample") &amp;&amp;<br>
+                    Property.Value("Description",<br>
+                                    "Testing with 30 second snippets pulled from the source files with audacity (Loopback)") &amp;&amp;<br>
+                    Property.ValueConstraint("Tracks",<br>
+                        ItemListOf<track>.NumberOfItems(1) &amp;&amp; ItemListOf<track>.IndexedItemConstraint(0, Is.Same(track))));<br>
+</track></track></pre>
 <p>
-  We are applying these constraints:<br />
-</p></p>
+  We are applying these constraints:<br>
+</p>
 <ul>
-<li>The first argument should:<br />
-  </li></p>
+<li>The first argument should:<br>
+  </li>
 <li style="list-style: none; display: inline">
 <ul>
-<li>Have a property called "Name", and it's value should be "One track, one loopback sample".<br />
-      </li></p>
-<li>And have a property called "Description", and it's value should be "Testing...." etc.<br />
-      </li></p>
-<li>And have a property called "Tracks", which is of type IItemList<Track> which:<br />
-      </li></p>
+<li>Have a property called "Name", and it's value should be "One track, one loopback sample".<br>
+      </li>
+<li>And have a property called "Description", and it's value should be "Testing...." etc.<br>
+      </li>
+<li>And have a property called "Tracks", which is of type IItemList<track> which:<br>
+      </track></li>
 <li style="list-style: none; display: inline">
 <ul>
-<li>Contains a total of 1 items<br />
-          </li></p>
-<li>And the item at index 0 should:<br />
-          </li></p>
+<li>Contains a total of 1 items<br>
+          </li>
+<li>And the item at index 0 should:<br>
+          </li>
 <li style="list-style: none; display: inline">
 <ul>
-<li>Be the same as the instance returned from an earlier save call.<br />
-              </li><br />
-            </ul><br />
-          </li><br />
-        </ul><br />
-      </li><br />
-    </ul><br />
-  </li><br />
-</ul></p>
+<li>Be the same as the instance returned from an earlier save call.<br>
+              </li><br>
+            </ul><br>
+          </li><br>
+        </ul><br>
+      </li><br>
+    </ul><br>
+  </li><br>
+</ul>
 <p>
-  Notice that we have to call the method we want to apply constraints to first, so that we can address it with LastCall - a necessary evil when the method has a return type of void... otherwise you can use the more pleasant "Expect.Call(...)" convention.<br />
-</p></p>
+  Notice that we have to call the method we want to apply constraints to first, so that we can address it with LastCall - a necessary evil when the method has a return type of void... otherwise you can use the more pleasant "Expect.Call(...)" convention.<br>
+</p>
 <p>
-  Also, I'm declaring instances of the expected Base4 object paths, and then applying them in the constraints... I could in-line the object paths, but I then need to disambiguate the overloaded call to the FindOne method, so we have my preference:<br />
-</p></p>
+  Also, I'm declaring instances of the expected Base4 object paths, and then applying them in the constraints... I could in-line the object paths, but I then need to disambiguate the overloaded call to the FindOne method, so we have my preference:<br>
+</p>
 <pre>
-ObjectPath trackReferencePath = (Track.Fields.Name == "Dirty Harry" &amp;&amp;<br />
-                                Track.Fields.Release.Name == "Demon Days" &amp;&amp;<br />
-                                Track.Fields.Release.Artist.Name == "Gorillaz");</p>
-<p>Expect.Call(_trackRepository.FindOne(trackReferencePath)).Constraints(<br />
-    Base4Query.PathEqual(trackReferencePath)).Return(track);<br />
-</pre></p>
+ObjectPath trackReferencePath = (Track.Fields.Name == "Dirty Harry" &amp;&amp;<br>
+                                Track.Fields.Release.Name == "Demon Days" &amp;&amp;<br>
+                                Track.Fields.Release.Artist.Name == "Gorillaz");
+<p>Expect.Call(_trackRepository.FindOne(trackReferencePath)).Constraints(<br>
+    Base4Query.PathEqual(trackReferencePath)).Return(track);<br>
+</p></pre>
 <p>
-  or this:<br />
-</p></p>
+  or this:<br>
+</p>
 <pre>
-Expect.Call(_trackRepository.FindOne((ObjectPath)null)).Constraints(<br />
-    Base4Query.PathEqual(Track.Fields.Name == "Dirty Harry" &amp;&amp;<br />
-                    Track.Fields.Release.Name == "Demon Days" &amp;&amp;<br />
-                    Track.Fields.Release.Artist.Name == "Gorillaz")).Return(track);<br />
-</pre></p>
+Expect.Call(_trackRepository.FindOne((ObjectPath)null)).Constraints(<br>
+    Base4Query.PathEqual(Track.Fields.Name == "Dirty Harry" &amp;&amp;<br>
+                    Track.Fields.Release.Name == "Demon Days" &amp;&amp;<br>
+                    Track.Fields.Release.Artist.Name == "Gorillaz")).Return(track);<br>
+</pre>
 <p>
-  The second involves less code, but I think it's easy to get confused between the compile time query language's logical operators and those of the RhinoMock's constraints... each have merits of course.<br />
-</p></p>
+  The second involves less code, but I think it's easy to get confused between the compile time query language's logical operators and those of the RhinoMock's constraints... each have merits of course.<br>
+</p>
 <h2>
-  Conclusion...<br />
-</h2></p>
+  Conclusion...<br>
+</h2>
 <p>
-I'm still working through some of the finer points of the implementation (and so won't publish any code just yet...) but this should give you some ideas about how you can test base4 interactions in your application with RhinoMocks, instead of hitting the base4 server and testing the results... and I think it's a lot more intuitive when attempting to do TDD with base4...<br />
-</p></p>
+I'm still working through some of the finer points of the implementation (and so won't publish any code just yet...) but this should give you some ideas about how you can test base4 interactions in your application with RhinoMocks, instead of hitting the base4 server and testing the results... and I think it's a lot more intuitive when attempting to do TDD with base4...<br>
+</p>
 <p>
-  I would also like to make a special mention that this code won't actually work with the latest published release of Base4... there is an issue preventing the addition of items to an IItemList<T> in some situations when you have not set a valid default context - there is a fix (Which works well) in the Base4 trunk, and I assume Alex James will release this at some point... and thanks for resolving that issue so quickly Alex :) much appreciated.<br />
-</p></p>
+  I would also like to make a special mention that this code won't actually work with the latest published release of Base4... there is an issue preventing the addition of items to an IItemList<t> in some situations when you have not set a valid default context - there is a fix (Which works well) in the Base4 trunk, and I assume Alex James will release this at some point... and thanks for resolving that issue so quickly Alex :) much appreciated.<br>
+</t></p>

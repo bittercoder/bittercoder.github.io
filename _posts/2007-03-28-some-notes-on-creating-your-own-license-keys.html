@@ -20,6 +20,7 @@ categories:
 tags: []
 comments: []
 ---
+
 <p>If you have to make your own license keys i.e.</p>
 <p>ABCDE-ABCDE-ABCDE-ABC1Z-A32DE</p>
 <p>Here's some thoughts/ideas for things you can do to break up the&nbsp;key space a little so people can not easily brute-force your keys&nbsp;by fiddliing just a couple of numbers.</p>
@@ -32,10 +33,10 @@ comments: []
 <li>Calculate the CRC for your payload and include it as part of&nbsp;the key's data, verify it when you're decoding.</li>
 <li>You can use structs with a sequential layout and a packing of&nbsp;1 to define your structure...</li>
 <li>Use Marshal.Copy etc. methods to copy between the struct and&nbsp;a byte array.</li>
-<li>Remap individual bits in the overall payload.</li><br />
-</ul><br />
-The last one is something that works really well... it's hard<br />
-to avoid certain digits "sticking" when generating sequential keys<br />
-no matter what you do... but if you remap the individual bits of a<br />
-15 byte array (i.e. using a lookup table containing 120 indexes)<br />
-you end up with very unique looking keys that have no sequential&nbsp;behaviour to them (especially if you redistribute the bits of the&nbsp;CRC into all the bytes of the key, which in turn are repacked into&nbsp;5 bit letters).</p>
+<li>Remap individual bits in the overall payload.</li><br>
+</ul><br>
+The last one is something that works really well... it's hard<br>
+to avoid certain digits "sticking" when generating sequential keys<br>
+no matter what you do... but if you remap the individual bits of a<br>
+15 byte array (i.e. using a lookup table containing 120 indexes)<br>
+you end up with very unique looking keys that have no sequential&nbsp;behaviour to them (especially if you redistribute the bits of the&nbsp;CRC into all the bytes of the key, which in turn are repacked into&nbsp;5 bit letters).

@@ -33,33 +33,34 @@ comments:
     rather then HyperV stand-alone which I've heard is a nightmare platform that I
     didn't really feel like dealing with...
 ---
-<p>I decided recently to upgrade a couple of commodity hardware&nbsp;staging boxes that were pushed to capacity (and had no viable&nbsp;upgrade path) which I use for hosting Virtual Machines - after a&nbsp;bit of umming and erring on what would be cost effective I ended up<br />
+
+<p>I decided recently to upgrade a couple of commodity hardware&nbsp;staging boxes that were pushed to capacity (and had no viable&nbsp;upgrade path) which I use for hosting Virtual Machines - after a&nbsp;bit of umming and erring on what would be cost effective I ended up<br>
 opting for 2 x the following kit:</p>
 <ul>
 <li><a href="http://processorfinder.intel.com/details.aspx?sSpec=SLAWQ">Q9550</a>&nbsp;Processor (2.83ghz, but they'll probably end up being clocked&nbsp;around 3ghz or a little above, once I'm happy the boxes are&nbsp;stable).</li>
 <li><a href="http://www.asus.com/products.aspx?l1=3&amp;l2=11&amp;l3=761&amp;l4=0&amp;model=2413&amp;modelmenu=1">Asus P5Q-EM</a> Motherboard (cheap, on-board graphics, supports&nbsp;16gig DDR2)</li>
-<li><a href="http://www.newegg.com/Product/Product.aspx?Item=N82E16820231183">G.SKILL 16gb</a> DDR2 kit.</li><br />
-</ul><br />
-As drop-in replacements these worked out really&nbsp;cost-effective, with the ram being the most expensive part at just&nbsp;under $800 for the kit.</p>
-<p>So for around $3K NZ I end up with 32gig of ram and 8 reasonably&nbsp;fast cores - not bad, plenty of bang for buck compared to picking&nbsp;up an equivalent server-spec hardware - and I can avoid the more&nbsp;expensive FB-DIMM (which would have worked out at least $3K for the<br />
+<li><a href="http://www.newegg.com/Product/Product.aspx?Item=N82E16820231183">G.SKILL 16gb</a> DDR2 kit.</li><br>
+</ul><br>
+As drop-in replacements these worked out really&nbsp;cost-effective, with the ram being the most expensive part at just&nbsp;under $800 for the kit.
+<p>So for around $3K NZ I end up with 32gig of ram and 8 reasonably&nbsp;fast cores - not bad, plenty of bang for buck compared to picking&nbsp;up an equivalent server-spec hardware - and I can avoid the more&nbsp;expensive FB-DIMM (which would have worked out at least $3K for the<br>
 RAM alone).</p>
 <p>I decided to go with HyperV on these new machines, replacing my&nbsp;existing VMWare Server setup... It's actually been reasonably&nbsp;painless to port my the various machines across, once I got a&nbsp;handle on a few little gotchas:</p>
 <p>So for Windows 2K3 virtual servers I've had to:</p>
 <ul>
 <li>Uninstall the VMWare tools (via add/remove programs).</li>
 <li>Uninstall the VMWare video driver (from the device&nbsp;manager).</li>
-<li>Run the VMWare cleanup utility (I had to do this on a few&nbsp;machines to clean up a "VMWare memory service" that was failing&nbsp;to start after moving the machine to HyperV) - you can grab the&nbsp;tool from the bottom of this <a href="http://kb.vmware.com/selfservice/microsites/search.do?cmd=displayKC&amp;docType=kc&amp;externalId=1308&amp;sliceId=2&amp;docTypeID=DT_KB_1_1&amp;dialogID=35946306&amp;stateId=0%200%202719456">KB article</a> for cleaning them, which works on VM's as well&nbsp;as hosts... in one case I also had to do some registry<br />
-spelunking to remove the errant service.</li></p>
-<li>Install an IDE drive (doesn't matter what size, I just set it&nbsp;to the smallest possible value) in the VMWare server - <a href="http://social.technet.microsoft.com/Forums/en-US/winserverhyperv/thread/ef8c12f7-c45d-442e-9a30-c43cd87df3b3">see here for details</a> - not doing this will result in a BSOD&nbsp;if your VMWare server is using virtual SCSI drives, like mine<br />
-were.</li></p>
+<li>Run the VMWare cleanup utility (I had to do this on a few&nbsp;machines to clean up a "VMWare memory service" that was failing&nbsp;to start after moving the machine to HyperV) - you can grab the&nbsp;tool from the bottom of this <a href="http://kb.vmware.com/selfservice/microsites/search.do?cmd=displayKC&amp;docType=kc&amp;externalId=1308&amp;sliceId=2&amp;docTypeID=DT_KB_1_1&amp;dialogID=35946306&amp;stateId=0%200%202719456">KB article</a> for cleaning them, which works on VM's as well&nbsp;as hosts... in one case I also had to do some registry<br>
+spelunking to remove the errant service.</li>
+<li>Install an IDE drive (doesn't matter what size, I just set it&nbsp;to the smallest possible value) in the VMWare server - <a href="http://social.technet.microsoft.com/Forums/en-US/winserverhyperv/thread/ef8c12f7-c45d-442e-9a30-c43cd87df3b3">see here for details</a> - not doing this will result in a BSOD&nbsp;if your VMWare server is using virtual SCSI drives, like mine<br>
+were.</li>
 <li>Shutdown the Virtual machine.</li>
 <li>Convert VMDK VMWare hard drives to VHD's using this&nbsp;<a href="http://vmtoolkit.com/files/folders/converters/entry8.aspx">tool</a> (ignoring the IDE drives I added).</li>
 <li>Create a new machine, add the drives back in (as IDE drives)&nbsp;in HyperV.</li>
 <li>Boot it up.</li>
 <li>Insert the Integration Services Disk (CTRL+I) - let it do&nbsp;it's thing, and reboot when prompted.</li>
-<li>All done.</li><br />
-</ul><br />
-For the few Ubuntu &amp; Debian virtual machines I just:</p>
+<li>All done.</li><br>
+</ul><br>
+For the few Ubuntu &amp; Debian virtual machines I just:
 <ul>
 <li>Uninstalled the VMWare tools, if they were installed (I don't&nbsp;always bother with Linux, most of the machines aren't disk or&nbsp;network intensive, so it never seems to make much&nbsp;difference).</li>
 <li>Convert VMDK VMWare hard drives to VHD's using this&nbsp;<a href="http://vmtoolkit.com/files/folders/converters/entry8.aspx">tool</a>.</li>
@@ -68,9 +69,9 @@ For the few Ubuntu &amp; Debian virtual machines I just:</p>
 <li>Boot it up, quickly hit "e" and the edit the grub boot line&nbsp;replacing "root=/dev/sda1" with "root=/dev/hda1".</li>
 <li>At this point it should finish booting (otherwise it'll hang&nbsp;trying to boot and eventually dump you into an (initramfs)&nbsp;prompt).</li>
 <li>Log in, locate "menu.lst" (normally in /boot/grub/) and&nbsp;change references to /dev/sda1 to /dev/hda1, save and reboot (so&nbsp;the change of hard drive for the root filesystem is&nbsp;persisted).</li>
-<li>Optionally install the <a href="http://blogs.msdn.com/virtual_pc_guy/archive/2008/09/22/rtm-of-linux-integration-components-for-hyper-v-now-available.aspx">Linux integration components</a>, though it takes some trial&nbsp;and error to get this working (I'm still fiddling with this a&nbsp;bit when I can be bothered - once working that should allow the&nbsp;virtual machine to stop using the legacy network adaptor and&nbsp;provide improved disk I/O &amp; Network performance).</li><br />
-</ul><br />
-And for the Windows server 2008 virtual machines I skipped the&nbsp;addition of an extra virtual IDE drive prior to conversion, as it&nbsp;just seemed to work (i.e. no BSOD).</p>
+<li>Optionally install the <a href="http://blogs.msdn.com/virtual_pc_guy/archive/2008/09/22/rtm-of-linux-integration-components-for-hyper-v-now-available.aspx">Linux integration components</a>, though it takes some trial&nbsp;and error to get this working (I'm still fiddling with this a&nbsp;bit when I can be bothered - once working that should allow the&nbsp;virtual machine to stop using the legacy network adaptor and&nbsp;provide improved disk I/O &amp; Network performance).</li><br>
+</ul><br>
+And for the Windows server 2008 virtual machines I skipped the&nbsp;addition of an extra virtual IDE drive prior to conversion, as it&nbsp;just seemed to work (i.e. no BSOD).
 <p>So far it's been reasonably painless process... the best part is I&nbsp;now have a plenty of room for some additional build servers to&nbsp;target my own open source projects, host some examples of&nbsp;RESTful/OAuth services etc.</p>
 <p><strong>Edit - Feb 1<sup>st</sup> 2008</strong>:&nbsp; It should be noted I&nbsp;since moved over to using VMWare server version 2, because I found&nbsp;the performance of HyperV to be diabolical for CPU-intensive tasks&nbsp;i.e. the server would be&nbsp;utilizing&nbsp;only about 10% of the available&nbsp;CPU resources when running continuous integration builds, resulting&nbsp;in builds taking well over 30 minutes instead of the usual 2 or 3 -&nbsp;at the time I found a few other users who suffered from the same&nbsp;problems, but no solution.</p>
 <p>At first I thought it might be a result of converting the VMWare&nbsp;machines to HyperV, but freshly paving new build servers didn't&nbsp;make any difference.&nbsp; Moving over to the VMWare server v2&nbsp;yielded very high CPU utilization, with builds that used to take 3&nbsp;minutes on my old build server, nowtaking less then a minute on the&nbsp;new host machine :)</p>

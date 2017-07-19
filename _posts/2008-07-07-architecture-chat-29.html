@@ -20,54 +20,55 @@ categories:
 tags: []
 comments: []
 ---
-<p>Reasonable turnout at the last Architecture Chat - appologies about<br />
-the late write-up!<br /><br />
-<br /><br />
-So we talked about a few things last week - on a recurring them of<br />
-IL generation and weaving we discussed verifying generated<br />
-assemblies with <a href="http://msdn.microsoft.com/en-us/library/62bwd2yd%28VS.80%29.aspx">PEVerify</a><br />
-- and how to ensure IL you generate is not invalid and Garreth<br />
-mentioned some issues with ILDASM crashes when using <a href="http://www.mono-project.com/Cecil">Mono.Cecil</a>.<br /><br />
-<br /><br />
-We talked about the process for wrapping and abstracting<br />
-functionality and services, and I gave a brief mention to this blog<br />
-post which provides a slightly more formalized description to this<br />
-process - <a href="http://hcoding.blogspot.com/2008/06/wafagy.html">Wafagy</a>.<br /><br />
-<br /><br />
-The discussion moved onto file/XML persistence and substituting<br />
-traditional relational databases with alternative persistence<br />
-mechanisms, especially in the cloud.<br /><br />
-<br /><br />
-Static analysis tools were discussed, and thoughts about what (if<br />
-any) alternatives exist to tools such as <a href="http://www.ndepend.com/">NDepend</a>.<br /><br />
-<br /><br />
-We talked about the use of "toolkit" style projects such as the<br />
-<a href="http://www.codeplex.com/umbrella">Umbrella project</a> or<br />
-<a href="http://ayende.com/Wiki/Default.aspx?Page=Rhino+Commons&amp;AspxAutoDetectCookieSupport=1"><br />
-Rhino Commons</a> and the compromise often felt between plucking<br />
-out only the bits you want (to control the surface area of your<br />
-project) verses the wish to easily integrate updates and unit tests<br />
-from the library into your project as they undergo continual<br />
-improvement.<br /><br />
-<br /><br />
-I also talked about hostile templating/transformation languages<br />
-(such as the template language in <a href="http://www.sparxsystems.com.au/">Enterprise Architect</a> which<br />
-I've been using for a recent project) and what features make a<br />
-domain or templating language "hostile" to being part of your daily<br />
-process i.e. lack of debugging, lack of comment syntax, poorly<br />
-identified or completely missed syntax errors, left to right<br />
-expression evaluation, lack of operator presidence rules etc.<br /><br />
-<br /><br />
-I then gave a quick run through how I've been using the MDA and MDG<br />
-to model a PIM (platform independent model) of the domain,<br />
-including OCL constraints, and how it's automatically transformed<br />
-into a platform specific model (Castle <a href="http://www.castleproject.org/ActiveRecord/">ActiveRecord</a> with<br />
-<a href="http://www.castleproject.org/activerecord/documentation/v1rc1/usersguide/validation.html"><br />
-validation attributes</a> in this case) which is then used to<br />
-generate code from - and the issues I've encountered so far with<br />
-the tool.<br /><br />
-<br /><br />
-Details of previous chats can be found <a href="http://wiki.bittercoder.com/SylviaParkArchitectureChats.ashx">here</a><br />
-on the wiki.<br /><br />
-<br /><br />
-The next Architecture chat is this Thursday, all are welcome.<br /></p>
+
+<p>Reasonable turnout at the last Architecture Chat - appologies about<br>
+the late write-up!<br><br>
+<br><br>
+So we talked about a few things last week - on a recurring them of<br>
+IL generation and weaving we discussed verifying generated<br>
+assemblies with <a href="http://msdn.microsoft.com/en-us/library/62bwd2yd%28VS.80%29.aspx">PEVerify</a><br>
+- and how to ensure IL you generate is not invalid and Garreth<br>
+mentioned some issues with ILDASM crashes when using <a href="http://www.mono-project.com/Cecil">Mono.Cecil</a>.<br><br>
+<br><br>
+We talked about the process for wrapping and abstracting<br>
+functionality and services, and I gave a brief mention to this blog<br>
+post which provides a slightly more formalized description to this<br>
+process - <a href="http://hcoding.blogspot.com/2008/06/wafagy.html">Wafagy</a>.<br><br>
+<br><br>
+The discussion moved onto file/XML persistence and substituting<br>
+traditional relational databases with alternative persistence<br>
+mechanisms, especially in the cloud.<br><br>
+<br><br>
+Static analysis tools were discussed, and thoughts about what (if<br>
+any) alternatives exist to tools such as <a href="http://www.ndepend.com/">NDepend</a>.<br><br>
+<br><br>
+We talked about the use of "toolkit" style projects such as the<br>
+<a href="http://www.codeplex.com/umbrella">Umbrella project</a> or<br>
+<a href="http://ayende.com/Wiki/Default.aspx?Page=Rhino+Commons&amp;AspxAutoDetectCookieSupport=1"><br>
+Rhino Commons</a> and the compromise often felt between plucking<br>
+out only the bits you want (to control the surface area of your<br>
+project) verses the wish to easily integrate updates and unit tests<br>
+from the library into your project as they undergo continual<br>
+improvement.<br><br>
+<br><br>
+I also talked about hostile templating/transformation languages<br>
+(such as the template language in <a href="http://www.sparxsystems.com.au/">Enterprise Architect</a> which<br>
+I've been using for a recent project) and what features make a<br>
+domain or templating language "hostile" to being part of your daily<br>
+process i.e. lack of debugging, lack of comment syntax, poorly<br>
+identified or completely missed syntax errors, left to right<br>
+expression evaluation, lack of operator presidence rules etc.<br><br>
+<br><br>
+I then gave a quick run through how I've been using the MDA and MDG<br>
+to model a PIM (platform independent model) of the domain,<br>
+including OCL constraints, and how it's automatically transformed<br>
+into a platform specific model (Castle <a href="http://www.castleproject.org/ActiveRecord/">ActiveRecord</a> with<br>
+<a href="http://www.castleproject.org/activerecord/documentation/v1rc1/usersguide/validation.html"><br>
+validation attributes</a> in this case) which is then used to<br>
+generate code from - and the issues I've encountered so far with<br>
+the tool.<br><br>
+<br><br>
+Details of previous chats can be found <a href="http://wiki.bittercoder.com/SylviaParkArchitectureChats.ashx">here</a><br>
+on the wiki.<br><br>
+<br><br>
+The next Architecture chat is this Thursday, all are welcome.<br></p>

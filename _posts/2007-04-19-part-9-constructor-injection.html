@@ -23,163 +23,164 @@ tags:
 - IoC
 comments: []
 ---
-<p><img src="http://blog.bittercoder.com/images/ioc_tutorial_titles/9_constructor_injection.png" alt="9_constructor_injection.png" border="0" height="189" widthsrc="270" /><br /><br />
-<br /><br />
-Constructor injection - so far inadvertantly we've been using setter inject to get our configuration information into our components... but you can also use constructors... the useful aspect of constructors is that it makes those parameters compulsory...<br /><br />
-<br /><br />
-So lets take a look at the code for this post, first off there's an interface for a service which takes care of encoding a string for us:<br /><br />
-<br /></p>
+
+<p><img src="http://blog.bittercoder.com/images/ioc_tutorial_titles/9_constructor_injection.png" alt="9_constructor_injection.png" border="0" height="189" widthsrc="270"><br><br>
+<br><br>
+Constructor injection - so far inadvertantly we've been using setter inject to get our configuration information into our components... but you can also use constructors... the useful aspect of constructors is that it makes those parameters compulsory...<br><br>
+<br><br>
+So lets take a look at the code for this post, first off there's an interface for a service which takes care of encoding a string for us:<br><br>
+<br></p>
 <pre>
-public interface IEncoder<br />
-{<br />
-    string Encode(string source);<br />
-}<br />
-</pre><br /><br />
-And then we have no classes which implement this service, one we can use when testing to not encode things at all - and another which encodes a string using our particularly strong "silly" encryption...<br /><br />
-<br /><br />
-<span stylesrc="text-decoration: underline">NullEncoder.cs<br /></span><br /></p>
+public interface IEncoder<br>
+{<br>
+    string Encode(string source);<br>
+}<br>
+</pre><br><br>
+And then we have no classes which implement this service, one we can use when testing to not encode things at all - and another which encodes a string using our particularly strong "silly" encryption...<br><br>
+<br><br>
+<span stylesrc="text-decoration: underline">NullEncoder.cs<br></span><br>
 <pre>
-public class NullEncoder : IEncoder<br />
-{<br />
-    public string Encode(string source)<br />
-    {<br />
-        return source;<br />
-    }<br />
-}<br />
-</pre><br /><br />
-<span stylesrc="text-decoration: underline">SillyEncoder.cs</span><br /><br />
-<br /></p>
+public class NullEncoder : IEncoder<br>
+{<br>
+    public string Encode(string source)<br>
+    {<br>
+        return source;<br>
+    }<br>
+}<br>
+</pre><br><br>
+<span stylesrc="text-decoration: underline">SillyEncoder.cs</span><br><br>
+<br>
 <pre>
-public class SillyEncoder : IEncoder<br />
-{<br />
-    private char[] _mixedUp = "YACBDFEGIHJLKMONPRSQTUWVXZ".ToCharArray();</p>
-<p>    public string Encode(string source)<br />
-    {<br />
-        string upperSource = source.ToUpper();<br />
-        char[] encoded = new char[source.Length];<br />
-        for (int i = 0; i < encoded.Length; i++)<br />
-        {<br />
-            encoded[i] = MapCharacter(upperSource[i]);<br />
-        }<br />
-        return new string(encoded);<br />
+public class SillyEncoder : IEncoder<br>
+{<br>
+    private char[] _mixedUp = "YACBDFEGIHJLKMONPRSQTUWVXZ".ToCharArray();
+<p>    public string Encode(string source)<br>
+    {<br>
+        string upperSource = source.ToUpper();<br>
+        char[] encoded = new char[source.Length];<br>
+        for (int i = 0; i < encoded.length;=""><br>
+        {<br>
+            encoded[i] = MapCharacter(upperSource[i]);<br>
+        }<br>
+        return new string(encoded);<br>
     }</p>
-<p>    private char MapCharacter(char ch)<br />
-    {<br />
-        if ((ch >= 'A') &amp;&amp; (ch <= 'Z'))<br />
-        {<br />
-            return _mixedUp[ch - 'A'];<br />
-        }<br />
-        return ch;<br />
-    }<br />
-}<br />
-</pre><br /><br />
-When then have a class for sending messages (currently we just send it to the console, so we can print them out and paste them onto the back of postcards) ... so lets have a look at that class:<br /><br />
-<br /></p>
+<p>    private char MapCharacter(char ch)<br>
+    {<br>
+        if ((ch >= 'A') &amp;&amp; (ch <=></=><br>
+        {<br>
+            return _mixedUp[ch - 'A'];<br>
+        }<br>
+        return ch;<br>
+    }<br>
+}<br>
+</p></pre><br><br>
+When then have a class for sending messages (currently we just send it to the console, so we can print them out and paste them onto the back of postcards) ... so lets have a look at that class:<br><br>
+<br>
 <pre>
-public class SecretMessageSender<br />
-{<br />
-    private readonly IEncoder _encoder;<br />
-    private readonly string _from;</p>
-<p>    public SecretMessageSender(string from, IEncoder encoder)<br />
-    {<br />
-        _from = from;<br />
-        _encoder = encoder;<br />
+public class SecretMessageSender<br>
+{<br>
+    private readonly IEncoder _encoder;<br>
+    private readonly string _from;
+<p>    public SecretMessageSender(string from, IEncoder encoder)<br>
+    {<br>
+        _from = from;<br>
+        _encoder = encoder;<br>
     }</p>
-<p>    public void SendMessage(string to, string body)<br />
-    {<br />
-        Console.WriteLine("to: {0}rnfrom: {1}rnrn{2}", to, _from, _encoder.Encode(body));<br />
-    }<br />
-}<br />
-</pre><br /><br />
-Notice the lack of default constructor, and that the constructor also takes an instance of type IEncoder... now Castle is smart enough to do two things for us:<br /></p>
+<p>    public void SendMessage(string to, string body)<br>
+    {<br>
+        Console.WriteLine("to: {0}rnfrom: {1}rnrn{2}", to, _from, _encoder.Encode(body));<br>
+    }<br>
+}<br>
+</p></pre><br><br>
+Notice the lack of default constructor, and that the constructor also takes an instance of type IEncoder... now Castle is smart enough to do two things for us:<br>
 <ul>
-<li>Throw an exception if we try to get an isntance of SecreteMessageSender without having set the <b>from</b> configuration parameter.<br />
-  </li></p>
-<li>Find the default implementation of the IEncoder registered in the container, and to supply that as the value for the second argument in the constructor.<br />
-  </li><br />
-</ul>So lets have a look at the application itself:<br /><br />
-<br /></p>
+<li>Throw an exception if we try to get an isntance of SecreteMessageSender without having set the <b>from</b> configuration parameter.<br>
+  </li>
+<li>Find the default implementation of the IEncoder registered in the container, and to supply that as the value for the second argument in the constructor.<br>
+  </li><br>
+</ul>So lets have a look at the application itself:<br><br>
+<br>
 <pre>
-static void Main(string[] args)<br />
-{<br />
-    WindsorContainer container = new WindsorContainer(new XmlInterpreter());</p>
-<p>    SecretMessageSender sender = container.Resolve<SecretMessageSender>();</p>
+static void Main(string[] args)<br>
+{<br>
+    WindsorContainer container = new WindsorContainer(new XmlInterpreter());
+<p>    SecretMessageSender sender = container.Resolve<secretmessagesender>();</secretmessagesender></p>
 <p>    sender.SendMessage("hammet", "castle is great!");</p>
-<p>    Console.Read();<br />
-}<br />
-</pre><br /><br />
-And finally our configuration:<br /><br />
-<br /></p>
+<p>    Console.Read();<br>
+}<br>
+</p></pre><br><br>
+And finally our configuration:<br><br>
+<br>
 <pre>
-<configuration></p>
-<p>  <configSections></p>
-<section name="castle"<br />
-        type="Castle.Windsor.Configuration.AppDomain.CastleSectionHandler, Castle.Windsor" /><br />
-  </configSections></p>
-<p>  <castle><br />
-    <components><br />
-      <component id="encoder.silly"<br />
-                 service="IoC.Tutorials.Part9.IEncoder, IoC.Tutorials.Part9"<br />
-                 type="IoC.Tutorials.Part9.SillyEncoder, IoC.Tutorials.Part9" /></p>
-<p>      <component id="encoder.null"<br />
-                 service="IoC.Tutorials.Part9.IEncoder, IoC.Tutorials.Part9"<br />
+<configuration>
+<p>  <configsections></configsections></p>
+<section name="castle"></section><br>
+        type="Castle.Windsor.Configuration.AppDomain.CastleSectionHandler, Castle.Windsor" /><br>
+  
+<p>  <castle><br>
+    <components><br>
+      <component id="encoder.silly"></component><br>
+                 service="IoC.Tutorials.Part9.IEncoder, IoC.Tutorials.Part9"<br>
+                 type="IoC.Tutorials.Part9.SillyEncoder, IoC.Tutorials.Part9" /></components></castle></p>
+<p>      <component id="encoder.null"></component><br>
+                 service="IoC.Tutorials.Part9.IEncoder, IoC.Tutorials.Part9"<br>
                  type="IoC.Tutorials.Part9.NullEncoder, IoC.Tutorials.Part9" /></p>
-<p>      <component id="messageSender"<br />
+<p>      <component id="messageSender"></component><br>
                  type="IoC.Tutorials.Part9.SecretMessageSender, IoC.Tutorials.Part9"></p>
-<parameters>SecretMessageSender<br />
-          <from>alex@bittercoder.com</from><br />
-        </parameters><br />
-      </component></p>
-<p>    </components><br />
-  </castle></p>
-<p></configuration><br />
-</pre><br /><br />
-So you can see we've registered both implementations of the encoder, with the silly encoder being first - so as mentioned in the last part - this will be the default - and we also register our message sender (with the required from parameter)... so what happens when we run it:<br /><br />
-<br /><br />
-<b>to: hammet<br /><br />
-from: alex@bittercoder.com<br /><br />
-<br /><br />
-CYSQLD IS ERDYQ!</b><br /><br />
-<br /><br />
-Cool... but what if wanted to send an unencrypted message... well we have a few options:<br /></p>
+<parameters>SecretMessageSender<br>
+          <from>alex@bittercoder.com</from><br>
+        </parameters><br>
+      
+<p>    <br>
+  </p>
+<p></p></configuration><br>
+</pre><br><br>
+So you can see we've registered both implementations of the encoder, with the silly encoder being first - so as mentioned in the last part - this will be the default - and we also register our message sender (with the required from parameter)... so what happens when we run it:<br><br>
+<br><br>
+<b>to: hammet<br><br>
+from: alex@bittercoder.com<br><br>
+<br><br>
+CYSQLD IS ERDYQ!</b><br><br>
+<br><br>
+Cool... but what if wanted to send an unencrypted message... well we have a few options:<br>
 <ul>
 <li>Swap the order in which the implementations are registered</li>
 <li>Remove / comment out any implementations we don't want (so comment out the silly encoder)</li>
-<li>Or reference the implementation we specifically want to wire up to, using it's identifier...</li><br />
-</ul></p>
-<p>So lets have a look at the last one...<br /></p>
-<p><b><br /></b></p>
+<li>Or reference the implementation we specifically want to wire up to, using it's identifier...</li><br>
+</ul>
+<p>So lets have a look at the last one...<br></p>
+<p><b><br></b></p>
 <pre>
-<configuration></p>
-<p>  <configSections></p>
-<section name="castle"<br />
-        type="Castle.Windsor.Configuration.AppDomain.CastleSectionHandler, Castle.Windsor" /><br />
-  </configSections></p>
-<p>  <castle><br />
-    <components><br />
-      <component id="encoder.silly"<br />
-                 service="IoC.Tutorials.Part9.IEncoder, IoC.Tutorials.Part9"<br />
-                 type="IoC.Tutorials.Part9.SillyEncoder, IoC.Tutorials.Part9" /></p>
-<p>      <component id="encoder.null"<br />
-                 service="IoC.Tutorials.Part9.IEncoder, IoC.Tutorials.Part9"<br />
+<configuration>
+<p>  <configsections></configsections></p>
+<section name="castle"></section><br>
+        type="Castle.Windsor.Configuration.AppDomain.CastleSectionHandler, Castle.Windsor" /><br>
+  
+<p>  <castle><br>
+    <components><br>
+      <component id="encoder.silly"></component><br>
+                 service="IoC.Tutorials.Part9.IEncoder, IoC.Tutorials.Part9"<br>
+                 type="IoC.Tutorials.Part9.SillyEncoder, IoC.Tutorials.Part9" /></components></castle></p>
+<p>      <component id="encoder.null"></component><br>
+                 service="IoC.Tutorials.Part9.IEncoder, IoC.Tutorials.Part9"<br>
                  type="IoC.Tutorials.Part9.NullEncoder, IoC.Tutorials.Part9" /></p>
-<p>      <component id="messageSender"<br />
+<p>      <component id="messageSender"></component><br>
                  type="IoC.Tutorials.Part9.SecretMessageSender, IoC.Tutorials.Part9"></p>
-<parameters>SecretMessageSender<br />
-          <from>alex@bittercoder.com</from><br />
-          <encoder>${encoder.null}</encoder><br />
-        </parameters><br />
-      </component></p>
-<p>    </components><br />
-  </castle></p>
-<p></configuration><br />
-</pre><br /><br />
-Notice the way the parameter is formatted - instead of the markup for a property reference which starts with a hash (#) we start service references with a dollar sign ($) and then surround the components identifier with braces.<br /><br />
-<br /><br />
-And the results of running the app now:<br /><br />
-<b><br /><br />
-to: hammet<br /><br />
-from: alex@bittercoder.com<br /><br />
-<br /><br />
-castle is great!</b><br /><br />
-<b><br /></b>And thats our first look at constructor injection... we will revisit constructor injection again in later posts, however the next part will look at setter injection.</p>
+<parameters>SecretMessageSender<br>
+          <from>alex@bittercoder.com</from><br>
+          <encoder>${encoder.null}</encoder><br>
+        </parameters><br>
+      
+<p>    <br>
+  </p>
+<p></p></configuration><br>
+</pre><br><br>
+Notice the way the parameter is formatted - instead of the markup for a property reference which starts with a hash (#) we start service references with a dollar sign ($) and then surround the components identifier with braces.<br><br>
+<br><br>
+And the results of running the app now:<br><br>
+<b><br><br>
+to: hammet<br><br>
+from: alex@bittercoder.com<br><br>
+<br><br>
+castle is great!</b><br><br>
+<b><br></b>And thats our first look at constructor injection... we will revisit constructor injection again in later posts, however the next part will look at setter injection.

@@ -21,12 +21,13 @@ tags:
 - castle
 comments: []
 ---
-<h1>Abstractions...&nbsp; mmmm... so sweet</h1><br />
-...a post from <a href="http://www.ayende.com/Blog/AbstractingAbstractnessIntoAbstractAbstractnessOfAbstractedAbstratness.aspx">Ayende on abstractions</a>, and specifically a mention of the&nbsp;logging "abstraction" in Castle... it's an interesting thing, for&nbsp;the Seismic product I worked logging (via the same abstraction)&nbsp;into a product a year or more ago...&nbsp; in the end we needed the&nbsp;ability to log contextual information (basically exposing features&nbsp;already existing in <strong>log4net</strong> at the time, but not available&nbsp;via the Castle <strong>ILogger</strong> interface) and so I ended up creating&nbsp;a new interface that was a superset of the existing abstraction,&nbsp;<strong>IExtendedLogger</strong>...</p>
+
+<h1>Abstractions...&nbsp; mmmm... so sweet</h1><br>
+...a post from <a href="http://www.ayende.com/Blog/AbstractingAbstractnessIntoAbstractAbstractnessOfAbstractedAbstratness.aspx">Ayende on abstractions</a>, and specifically a mention of the&nbsp;logging "abstraction" in Castle... it's an interesting thing, for&nbsp;the Seismic product I worked logging (via the same abstraction)&nbsp;into a product a year or more ago...&nbsp; in the end we needed the&nbsp;ability to log contextual information (basically exposing features&nbsp;already existing in <strong>log4net</strong> at the time, but not available&nbsp;via the Castle <strong>ILogger</strong> interface) and so I ended up creating&nbsp;a new interface that was a superset of the existing abstraction,&nbsp;<strong>IExtendedLogger</strong>...
 <p>here's the devil... looks simple...</p>
-<pre>public interface IExtendedLogger : ILogger { void AddProperty(string key, object value); void RemoveProperty(string key); }</pre><br />
-However... because we're being a good little abstraction&nbsp;"<em>whore</em>" we end up with a few more classes to support&nbsp;this new interface, and make the user experience more&nbsp;pleasurable:</p>
-<p><img src="http://blog.bittercoder.com/content/binary/logging_extractions.png" alt="" /></p>
+<pre>public interface IExtendedLogger : ILogger { void AddProperty(string key, object value); void RemoveProperty(string key); }</pre><br>
+However... because we're being a good little abstraction&nbsp;"<em>whore</em>" we end up with a few more classes to support&nbsp;this new interface, and make the user experience more&nbsp;pleasurable:
+<p><img src="http://blog.bittercoder.com/content/binary/logging_extractions.png" alt=""></p>
 <p>Though I was reasonably pleased with the end result a year ago,&nbsp;that was probably a couple of hours work + some more time&nbsp;tweaking (once you include the time to code up that test&nbsp;fixtures) that would've been better spent building additional&nbsp;functionality into the product.</p>
 <p>I have to admit the lure of a needless abstraction is ever&nbsp;present to me... I enjoy halving a class into an abstract and&nbsp;concrete implementation, and then extracting an interface is like&nbsp;the candy coating... prefixing the concrete implementation with&nbsp;"Default" makes it even seem like you've all but got people&nbsp;lining up to create their own versions!&nbsp; Wow, isn't it&nbsp;powerful, flexible.. and all sorts of other words ending in "ul"&nbsp;or "ile".</p>
 <p>....But in the end, needless is needless - and I haven't needed&nbsp;the flexibility gained from this abstraction so far... after a&nbsp;year... a whole year, that's pretty much like never... sure I had&nbsp;grand plans, but they never did come to fruition... and grand&nbsp;plans don't keep me fed - <a href="http://c2.com/xp/YouArentGonnaNeedIt.html">YAGNI</a> strikes&nbsp;again.</p>

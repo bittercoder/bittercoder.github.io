@@ -30,122 +30,123 @@ comments:
 
     Rob: Agreed - it's not exactly quick, but checking out the castle project or rhino tools never is :)
 ---
+
 <p>So I decided to take the&nbsp;<a href="http://code.google.com/p/hornget/">Horn</a>&nbsp;project for a test drive after repaving a number of machines to Windows 7 RTM and waiting for things to install.</p>
 <p>After Horn&rsquo;s initial announcement this year I was excited, but it didn&rsquo;t really&nbsp;<span style="text-decoration: underline;">do</span>&nbsp;anything at that stage (and I didn&rsquo;t have enough time to assist with the dev work / patches)... so I put it on the back burner.&nbsp; But I found myself need to rebuild Rhino Tools, Castle and NHibernate today from trunk and thought I would give it a try.</p>
 <p>At any rate, this is a post covering my &ldquo;noob&rdquo; observations as I walk through building horn, and then using horn to build Rhino Tools.</p>
-<h3>Background</h3><br />
-As a little background, Horn was started by the&nbsp;<a href="http://scotalt.net/">Scotland ALT.Net group</a>, it was kicked off on the&nbsp;<a href="http://code.google.com/p/scotaltdotnet/">scotaltdotnet google code</a>&nbsp;project, and later moved to the&nbsp;<a href="http://code.google.com/p/hornget/">hornget project</a>, also on google code. The projects Initial mission statement is to &ldquo;<em>take control of building a common set of open source packages that are probably similar to many in the ALT.NET space</em>&rdquo; which I think it&rsquo;s coming close to realising, but they also have a grander vision of &ldquo;<em>providing a standard mechanism for easy installation of .Net Packages&rdquo; &ndash;&nbsp;</em>something I definitely think .Net needs, and that dynamic languages lord over us currently with their gem&rsquo;s and egg&rsquo;s (and incidentally it is a much trickier problem to solve when you need to produce compiled assemblies, think signing vs. unsigned, ability to specify x86/x64/any platform flags and the way in which assembly versioning in .Net works).</p>
-<h3>Building Horn</h3><br />
-Assuming you have the Subversion command line tools installed (or tortoise svn) - it&rsquo;s pretty easy.&nbsp; First off check out the horn trunk&hellip;</p>
-<pre>svn checkout <strong><em>http</em></strong>://hornget.googlecode.com/svn/trunk/ hornget-read-only</pre><br />
-Once all the files have been pulled down, you need to then build horn, using the following batch file:</p>
-<pre>cd hornget-read-onlysrc<br />
-hornbuild.bat</pre><br />
-hornbuild.bat will execute Nant, and the total build takes about 15 to 20 seconds. It dumps the outputs into a buildnet-3.5debug folder, including horn.exe which is the command line client (Horn package manager).&nbsp; I would assume as Horn matures we will see an installer / binary release on the horn website, which should hopefully make this even easier.</p>
-<h3>Running Horn</h3><br />
-Now jump into the outputs directory...and run horn for the first time.</p>
-<pre>cd buildnet-3.5debug<br />
-horn</pre><br />
-At which point you will be rewarded with the usage screen:</p>
-<pre>THE HORN PACKAGE MANAGER</p>
+<h3>Background</h3><br>
+As a little background, Horn was started by the&nbsp;<a href="http://scotalt.net/">Scotland ALT.Net group</a>, it was kicked off on the&nbsp;<a href="http://code.google.com/p/scotaltdotnet/">scotaltdotnet google code</a>&nbsp;project, and later moved to the&nbsp;<a href="http://code.google.com/p/hornget/">hornget project</a>, also on google code. The projects Initial mission statement is to &ldquo;<em>take control of building a common set of open source packages that are probably similar to many in the ALT.NET space</em>&rdquo; which I think it&rsquo;s coming close to realising, but they also have a grander vision of &ldquo;<em>providing a standard mechanism for easy installation of .Net Packages&rdquo; &ndash;&nbsp;</em>something I definitely think .Net needs, and that dynamic languages lord over us currently with their gem&rsquo;s and egg&rsquo;s (and incidentally it is a much trickier problem to solve when you need to produce compiled assemblies, think signing vs. unsigned, ability to specify x86/x64/any platform flags and the way in which assembly versioning in .Net works).
+<h3>Building Horn</h3><br>
+Assuming you have the Subversion command line tools installed (or tortoise svn) - it&rsquo;s pretty easy.&nbsp; First off check out the horn trunk&hellip;
+<pre>svn checkout <strong><em>http</em></strong>://hornget.googlecode.com/svn/trunk/ hornget-read-only</pre><br>
+Once all the files have been pulled down, you need to then build horn, using the following batch file:
+<pre>cd hornget-read-onlysrc<br>
+hornbuild.bat</pre><br>
+hornbuild.bat will execute Nant, and the total build takes about 15 to 20 seconds. It dumps the outputs into a buildnet-3.5debug folder, including horn.exe which is the command line client (Horn package manager).&nbsp; I would assume as Horn matures we will see an installer / binary release on the horn website, which should hopefully make this even easier.
+<h3>Running Horn</h3><br>
+Now jump into the outputs directory...and run horn for the first time.
+<pre>cd buildnet-3.5debug<br>
+horn</pre><br>
+At which point you will be rewarded with the usage screen:
+<pre>THE HORN PACKAGE MANAGER
 <p>http://code.google.com/p/hornget/</p>
-<p>Usage : horn -install:<br />
-Options :<br />
-    -rebuildonly     Do not check for the latest source code.<br />
-    -version:        The specific version of a package.</pre><br />
-Now it's just a matter of building the project you want.. in this case let's build rhino tools (which in turn will build Nhibernate and some parts of the castle project).&nbsp; Might pay to go make a coffee at this point, as there's going to be a lot going on while you wait patiently.</p>
-<pre>horn -install:rhino</pre><br />
-Oh, and expect to see a lot of this if your connection to the various project&rsquo;s SVN repositories is slow..</p>
-<pre>Reading the current revision for castle<br />
-working......<br />
-working......<br />
-working......<br />
-working......<br />
-working......<br />
-working......<br />
-working......<br />
-working......<br />
-working......<br />
-working......</pre><br />
-Also, as an aside - there's a cyclic relationship between Castle and NHibernate (i.e. Nhibernate relies on Castle Core &amp; Dynamic Proxy, while Castle relies on NHibernate to build) - it's not truly cyclic as such though, just that if you attempt to build either set of project in it's entirety, you will need the outputs of the other. In Horn things like dynamic proxy are broken out into separate projects ie. "castle.tools" rather then just "castle" (though a castle package exists as well, which does build castle in it&rsquo;s entirety).</p>
+<p>Usage : horn -install:<br>
+Options :<br>
+    -rebuildonly     Do not check for the latest source code.<br>
+    -version:        The specific version of a package.</p></pre><br>
+Now it's just a matter of building the project you want.. in this case let's build rhino tools (which in turn will build Nhibernate and some parts of the castle project).&nbsp; Might pay to go make a coffee at this point, as there's going to be a lot going on while you wait patiently.
+<pre>horn -install:rhino</pre><br>
+Oh, and expect to see a lot of this if your connection to the various project&rsquo;s SVN repositories is slow..
+<pre>Reading the current revision for castle<br>
+working......<br>
+working......<br>
+working......<br>
+working......<br>
+working......<br>
+working......<br>
+working......<br>
+working......<br>
+working......<br>
+working......</pre><br>
+Also, as an aside - there's a cyclic relationship between Castle and NHibernate (i.e. Nhibernate relies on Castle Core &amp; Dynamic Proxy, while Castle relies on NHibernate to build) - it's not truly cyclic as such though, just that if you attempt to build either set of project in it's entirety, you will need the outputs of the other. In Horn things like dynamic proxy are broken out into separate projects ie. "castle.tools" rather then just "castle" (though a castle package exists as well, which does build castle in it&rsquo;s entirety).
 <p>It seems to handle this scenario well, and this was certainly a failing of most home-grown solutions I&rsquo;ve put together over the years which relied on nant or msbuild files&hellip; Right, so after about 5 minutes, you should see the horn executable run to completion, like this:</p>
-<pre>BUILD SUCCEEDED</p>
+<pre>BUILD SUCCEEDED
 <p>Total time: 46.6 seconds.</p>
-<p>HORN HAS FINISHED INSTALLING rhino.</pre><br />
-Note: The "BUILD SUCCEEDED" message is from rhino tools, which was the last project to be built, rather then telling us how long the process took in total.</p>
-<h3>Locating Outputs</h3><br />
-At this point Horn has finished doing it's job, but... if you do a quick directory search, you probably won't find any output binaries. What gives? Well Horn in fact stores all it's files under a directory against the user's profile. So in the case of windows 7 / Vista, that means I can just change directory to find them:</p>
-<pre>c:devOtherOpenSourcehornget-read-onlysrcbuildnet-3.5debug>cd %USERPROFILE%.horn</p>
-<p>C:Usersalex.horn>_</pre><br />
-If we grab a quick directory listing... we can see there's a few folders in there.</p>
-<pre>C:Usersalex.horn>dir * /A<br />
- Volume in drive C has no label.<br />
- Volume Serial Number is 6AFA-976C</p>
+<p>HORN HAS FINISHED INSTALLING rhino.</p></pre><br>
+Note: The "BUILD SUCCEEDED" message is from rhino tools, which was the last project to be built, rather then telling us how long the process took in total.
+<h3>Locating Outputs</h3><br>
+At this point Horn has finished doing it's job, but... if you do a quick directory search, you probably won't find any output binaries. What gives? Well Horn in fact stores all it's files under a directory against the user's profile. So in the case of windows 7 / Vista, that means I can just change directory to find them:
+<pre>c:devOtherOpenSourcehornget-read-onlysrcbuildnet-3.5debug>cd %USERPROFILE%.horn
+<p>C:Usersalex.horn>_</p></pre><br>
+If we grab a quick directory listing... we can see there's a few folders in there.
+<pre>C:Usersalex.horn>dir * /A<br>
+ Volume in drive C has no label.<br>
+ Volume Serial Number is 6AFA-976C
 <p> Directory of C:Usersalex.horn</p>
-<p>12/08/2009  09:39 p.m.    <DIR>          .<br />
-12/08/2009  09:39 p.m.    <DIR>          ..<br />
-12/08/2009  09:37 p.m.    <DIR>          .svn<br />
-10/08/2009  03:47 p.m.    <DIR>          buildengines<br />
-10/08/2009  03:47 p.m.    <DIR>          builders<br />
-10/08/2009  03:47 p.m.    <DIR>          esbs<br />
-10/08/2009  03:46 p.m.    <DIR>          frameworks<br />
-10/08/2009  03:47 p.m.    <DIR>          ioc<br />
-10/08/2009  03:46 p.m.    <DIR>          languages<br />
-10/08/2009  03:46 p.m.    <DIR>          loggers<br />
-10/08/2009  03:46 p.m.    <DIR>          mappers<br />
-10/08/2009  03:47 p.m.    <DIR>          mocks<br />
-10/08/2009  03:47 p.m.    <DIR>          orm<br />
-12/08/2009  09:45 p.m.    <DIR>          result<br />
-12/08/2009  09:37 p.m.                15 revision.horn<br />
-10/08/2009  03:47 p.m.    <DIR>          web<br />
-10/08/2009  03:47 p.m.    <DIR>          wpf<br />
-               1 File(s)             15 bytes<br />
-              16 Dir(s)  578,876,366,848 bytes free</pre><br />
-Notice the .svn folder, the .horn directory is actually populated from&nbsp;<a href="http://hornget.googlecode.com/svn/trunk/package_tree" target="_blank">this subversion repository</a>, which stores all the package descriptions etc. (I&rsquo;m not entirely clear on the terminology here, documentation is fairly sparse on the website &ndash; they&rsquo;re almost more like package build scripts, because they&rsquo;re a DSL outlining the steps required to build the outputs, required dependencies and so on).</p>
+<p>12/08/2009  09:39 p.m.    <dir>          .<br>
+12/08/2009  09:39 p.m.    <dir>          ..<br>
+12/08/2009  09:37 p.m.    <dir>          .svn<br>
+10/08/2009  03:47 p.m.    <dir>          buildengines<br>
+10/08/2009  03:47 p.m.    <dir>          builders<br>
+10/08/2009  03:47 p.m.    <dir>          esbs<br>
+10/08/2009  03:46 p.m.    <dir>          frameworks<br>
+10/08/2009  03:47 p.m.    <dir>          ioc<br>
+10/08/2009  03:46 p.m.    <dir>          languages<br>
+10/08/2009  03:46 p.m.    <dir>          loggers<br>
+10/08/2009  03:46 p.m.    <dir>          mappers<br>
+10/08/2009  03:47 p.m.    <dir>          mocks<br>
+10/08/2009  03:47 p.m.    <dir>          orm<br>
+12/08/2009  09:45 p.m.    <dir>          result<br>
+12/08/2009  09:37 p.m.                15 revision.horn<br>
+10/08/2009  03:47 p.m.    <dir>          web<br>
+10/08/2009  03:47 p.m.    <dir>          wpf<br>
+               1 File(s)             15 bytes<br>
+              16 Dir(s)  578,876,366,848 bytes free</dir></dir></dir></dir></dir></dir></dir></dir></dir></dir></dir></dir></dir></dir></dir></dir></p></pre><br>
+Notice the .svn folder, the .horn directory is actually populated from&nbsp;<a href="http://hornget.googlecode.com/svn/trunk/package_tree" target="_blank">this subversion repository</a>, which stores all the package descriptions etc. (I&rsquo;m not entirely clear on the terminology here, documentation is fairly sparse on the website &ndash; they&rsquo;re almost more like package build scripts, because they&rsquo;re a DSL outlining the steps required to build the outputs, required dependencies and so on).
 <p>The one folder not under version control is "result" - which is where our outputs are actually stored. So let's take a quick look...</p>
-<pre>C:Usersalex.horn>cd result</p>
-<p>C:Usersalex.hornresult>dir<br />
- Volume in drive C has no label.<br />
+<pre>C:Usersalex.horn>cd result
+<p>C:Usersalex.hornresult>dir<br>
+ Volume in drive C has no label.<br>
  Volume Serial Number is 6AFA-976C</p>
 <p> Directory of C:Usersalex.hornresult</p>
-<p>12/08/2009  09:45 p.m.    <DIR>          .<br />
-12/08/2009  09:45 p.m.    <DIR>          ..<br />
-10/08/2009  03:56 p.m.             1,997 ABC.hbm.xml<br />
-10/08/2009  03:48 p.m.           110,592 adodb.dll<br />
-10/08/2009  04:07 p.m.               568 AnotherBus.config<br />
-10/08/2009  03:48 p.m.            40,960 anrControls.Markdown.NET.dll<br />
-10/08/2009  03:58 p.m.           106,496 antlr.runtime.dll<br />
-10/08/2009  04:01 p.m.           116,736 Antlr3.Runtime.dll<br />
-10/08/2009  03:59 p.m.            40,960 Bamboo.Prevalence.dll<br />
-10/08/2009  03:59 p.m.             6,656 Bamboo.Prevalence.Util.dll<br />
-10/08/2009  04:01 p.m.            40,960 Boo.Lang.CodeDom.dll<br />
-10/08/2009  04:01 p.m.           753,664 Boo.Lang.Compiler.dll<br />
-10/08/2009  04:01 p.m.           118,784 Boo.Lang.dll<br />
-10/08/2009  04:01 p.m.            32,768 Boo.Lang.Extensions.dll<br />
-10/08/2009  04:01 p.m.            86,016 Boo.Lang.Interpreter.dll<br />
-10/08/2009  04:01 p.m.           425,984 Boo.Lang.Parser.dll<br />
-10/08/2009  03:48 p.m.            28,672 Boo.Lang.PatternMatching.dll<br />
-10/08/2009  04:01 p.m.            81,920 Boo.Lang.Useful.dll<br />
-10/08/2009  04:01 p.m.            32,768 Boo.Microsoft.Build.Tasks.dll<br />
-10/08/2009  04:01 p.m.            28,672 Boo.NAnt.Tasks.dll<br />
-10/08/2009  04:07 p.m.               393 BusOnTransactionalQueue.config<br />
-10/08/2009  04:07 p.m.               405 BusWithLogging.config<br />
-10/08/2009  03:48 p.m.            45,056 Cassini.dll<br />
-12/08/2009  09:43 p.m.           249,856 Castle.ActiveRecord.dll<br />
-12/08/2009  09:43 p.m.             6,656 Castle.ActiveRecord.Linq.dll<br />
-12/08/2009  09:43 p.m.            17,920 Castle.ActiveRecord.Linq.pdb<br />
-12/08/2009  09:43 p.m.             4,736 Castle.ActiveRecord.Linq.xml<br />
-12/08/2009  09:43 p.m.           960,000 Castle.ActiveRecord.pdb<br />
-10/08/2009  04:02 p.m.           543,085 Castle.ActiveRecord.XML<br />
-12/08/2009  09:42 p.m.            49,152 Castle.Components.Binder.dll<br />
-12/08/2009  09:42 p.m.           138,752 Castle.Components.Binder.pdb<br />
-12/08/2009  09:42 p.m.            17,275 Castle.Components.Binder.xml<br />
-                 ... And the list goes ...</p>
-<p>             353 File(s)     67,002,734 bytes<br />
-               2 Dir(s)  578,875,887,616 bytes free</pre><br />
-Not bad for what was effectively just a single command line.</p>
-<h3>Where to from here</h3><br />
-I strongly suggest giving Horn a go &ndash; not just because it&rsquo;s useful, but I think that it fills a real hole in the .Net developer open source space, removing one of the barriers to entry &ndash; making it easier for people to develop applications against the trunk, or a specific version, of many popular open source projects, will definitely drive up adoption of these projects.</p>
+<p>12/08/2009  09:45 p.m.    <dir>          .<br>
+12/08/2009  09:45 p.m.    <dir>          ..<br>
+10/08/2009  03:56 p.m.             1,997 ABC.hbm.xml<br>
+10/08/2009  03:48 p.m.           110,592 adodb.dll<br>
+10/08/2009  04:07 p.m.               568 AnotherBus.config<br>
+10/08/2009  03:48 p.m.            40,960 anrControls.Markdown.NET.dll<br>
+10/08/2009  03:58 p.m.           106,496 antlr.runtime.dll<br>
+10/08/2009  04:01 p.m.           116,736 Antlr3.Runtime.dll<br>
+10/08/2009  03:59 p.m.            40,960 Bamboo.Prevalence.dll<br>
+10/08/2009  03:59 p.m.             6,656 Bamboo.Prevalence.Util.dll<br>
+10/08/2009  04:01 p.m.            40,960 Boo.Lang.CodeDom.dll<br>
+10/08/2009  04:01 p.m.           753,664 Boo.Lang.Compiler.dll<br>
+10/08/2009  04:01 p.m.           118,784 Boo.Lang.dll<br>
+10/08/2009  04:01 p.m.            32,768 Boo.Lang.Extensions.dll<br>
+10/08/2009  04:01 p.m.            86,016 Boo.Lang.Interpreter.dll<br>
+10/08/2009  04:01 p.m.           425,984 Boo.Lang.Parser.dll<br>
+10/08/2009  03:48 p.m.            28,672 Boo.Lang.PatternMatching.dll<br>
+10/08/2009  04:01 p.m.            81,920 Boo.Lang.Useful.dll<br>
+10/08/2009  04:01 p.m.            32,768 Boo.Microsoft.Build.Tasks.dll<br>
+10/08/2009  04:01 p.m.            28,672 Boo.NAnt.Tasks.dll<br>
+10/08/2009  04:07 p.m.               393 BusOnTransactionalQueue.config<br>
+10/08/2009  04:07 p.m.               405 BusWithLogging.config<br>
+10/08/2009  03:48 p.m.            45,056 Cassini.dll<br>
+12/08/2009  09:43 p.m.           249,856 Castle.ActiveRecord.dll<br>
+12/08/2009  09:43 p.m.             6,656 Castle.ActiveRecord.Linq.dll<br>
+12/08/2009  09:43 p.m.            17,920 Castle.ActiveRecord.Linq.pdb<br>
+12/08/2009  09:43 p.m.             4,736 Castle.ActiveRecord.Linq.xml<br>
+12/08/2009  09:43 p.m.           960,000 Castle.ActiveRecord.pdb<br>
+10/08/2009  04:02 p.m.           543,085 Castle.ActiveRecord.XML<br>
+12/08/2009  09:42 p.m.            49,152 Castle.Components.Binder.dll<br>
+12/08/2009  09:42 p.m.           138,752 Castle.Components.Binder.pdb<br>
+12/08/2009  09:42 p.m.            17,275 Castle.Components.Binder.xml<br>
+                 ... And the list goes ...</dir></dir></p>
+<p>             353 File(s)     67,002,734 bytes<br>
+               2 Dir(s)  578,875,887,616 bytes free</p></pre><br>
+Not bad for what was effectively just a single command line.
+<h3>Where to from here</h3><br>
+I strongly suggest giving Horn a go &ndash; not just because it&rsquo;s useful, but I think that it fills a real hole in the .Net developer open source space, removing one of the barriers to entry &ndash; making it easier for people to develop applications against the trunk, or a specific version, of many popular open source projects, will definitely drive up adoption of these projects.
 <p>It&rsquo;s&nbsp;<strong>worth noting</strong>&nbsp;that currently &ldquo;Horn&rdquo; is considered a &ldquo;developer-only&rdquo; release at the moment, though I think it&rsquo;s current state is useful enough to warrant giving it a try, and providing feedback to the Horn dev team etc. so umm&hellip; Check it out, if you haven&rsquo;t already.&nbsp; I think you&rsquo;ll be pleasantly surprised.</p>
 <ul>
 <li><a href="http://code.google.com/p/hornget/">Hornget</a>&nbsp;project.</li>
@@ -154,5 +155,5 @@ I strongly suggest giving Horn a go &ndash; not just because it&rsquo;s useful, 
 <li><a href="http://msdn.microsoft.com/en-us/oslo/dd727726.aspx">DSL DevCon Presentation</a>&nbsp;on the Horn DSL.</li>
 <li><a href="http://craignicol.wordpress.com/">Craig Nicol&rsquo;s blog</a>&nbsp;(developer blog).</li>
 <li><a href="http://davetheninja.net/category/HORN.aspx">Davetheninja.net&rsquo;s blog</a>&nbsp;(developer blog).</li>
-<li><a href="http://thesoftwaresimpleton.blogspot.com/">Paul Cowan&rsquo;s blog</a>&nbsp;(developer blog).</li><br />
-</ul></p>
+<li><a href="http://thesoftwaresimpleton.blogspot.com/">Paul Cowan&rsquo;s blog</a>&nbsp;(developer blog).</li><br>
+</ul>

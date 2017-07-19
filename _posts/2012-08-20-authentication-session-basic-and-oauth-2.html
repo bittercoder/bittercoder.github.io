@@ -20,112 +20,113 @@ categories:
 tags: []
 comments: []
 ---
-<h2>Authentication</h2></p>
+
+<h2>Authentication</h2>
 <p>Authenticating users of an API is very important - and thankfully the many available extension points within ASP.Net MVC WebAPI make this really easy to implement.</p>
 <p>We intended the API being developed to be consumed by both the application itself, as well as clients armed with a username and password - so that meant:</p>
 <ul>
 <li>Session based authentication</li>
-<li>Basic Authentication</li><br />
-</ul></p>
+<li>Basic Authentication</li><br>
+</ul>
 <p>The application was already an OAuth provider (to support our OpenSocial gadget support) - so we also decided to adopt this for the API, thus allowing those gadgets to also interact with the API (and to allow for delegated authentication scenarios).</p>
-<h2>Delegating Handler</h2></p>
+<h2>Delegating Handler</h2>
 <p>Initially we attempted to support these three authentication methods through separate <a href="http://msdn.microsoft.com/en-us/library/system.net.http.delegatinghandler(v=vs.110).aspx">delegating handlers</a>, but eventually abandoned that approach for a single class that handled all 3 authentication methods - here is the guts of determining which method to use:</p>
 <pre>
-Task<HttpResponseMessage> AuthenticateRequest(HttpRequestMessage request, CancellationToken cancellationToken)<br />
-{<br />
-  if (request.Properties.ContainsKey("user") && request.Properties["user"] != null)<br />
-  {<br />
-      return HandlePreAuthenticated(request, cancellationToken);<br />
-  }</p>
+Task<httpresponsemessage> AuthenticateRequest(HttpRequestMessage request, CancellationToken cancellationToken)<br>
+{<br>
+  if (request.Properties.ContainsKey("user") && request.Properties["user"] != null)<br>
+  {<br>
+      return HandlePreAuthenticated(request, cancellationToken);<br>
+  }
 <p>  var context = request.GetHttpContext();</p>
-<p>  if (request.Headers != null<br />
-      && request.Headers.Authorization != null<br />
-      && request.Headers.Authorization.Scheme != null)<br />
-  {<br />
-      if (request.Headers.Authorization.Scheme.Equals("basic", StringComparison.OrdinalIgnoreCase))<br />
-      {<br />
-          return HandleWithBasicAuthAuthentication(request, cancellationToken);<br />
+<p>  if (request.Headers != null<br>
+      && request.Headers.Authorization != null<br>
+      && request.Headers.Authorization.Scheme != null)<br>
+  {<br>
+      if (request.Headers.Authorization.Scheme.Equals("basic", StringComparison.OrdinalIgnoreCase))<br>
+      {<br>
+          return HandleWithBasicAuthAuthentication(request, cancellationToken);<br>
       }</p>
-<p>      if (request.Headers.Authorization.Scheme.Equals("OAuth", StringComparison.OrdinalIgnoreCase))<br />
-      {<br />
-          return HandleWithOAuthAuthentication(request, cancellationToken, context);<br />
+<p>      if (request.Headers.Authorization.Scheme.Equals("OAuth", StringComparison.OrdinalIgnoreCase))<br>
+      {<br>
+          return HandleWithOAuthAuthentication(request, cancellationToken, context);<br>
       }</p>
-<p>      return Task.Factory.StartNew(() => new HttpResponseMessage(HttpStatusCode.Unauthorized));<br />
+<p>      return Task.Factory.StartNew(() => new HttpResponseMessage(HttpStatusCode.Unauthorized));<br>
   }</p>
-<p>  return HandleWithSessionAuthentication(request, cancellationToken, context);<br />
-}<br />
-</pre></p>
+<p>  return HandleWithSessionAuthentication(request, cancellationToken, context);<br>
+}<br>
+</p></httpresponsemessage></pre>
 <p>So the approach taken was that:</p>
 <ul>
 <li>If the request properties contains a user, we treat the request as pre-authenticated (used for testing mostly, more on that in a future post).</li>
 <li>If there is authorization header, we check the scheme and perform either Basic or OAuth handling of the request.</li>
-<li>Otherwise, we fall through to handling the request with session authentication.</li><br />
-</ul></p>
+<li>Otherwise, we fall through to handling the request with session authentication.</li><br>
+</ul>
 <p>The HttpContext (and it's related abstractions) are fairly baked in to parts of the pre-existing Authentication infrastructure and so we need to extract this from the request to complete authentication in many cases - this has actually got much easier with each release of the WebAPI - the first WCF based drops of the WebAPI made this almost impossible to do without spelunking into reflection over private fields.</p>
 <p>All authentication methods would eventually end up associating an authenticated user with the requests properties via a SetIdentity method:</p>
 <pre>
-void SetIdentity(User user, HttpRequestMessage request)<br />
-{<br />
-    request.Properties.Add("user", user);<br />
-}<br />
-</pre></p>
-<h2>OAuth</h2></p>
+void SetIdentity(User user, HttpRequestMessage request)<br>
+{<br>
+    request.Properties.Add("user", user);<br>
+}<br>
+</pre>
+<h2>OAuth</h2>
 <p>Enterprise Tester uses <a href="https://github.com/bittercoder/DevDefined.OAuth">DevDefined.OAuth</a> - which includes support for the <a href="http://wiki.oauth.net/w/page/12238543/ProblemReporting">problem reporting extension as part of OAuth 1</a> - this is exposed as <b>Report</b> property on the OAuthException, which can be then used as the content of a response when Authentication fails:</p>
 <pre>
-Task<HttpResponseMessage> HandleWithOAuthAuthentication(<br />
-    HttpRequestMessage request,<br />
-    CancellationToken cancellationToken,<br />
-    HttpContextBase context)<br />
-{<br />
-    var httpRequest = context.Request;</p>
-<p>    try<br />
-    {<br />
+Task<httpresponsemessage> HandleWithOAuthAuthentication(<br>
+    HttpRequestMessage request,<br>
+    CancellationToken cancellationToken,<br>
+    HttpContextBase context)<br>
+{<br>
+    var httpRequest = context.Request;
+<p>    try<br>
+    {<br>
         User user = _authenticationService.AuthenticateRequest(httpRequest);</p>
 <p>        SetIdentity(user, request);</p>
-<p>        return base.SendAsync(request, cancellationToken);<br />
-    }<br />
-    catch (OAuthException authEx)<br />
-    {<br />
+<p>        return base.SendAsync(request, cancellationToken);<br>
+    }<br>
+    catch (OAuthException authEx)<br>
+    {<br>
         string reportAsText = authEx.Report.ToString();</p>
 <p>        if (Logger.IsErrorEnabled) Logger.ErrorFormat(authEx, "OAuth Error occurred while authenticating OAuth request, url: {0}, method: {1}", httpRequest.Url, httpRequest.HttpMethod);</p>
-<p>        return Task.Factory.StartNew(() => new HttpResponseMessage(HttpStatusCode.Forbidden) {Content = new StringContent(reportAsText)});<br />
-    }<br />
-    catch (Exception ex)<br />
-    {<br />
+<p>        return Task.Factory.StartNew(() => new HttpResponseMessage(HttpStatusCode.Forbidden) {Content = new StringContent(reportAsText)});<br>
+    }<br>
+    catch (Exception ex)<br>
+    {<br>
         if (Logger.IsErrorEnabled) Logger.ErrorFormat(ex, "General Error occurred while authenticating OAuth request, url: {0}, method: {1}", httpRequest.Url, httpRequest.HttpMethod);</p>
 <p>        var report = new OAuthProblemReport {Problem = OAuthProblems.PermissionUnknown, ProblemAdvice = "Encountered general error: " + ex.Message + " - please see application logs for more details"};</p>
 <p>        string reportAsText = report.ToString();</p>
-<p>        return Task.Factory.StartNew(() => new HttpResponseMessage(HttpStatusCode.Forbidden) {Content = new StringContent(reportAsText)});<br />
-    }<br />
-}<br />
-</pre></p>
-<h2>Async</h2></p>
+<p>        return Task.Factory.StartNew(() => new HttpResponseMessage(HttpStatusCode.Forbidden) {Content = new StringContent(reportAsText)});<br>
+    }<br>
+}<br>
+</p></httpresponsemessage></pre>
+<h2>Async</h2>
 <p>Within the application we have a simple service for returning the "current user" associated with a request/thread:</p>
 <pre>
-public interface IUserContext<br />
-{<br />
-    User CurrentUser { get; }<br />
-}<br />
-</pre></p>
+public interface IUserContext<br>
+{<br>
+    User CurrentUser { get; }<br>
+}<br>
+</pre>
 <p>With the WebAPI being asynchronous the mechanics of this didn't work very well for us (The thread the DelegatingHandler executes on for Authentication wasn't necessarily the same thread that constructed the controller and executed the action).</p>
 <p>To avoid too much rework we just implemented an <a href="http://msdn.microsoft.com/en-us/library/system.web.http.filters.actionfilterattribute(v=vs.108).aspx">ActionFilterAttribute</a> that was applied to a base controller which all the "authenticated" controllers inherited from:</p>
 <pre>
-public class AssociateUserWithThreadFilterAttribute : ActionFilterAttribute<br />
-{<br />
-    public override void OnActionExecuting(HttpActionContext actionContext)<br />
-    {<br />
-        var service = IoC.Resolve<ICurrentIdentityService>();</p>
+public class AssociateUserWithThreadFilterAttribute : ActionFilterAttribute<br>
+{<br>
+    public override void OnActionExecuting(HttpActionContext actionContext)<br>
+    {<br>
+        var service = IoC.Resolve<icurrentidentityservice>();
 <p>        var user = actionContext.Request.Properties["user"] as User;</p>
-<p>        if (user != null && service != null)<br />
-        {<br />
-            service.SetIdentity(user, Authorization.Everything);<br />
+<p>        if (user != null && service != null)<br>
+        {<br>
+            service.SetIdentity(user, Authorization.Everything);<br>
         }</p>
-<p>        base.OnActionExecuting(actionContext);<br />
-    }<br />
-}<br />
-</pre></p>
+<p>        base.OnActionExecuting(actionContext);<br>
+    }<br>
+}<br>
+</p></icurrentidentityservice></pre>
 <p>It's not a beautiful solution, but had no impact on our existing implementation for authentication which is great.</p>
-<p>The one gotcha here is if returning a Task<HttpResponseMessage> as the result of a controller action you need to be a little careful/take care with associating the user with the task's thread yourself.</p>
-<p>So far we only return a Task<T> from the POST methods handling the upload of attachments as a mime multipart request, so this hasn't been too much of a problem to deal with.</p>
-<h2>Next</h2></p>
+<p>The one gotcha here is if returning a Task<httpresponsemessage> as the result of a controller action you need to be a little careful/take care with associating the user with the task's thread yourself.</httpresponsemessage></p>
+<p>So far we only return a Task<t> from the POST methods handling the upload of attachments as a mime multipart request, so this hasn't been too much of a problem to deal with.</t></p>
+<h2>Next</h2>
 <p><a href="/?p=83489922">Next in part 6 we take a look at how we handled exposing long running tasks.</a></p>

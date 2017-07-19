@@ -33,18 +33,19 @@ comments:
 
     Be careful when putting trust into stable builds, in a number of cases the trunk fixes bug's that are in the stable release but weren't identified or resolved in time - that's certainly the case with the Castle Project.
 ---
+
 <p>Wasted 5 minutes figuring out what was going wrong, maybe this will save someone else the effort!</p>
 <p>When using <a href="http://www.ayende.com/Blog/category/486.aspx">RhinoCommons</a> and&nbsp;<a href="http://www.castleproject.org/">CastleProject</a> both from trunk there's a version conflict with <a href="http://www.nhibernate.org/">NHibernate</a>.</p>
 <p>RhinoCommons has NHibernate Version 2.0.0.1001 (Including support for things like Multi criteria) ... and then the Castle Project is using NHibernate Version (1.2.0.4000) - this took me a little bit by surprise when I discovered that a monorail project I had was failing when attempting to databind properly when using the <a href="http://www.castleproject.org/monorail/documentation/v1rc2/integration/ar.html">ARSmartDispatcherController</a>... because I wasn't checking the binding errors collection, this was just failing silently... so a save would just load/save the existing record, without any binding.</p>
 <p>Quick fix is just to use a &nbsp;<a href="http://msdn2.microsoft.com/en-us/library/2fc472t2%28VS.71%29.aspx">assembly binding redirect</a> in the web.config:</p>
 <pre>
-<runtime><br />
-    <assemblyBinding xmlns="urn:schemas-microsoft-com:asm.v1"> </p>
-<publisherPolicy apply="no"/>
-        <dependentAssembly><br />
-          <assemblyIdentity name="NHibernate" publicKeyToken="aa95f207798dfdb4" culture="neutral" /><br />
-          <bindingRedirect oldVersion="1.2.0.4000" newVersion="2.0.0.1001"/><br />
-        </dependentAssembly><br />
-    </assemblyBinding><br />
-</runtime><br />
-</pre></p>
+<runtime><br>
+    <assemblybinding xmlns="urn:schemas-microsoft-com:asm.v1"> 
+<publisherpolicy apply="no"></publisherpolicy>
+        <dependentassembly><br>
+          <assemblyidentity name="NHibernate" publickeytoken="aa95f207798dfdb4" culture="neutral"></assemblyidentity><br>
+          <bindingredirect oldversion="1.2.0.4000" newversion="2.0.0.1001"></bindingredirect><br>
+        </dependentassembly><br>
+    </assemblybinding><br>
+</runtime><br>
+</pre>
