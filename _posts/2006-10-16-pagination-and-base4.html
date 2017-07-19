@@ -33,24 +33,24 @@ comments:
     hasn't jumped on the idea by then.
 ---
 <h1>
-  Monorail Pagination with Base4.Net <&#47;h1>So, part of today was spent building "digg" style pagination for data I'm pulling out of base4... if you don't use digg, then what I mean is stuff like this:<br &#47;><br />
-<br &#47;><br />
-<img src="http:&#47;&#47;blog.bittercoder.com&#47;content&#47;binary&#47;digg_pagination.png"<br />
-border="0" &#47;><br &#47;><br />
-<br &#47;><br />
-Flickr and plenty of other sites use the same layout... and it does seem quite a convenient way to work your way through large result sets...<br &#47;><br />
-<br &#47;><br />
-Fairly standard stuff, because I'm using monorail my first pit stop was the <a href="http:&#47;&#47;www.castleproject.org&#47;index.php&#47;MonoRail:PaginationHelper">pagination helper<&#47;a> - however there's a bit of an impedance mismatch here, as the pagination helper is geared towards paging through an <b>IList<&#47;b> containing all the records, where as generally speaking you're working with <b>IItemList<T><&#47;b> and wanting to make use of the inherent paging support in base4.net... hmmm... at any rate, this isn't exactly "brilliant" code - but it might prove useful if you messing around with <a href="http:&#47;&#47;www.castleproject.org&#47;index.php&#47;MonoRail">Monorail<&#47;a> at home - something I think you should do.<br &#47;></p>
+  Monorail Pagination with Base4.Net </h1>So, part of today was spent building "digg" style pagination for data I'm pulling out of base4... if you don't use digg, then what I mean is stuff like this:<br /><br />
+<br /><br />
+<img src="http://blog.bittercoder.com/content/binary/digg_pagination.png"<br />
+border="0" /><br /><br />
+<br /><br />
+Flickr and plenty of other sites use the same layout... and it does seem quite a convenient way to work your way through large result sets...<br /><br />
+<br /><br />
+Fairly standard stuff, because I'm using monorail my first pit stop was the <a href="http://www.castleproject.org/index.php/MonoRail:PaginationHelper">pagination helper</a> - however there's a bit of an impedance mismatch here, as the pagination helper is geared towards paging through an <b>IList</b> containing all the records, where as generally speaking you're working with <b>IItemList<T></b> and wanting to make use of the inherent paging support in base4.net... hmmm... at any rate, this isn't exactly "brilliant" code - but it might prove useful if you messing around with <a href="http://www.castleproject.org/index.php/MonoRail">Monorail</a> at home - something I think you should do.<br /></p>
 <h2>
   Paging and base4.net<br />
-<&#47;h2>So, first off, I built a small class to represent a "page" from a larger set of query results in my application... it looks like this...<br &#47;><br />
-<br &#47;></p>
+</h2>So, first off, I built a small class to represent a "page" from a larger set of query results in my application... it looks like this...<br /><br />
+<br /></p>
 <pre>
-&#47;&#47;&#47;<br />
+///<br />
 <summary>
-&#47;&#47;&#47; Represents a page from a query<br />
-&#47;&#47;&#47; <&#47;summary><br />
-&#47;&#47;&#47; <typeparam name="T"><&#47;typeparam><br />
+/// Represents a page from a query<br />
+/// </summary><br />
+/// <typeparam name="T"></typeparam><br />
 public class PagedItemList<T> : IEnumerable<T><br />
     where T: class, IItem<br />
 {<br />
@@ -69,18 +69,18 @@ public class PagedItemList<T> : IEnumerable<T><br />
         _pageSize = pageSize;</p>
 <p>_totalCount = totalCount;       </p>
 <p>    }</p>
-<p>    &#47;&#47;&#47;<br />
+<p>    ///<br />
 <summary>
-    &#47;&#47;&#47; The count of items on this page<br />
-    &#47;&#47;&#47; <&#47;summary><br />
+    /// The count of items on this page<br />
+    /// </summary><br />
     public int PageCount<br />
     {<br />
-        get { return (int)Math.Ceiling(((double)TotalCount) &#47; ((double)PageSize)); }<br />
+        get { return (int)Math.Ceiling(((double)TotalCount) / ((double)PageSize)); }<br />
     }</p>
-<p>    &#47;&#47;&#47;<br />
+<p>    ///<br />
 <summary>
-    &#47;&#47;&#47; Index of the first item on this page<br />
-    &#47;&#47;&#47; <&#47;summary><br />
+    /// Index of the first item on this page<br />
+    /// </summary><br />
     public int FirstItemIndex<br />
     {<br />
         get<br />
@@ -88,10 +88,10 @@ public class PagedItemList<T> : IEnumerable<T><br />
             return PageSize * (PageNumber-1);<br />
         }<br />
     }</p>
-<p>    &#47;&#47;&#47;<br />
+<p>    ///<br />
 <summary>
-    &#47;&#47;&#47; Index of the last item on this page<br />
-    &#47;&#47;&#47; <&#47;summary><br />
+    /// Index of the last item on this page<br />
+    /// </summary><br />
     public int LastItemIndex<br />
     {<br />
         get<br />
@@ -99,10 +99,10 @@ public class PagedItemList<T> : IEnumerable<T><br />
             return Math.Min(FirstItemIndex + (PageSize - 1), TotalCount - 1);<br />
         }<br />
     }</p>
-<p>    &#47;&#47;&#47;<br />
+<p>    ///<br />
 <summary>
-    &#47;&#47;&#47; 1-relative page number index<br />
-    &#47;&#47;&#47; <&#47;summary><br />
+    /// 1-relative page number index<br />
+    /// </summary><br />
     public int PageNumber<br />
     {<br />
         get<br />
@@ -110,34 +110,34 @@ public class PagedItemList<T> : IEnumerable<T><br />
              return _pageNumber;<br />
         }<br />
     }</p>
-<p>    &#47;&#47;&#47;<br />
+<p>    ///<br />
 <summary>
-    &#47;&#47;&#47; The size of each page<br />
-    &#47;&#47;&#47; <&#47;summary><br />
+    /// The size of each page<br />
+    /// </summary><br />
     public int PageSize<br />
     {<br />
         get { return _pageSize; }<br />
     }</p>
-<p>    &#47;&#47;&#47;<br />
+<p>    ///<br />
 <summary>
-    &#47;&#47;&#47; Total number of results returned from the query<br />
-    &#47;&#47;&#47; <&#47;summary><br />
+    /// Total number of results returned from the query<br />
+    /// </summary><br />
     public int TotalCount<br />
     {<br />
         get { return _totalCount; }<br />
     }</p>
-<p>    &#47;&#47;&#47;<br />
+<p>    ///<br />
 <summary>
-    &#47;&#47;&#47; Number of items on this page<br />
-    &#47;&#47;&#47; <&#47;summary><br />
+    /// Number of items on this page<br />
+    /// </summary><br />
     public int Count<br />
     {<br />
         get { return _items.Count; }<br />
     }</p>
-<p>    &#47;&#47;&#47;<br />
+<p>    ///<br />
 <summary>
-    &#47;&#47;&#47; the underlying list of items<br />
-    &#47;&#47;&#47; <&#47;summary><br />
+    /// the underlying list of items<br />
+    /// </summary><br />
     public IItemList<T> Items<br />
     {<br />
         get { return _items; }<br />
@@ -151,9 +151,9 @@ public class PagedItemList<T> : IEnumerable<T><br />
         return ((IEnumerable)_items).GetEnumerator();<br />
     }<br />
 }<br />
-<&#47;pre><br &#47;><br />
-Pretty mundane, next we just extend my existing repository with a new method for returning a <b>PagedItemList<T><&#47;b>... here's how it looks:<br &#47;><br />
-<br &#47;></p>
+</pre><br /><br />
+Pretty mundane, next we just extend my existing repository with a new method for returning a <b>PagedItemList<T></b>... here's how it looks:<br /><br />
+<br /></p>
 <pre>
 public virtual PagedItemList<T> Find(ObjectQuery query, int pageSize, int pageNumber)<br />
 {<br />
@@ -165,12 +165,12 @@ public virtual PagedItemList<T> Find(ObjectQuery query, int pageSize, int pageNu
     query.Path.PageNumber = pageNumber;</p>
 <p>    return new PagedItemList<T>(Find(query), pageSize, pageNumber, count);<br />
 }<br />
-<&#47;pre><br &#47;><br />
-For our query we first estabilsh the total count of results, then we just run the query again and return the results for the selected page.<br &#47;></p>
+</pre><br /><br />
+For our query we first estabilsh the total count of results, then we just run the query again and return the results for the selected page.<br /></p>
 <h2>
   From Base4.Net to Monorail<br />
-<&#47;h2>Now, our <b>PagedItemList<T><&#47;b> is useful by itself, but there's a more feature-complete interface in monorail for representing a "page" of informaton for display logic, used by the pagination helper, it's called <b>IPaginatedPage<&#47;b>.<br &#47;><br />
-<br &#47;></p>
+</h2>Now, our <b>PagedItemList<T></b> is useful by itself, but there's a more feature-complete interface in monorail for representing a "page" of informaton for display logic, used by the pagination helper, it's called <b>IPaginatedPage</b>.<br /><br />
+<br /></p>
 <pre>
 public interface IPaginatedPage : IEnumerable<br />
 {<br />
@@ -187,9 +187,9 @@ public interface IPaginatedPage : IEnumerable<br />
     bool HasFirst { get; }<br />
     bool HasLast { get; }<br />
 }<br />
-<&#47;pre><br &#47;><br />
-...so, we just build a little adaptor object, using the abstract base page that implementes <b>IPaginatedPage<&#47;b>, called "<b>AbstractPage<&#47;b>" funnily enough - here I've called my adaptor <b>Base4Page<&#47;b>.<br &#47;><br />
-<br &#47;></p>
+</pre><br /><br />
+...so, we just build a little adaptor object, using the abstract base page that implementes <b>IPaginatedPage</b>, called "<b>AbstractPage</b>" funnily enough - here I've called my adaptor <b>Base4Page</b>.<br /><br />
+<br /></p>
 <pre>
 public class Base4Page<T> : AbstractPage<br />
     where T: class, IItem<br />
@@ -207,40 +207,40 @@ items.TotalCount, items.PageSize, items.PageNumber);<br />
         return _items.GetEnumerator();<br />
     }<br />
 }<br />
-<&#47;pre><br &#47;><br />
-Soo... last of all, where's the pay off?<br &#47;><br />
-<br &#47;><br />
-Well, first thing's first, now you can do this in your controller:<br &#47;><br />
-<br &#47;></p>
+</pre><br /><br />
+Soo... last of all, where's the pay off?<br /><br />
+<br /><br />
+Well, first thing's first, now you can do this in your controller:<br /><br />
+<br /></p>
 <pre>
 public void Users(int pageSize, int page)<br />
 {<br />
     ObjectQuery query = new ObjectQuery(typeof(Car));<br />
-    &#47;&#47; not enough set some further critiera...</p>
+    // not enough set some further critiera...</p>
 <p>    PropertyBag.Add("Cars", new Base4Page<Car>(_carRepository.Find(query, pageSize, page)));<br />
 }<br />
-<&#47;pre><br &#47;><br />
-At which point, you could do some simple pagination in your views (and pagination examples for existing Monorail websites can be cut 'n' pasted in to give you a head start)...<br &#47;><br />
-<br &#47;></p>
+</pre><br /><br />
+At which point, you could do some simple pagination in your views (and pagination examples for existing Monorail websites can be cut 'n' pasted in to give you a head start)...<br /><br />
+<br /></p>
 <pre>
 <table cellpadding="4">
 <tr>
-<th>Make<&#47;th></p>
-<th>Model<&#47;th></p>
-<th>Year<&#47;th><br />
-	<&#47;tr><br />
+<th>Make</th></p>
+<th>Model</th></p>
+<th>Year</th><br />
+	</tr><br />
 	#foreach($Car in $Cars)</p>
 <tr>
-<td>$!Car.Make<&#47;td></p>
-<td>$!Car.Model<&#47;td></p>
-<td>$!Car.Year<&#47;td><br />
-	<&#47;tr><br />
+<td>$!Car.Make</td></p>
+<td>$!Car.Model</td></p>
+<td>$!Car.Year</td><br />
+	</tr><br />
 	#end<br />
-<&#47;table></p>
+</table></p>
 <div class="pagination" id="pagination">
 <table width="90%" border="0">
 <tr>
-<td>Showing $Cars.FirstItem - $Cars.LastItem of $Cars.TotalItems<&#47;td></p>
+<td>Showing $Cars.FirstItem - $Cars.LastItem of $Cars.TotalItems</td></p>
 <td align="right">
 			#if($Cars.HasFirst) $PaginationHelper.CreatePageLink( 1, "first", null, null) ) #end<br />
 			#if(!$Cars.HasFirst) first #end<br />
@@ -250,14 +250,14 @@ At which point, you could do some simple pagination in your views (and paginatio
 			#if(!$Cars.HasNext) | next #end<br />
 			#if($Cars.HasLast) | $PaginationHelper.CreatePageLink( $Cars.LastIndex, "last",null, null) ) #end<br />
 			#if(!$Cars.HasLast) | last #end<br />
-		<&#47;td><br />
-	<&#47;tr><br />
-	<&#47;table><br />
-<&#47;div></p>
-<p><&#47;pre></p>
-<p><br &#47;><br />
-And of course it's not much harder to write the logic for displaying "digg" style pagination.... I decided to write it as a helper in C#, because after messing with it for 15 minutes in <a href="http:&#47;&#47;www.castleproject.org&#47;index.php&#47;MonoRail:Brail">brail<&#47;a> it pissed me off too much (some things in brail are quite annoying compared to normal <a href="http:&#47;&#47;boo.codehaus.org&#47;">boo<&#47;a>, for instance I couldn't seem to use the "range(...)" builtin, and if your view doesn't have any content after the last <% ... %> block it throws up a compile time exception... Admittedly I haven't done a get latest from the Castle site in a couple of weeks... so this might not actually be a problem any more, or maybe I just don't have the brail engine configure "just right".<br &#47;><br />
-<br &#47;></p>
+		</td><br />
+	</tr><br />
+	</table><br />
+</div></p>
+<p></pre></p>
+<p><br /><br />
+And of course it's not much harder to write the logic for displaying "digg" style pagination.... I decided to write it as a helper in C#, because after messing with it for 15 minutes in <a href="http://www.castleproject.org/index.php/MonoRail:Brail">brail</a> it pissed me off too much (some things in brail are quite annoying compared to normal <a href="http://boo.codehaus.org/">boo</a>, for instance I couldn't seem to use the "range(...)" builtin, and if your view doesn't have any content after the last <% ... %> block it throws up a compile time exception... Admittedly I haven't done a get latest from the Castle site in a couple of weeks... so this might not actually be a problem any more, or maybe I just don't have the brail engine configure "just right".<br /><br />
+<br /></p>
 <pre>
 public abstract class AbstractDiggPaginationHelper : AbstractHelper<br />
 {<br />
@@ -269,13 +269,13 @@ public abstract class AbstractDiggPaginationHelper : AbstractHelper<br />
     {<br />
         StringBuilder output = new StringBuilder();<br />
         WriteLink(output, page.PreviousIndex, "? prev", !page.HasPrevious, queryStringParams);</p>
-<p>        if (page.LastIndex < (4 + (adjacents * 2))) &#47;&#47; not enough links to make it worth breaking up<br />
+<p>        if (page.LastIndex < (4 + (adjacents * 2))) // not enough links to make it worth breaking up<br />
         {<br />
             WriteNumberedLinks(output, page, 1, page.LastIndex, queryStringParams);<br />
         }<br />
         else<br />
         {<br />
-            if ((page.LastIndex - (adjacents * 2) > page.CurrentIndex) &amp;&amp; &#47;&#47; in the middle</p>
+            if ((page.LastIndex - (adjacents * 2) > page.CurrentIndex) &amp;&amp; // in the middle</p>
 <p>(page.CurrentIndex > (adjacents * 2)))<br />
             {</p>
 <p>        WriteNumberedLinks(output, page,<br />
@@ -288,7 +288,7 @@ queryStringParams);<br />
 <p>        WriteNumberedLinks(output, page,<br />
 page.LastIndex - 1, page.LastIndex, queryStringParams);<br />
             }<br />
-            else if (page.CurrentIndex < (page.LastIndex &#47;2))<br />
+            else if (page.CurrentIndex < (page.LastIndex /2))<br />
             {</p>
 <p>        WriteNumberedLinks(output, page,<br />
 1, 2 + (adjacents * 2), queryStringParams);<br />
@@ -296,7 +296,7 @@ page.LastIndex - 1, page.LastIndex, queryStringParams);<br />
 <p>        WriteNumberedLinks(output, page,<br />
 page.LastIndex - 1, page.LastIndex, queryStringParams);</p>
 <p>    }       </p>
-<p>            else &#47;&#47; at the end<br />
+<p>            else // at the end<br />
             {</p>
 <p>        WriteNumberedLinks(output, page,<br />
 1, 2, queryStringParams);       </p>
@@ -324,7 +324,7 @@ queryStringParams);<br />
     {<br />
         if (disabled)<br />
         {<br />
-            builder.AppendFormat("<span class="disabled">{0}<&#47;span>", text);<br />
+            builder.AppendFormat("<span class="disabled">{0}</span>", text);<br />
         }<br />
         else<br />
         {<br />
@@ -335,7 +335,7 @@ queryStringParams);<br />
     {<br />
         if (index == page.CurrentIndex)<br />
         {<br />
-            builder.AppendFormat("<span class="current">{0}<&#47;span>", index);<br />
+            builder.AppendFormat("<span class="current">{0}</span>", index);<br />
         }<br />
         else<br />
         {<br />
@@ -344,9 +344,9 @@ queryStringParams);<br />
     }</p>
 <p>    protected abstract void WritePageLink(StringBuilder builder, int page, String text, IDictionary htmlAttributes, IDictionary queryStringParams);</p>
 <p>}<br />
-<&#47;pre><br &#47;><br />
-The guts of the helper is in an abstract class, simply so I could test the numbering logic without having to worry about creating a controller &amp; http context (just implement the WritePageLink method with some simple text output ... the implementation is here:<br &#47;><br />
-<br &#47;></p>
+</pre><br /><br />
+The guts of the helper is in an abstract class, simply so I could test the numbering logic without having to worry about creating a controller &amp; http context (just implement the WritePageLink method with some simple text output ... the implementation is here:<br /><br />
+<br /></p>
 <pre>
 public class DiggPaginationHelper : AbstractDiggPaginationHelper<br />
 {</p>
@@ -362,16 +362,16 @@ public class DiggPaginationHelper : AbstractDiggPaginationHelper<br />
             queryStringParams = new Hashtable();<br />
         }</p>
 <p>        queryStringParams["page"] = page.ToString();</p>
-<p>        builder.AppendFormat("<a href="{0}?{1}" {2}>{3}<&#47;a>", filePath, BuildQueryString(queryStringParams), GetAttributes(htmlAttributes), text);<br />
+<p>        builder.AppendFormat("<a href="{0}?{1}" {2}>{3}</a>", filePath, BuildQueryString(queryStringParams), GetAttributes(htmlAttributes), text);<br />
     }<br />
 }<br />
-<&#47;pre><br &#47;><br />
-At which point you can just register it on the controller, and call it with something like <b>${DiggPaginationHelper.CreateDiggPagination(tracks, 3)}<&#47;b> and get yourself a nice little paging display.&nbsp; The second parameter is the "adjacent" - which can be used to control how many pages are displayed either side of the selected page when dealing with lots of results.<br &#47;><br />
-<br &#47;><br />
-Oh, and of course you might want some CSS to go with it...<br &#47;><br />
-<br &#47;></p>
+</pre><br /><br />
+At which point you can just register it on the controller, and call it with something like <b>${DiggPaginationHelper.CreateDiggPagination(tracks, 3)}</b> and get yourself a nice little paging display.&nbsp; The second parameter is the "adjacent" - which can be used to control how many pages are displayed either side of the selected page when dealing with lots of results.<br /><br />
+<br /><br />
+Oh, and of course you might want some CSS to go with it...<br /><br />
+<br /></p>
 <pre>
-&#47;* pagination *&#47;</p>
+/* pagination */</p>
 <p>div.pagination {<br />
     padding: 3px;<br />
     margin: 3px;<br />
@@ -401,5 +401,5 @@ Oh, and of course you might want some CSS to go with it...<br &#47;><br />
     margin: 2px;<br />
     border: 1px solid #EEE;<br />
 }<br />
-<&#47;pre><br &#47;><br />
-<br &#47;></p>
+</pre><br /><br />
+<br /></p>

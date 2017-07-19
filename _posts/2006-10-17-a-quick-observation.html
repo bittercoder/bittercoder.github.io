@@ -35,38 +35,38 @@ comments:
 
     Good stuff :D
 ---
-<h1>Startable facility and hosting base4<&#47;h1><a href="http:&#47;&#47;www.flanders.co.nz&#47;Blog&#47;">Ivan's<&#47;a> pretty keen :) last week he demonstrated hosting the <a href="http:&#47;&#47;www.flanders.co.nz&#47;Blog&#47;2006&#47;10&#47;12&#47;HostingBase4InsideYourWebApplication.aspx"> base4 service in ASP.Net<&#47;a> ... cool stuff.<br &#47;><br />
-<br &#47;><br />
-Now here he has placed the implementation in the <b>HttpApplication<&#47;b> class, and as a quick observation this would be a good candidate for moving into it's own component... and as luck would have it, Castle has just the thing, via the <a href="http:&#47;&#47;www.castleproject.org&#47;index.php&#47;Facility:Startable">Startable facility<&#47;a>.<br &#47;></p>
-<h2>  Startable... (and the implied, stoppable ;o)<&#47;h2></p>
-<p>Now the startable facility is a very simple beast, basically... you create a class, that implements this interface:<br &#47;><br />
-<br &#47;></p>
+<h1>Startable facility and hosting base4</h1><a href="http://www.flanders.co.nz/Blog/">Ivan's</a> pretty keen :) last week he demonstrated hosting the <a href="http://www.flanders.co.nz/Blog/2006/10/12/HostingBase4InsideYourWebApplication.aspx"> base4 service in ASP.Net</a> ... cool stuff.<br /><br />
+<br /><br />
+Now here he has placed the implementation in the <b>HttpApplication</b> class, and as a quick observation this would be a good candidate for moving into it's own component... and as luck would have it, Castle has just the thing, via the <a href="http://www.castleproject.org/index.php/Facility:Startable">Startable facility</a>.<br /></p>
+<h2>  Startable... (and the implied, stoppable ;o)</h2></p>
+<p>Now the startable facility is a very simple beast, basically... you create a class, that implements this interface:<br /><br />
+<br /></p>
 <pre>
-&#47;&#47;&#47;<br />
+///<br />
 <summary>
-&#47;&#47;&#47; Interface for components that wish to be started by the container<br />
-&#47;&#47;&#47; <&#47;summary><br />
+/// Interface for components that wish to be started by the container<br />
+/// </summary><br />
 public interface IStartable<br />
 {<br />
     void Start();<br />
     void Stop();<br />
 }<br />
-<&#47;pre><br &#47;><br />
-Which lives in the <b>Castle.Core<&#47;b> assembly... though the facility itself lives in the <b>Castle.MicroKernel<&#47;b> assembly... you should already have references to both, otherwise I doubt your container is working at all :P<br &#47;><br />
-<br &#47;><br />
-And you then register the startable facility in the container:<br &#47;><br />
-<br &#47;></p>
+</pre><br /><br />
+Which lives in the <b>Castle.Core</b> assembly... though the facility itself lives in the <b>Castle.MicroKernel</b> assembly... you should already have references to both, otherwise I doubt your container is working at all :P<br /><br />
+<br /><br />
+And you then register the startable facility in the container:<br /><br />
+<br /></p>
 <pre>
 <facility id="startable.facility"<br />
-    type="Castle.Facilities.Startable.StartableFacility, Castle.MicroKernel" &#47;><br />
-<&#47;pre><br &#47;><br />
-And thats it... now whenever you register a component in the container, the startable facility will check it, and if it's found to implement <b>IStartable<&#47;b> it will add it to a list of components "awaiting startup"... once any of these awaiting components has had all it's dependencies satisfied it will be started (so it may be started as soon as the component is registered, if it doesn't have any dependencies - this will be the case for our component)...<br &#47;><br />
-<br &#47;><br />
-Disposing of the container will cause the components to be stopped in turn... perfect for hosting our base4 server...<br &#47;></p>
+    type="Castle.Facilities.Startable.StartableFacility, Castle.MicroKernel" /><br />
+</pre><br /><br />
+And thats it... now whenever you register a component in the container, the startable facility will check it, and if it's found to implement <b>IStartable</b> it will add it to a list of components "awaiting startup"... once any of these awaiting components has had all it's dependencies satisfied it will be started (so it may be started as soon as the component is registered, if it doesn't have any dependencies - this will be the case for our component)...<br /><br />
+<br /><br />
+Disposing of the container will cause the components to be stopped in turn... perfect for hosting our base4 server...<br /></p>
 <h2>
   Reworking the hosting code to be a startable component...<br />
-<&#47;h2>...so taking what Ivan's done, we could rework it a little... and be able to host base4 in web apps, as well as say your business logic's test harness... here's my quick 'n dirty reworked implementation as a component that I did this afternoon... my final version probably won't have any dependencies on the <b>HttpContext<&#47;b> as I'll just rely on explicit declaration of all the settings as parameters in the container configuration... I tend to like keeping all the config in the container, one place to look 'n all that.<br &#47;><br />
-<br &#47;></p>
+</h2>...so taking what Ivan's done, we could rework it a little... and be able to host base4 in web apps, as well as say your business logic's test harness... here's my quick 'n dirty reworked implementation as a component that I did this afternoon... my final version probably won't have any dependencies on the <b>HttpContext</b> as I'll just rely on explicit declaration of all the settings as parameters in the container configuration... I tend to like keeping all the config in the container, one place to look 'n all that.<br /><br />
+<br /></p>
 <pre>
 public class Base4Host : IStartable<br />
 {<br />
@@ -103,7 +103,7 @@ public class Base4Host : IStartable<br />
     {<br />
         _configuration = CreateConfiguration();<br />
         _proxy = ServerFactory.StartServer(_configuration, false);<br />
-        string base4Context = string.Format("tcp:&#47;&#47;Server:@localhost:{0}&#47;{1}", _port, _appName);<br />
+        string base4Context = string.Format("tcp://Server:@localhost:{0}/{1}", _port, _appName);<br />
         StorageContext.SetDefault(base4Context);<br />
     }</p>
 <p>    public void Stop()<br />
@@ -148,7 +148,7 @@ public class Base4Host : IStartable<br />
     }</p>
 <p>    private void InsertApplicationRoot(ServerConfiguration configuration)<br />
     {<br />
-        string root = string.IsNullOrEmpty(_root) ? HttpContext.Current.Server.MapPath("~&#47;") : _root;<br />
+        string root = string.IsNullOrEmpty(_root) ? HttpContext.Current.Server.MapPath("~/") : _root;<br />
         configuration.Store.Root = root.EndsWith("") ? root + "App_DataBase4" : root + "App_DataBase4";<br />
     }</p>
 <p>    private void InsertConnectionStrings(ServerConfiguration configuration)<br />
@@ -167,32 +167,32 @@ public class Base4Host : IStartable<br />
     }</p>
 <p>    #endregion<br />
 }<br />
-<&#47;pre><br &#47;><br />
-Notice we don't expose a default constructor... how can the container create it?<br &#47;><br />
-<br &#47;><br />
-Well, it can't unless we supply the parameters it requires... which is just what we'll do:<br &#47;><br />
-<br &#47;></p>
+</pre><br /><br />
+Notice we don't expose a default constructor... how can the container create it?<br /><br />
+<br /><br />
+Well, it can't unless we supply the parameters it requires... which is just what we'll do:<br /><br />
+<br /></p>
 <pre>
 <component<br />
     id="base4host.default"<br />
     type="MyProject.Base4Host, MyProject"></p>
 <parameters>
-        <appName>GoatsAndBoats<&#47;appName></p>
-<port>11888<&#47;port><br />
-    <&#47;parameters><br />
-<&#47;component><br />
-<&#47;pre><br &#47;><br />
-Simple... a couple of useful extensions to our existing base4 facility may well be to:<br &#47;></p>
+        <appName>GoatsAndBoats</appName></p>
+<port>11888</port><br />
+    </parameters><br />
+</component><br />
+</pre><br /><br />
+Simple... a couple of useful extensions to our existing base4 facility may well be to:<br /></p>
 <ul>
 <li>Ensure the startable facility is installed... so we can fail-early and with a meaningful error during application<br />
   startup.<br />
-  <&#47;li></p>
+  </li></p>
 <li>Add some additional "optional" parameters for configuring the facility, so that it can take care of registering the Base4Host for us.<br />
-  <&#47;li><br />
-<&#47;ul></p>
+  </li><br />
+</ul></p>
 <p>
   For the optional parameters, I'm thinking of doing something like this:<br />
-<&#47;p></p>
+</p></p>
 <pre>
 <facility id="base4.storageFacility"<br />
     type="SomeProject.Core.Base4StorageFacility, SomeProject.Core"<br />
@@ -200,6 +200,6 @@ Simple... a couple of useful extensions to our existing base4 facility may well 
     appName="GoatsAndBoats"<br />
     port="11888"<br />
     connectionString="local"<br />
-    &#47;><br />
-<&#47;pre><br &#47;><br />
+    /><br />
+</pre><br /><br />
 At which point it's trivial to shift between accessing base4.net as a remote service vs. hosting it in your own app... unlike the remote setup you can skip providing the base4 url (context string) as it'll be implied from the app name and port.</p>

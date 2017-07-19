@@ -22,20 +22,20 @@ tags:
 - IronPython
 comments: []
 ---
-<h2>IronPython on ASP.Net ?<&#47;h2><br />
-Yes, that's right... dynamic language support in ASP.Net ... and&nbsp;some interesting things I didn't know existed in ASP.Net already,&nbsp;such as no-compile pages - well worth a skim through the&nbsp;whitepaper here (<a href="http:&#47;&#47;www.asp.net&#47;ironpython&#47;WhitePaper.aspx?tabid=62">http:&#47;&#47;www.asp.net&#47;ironpython&#47;WhitePaper.aspx?tabid=62<&#47;a>)&nbsp;- it's an interesting approach to bringing in dynamic language&nbsp;support to asp.net - and would certainly work for ruby on the CLR&nbsp;as well... probably better actually because ruby's statements are&nbsp;balanced and so you have less problem with whitespace.</p>
+<h2>IronPython on ASP.Net ?</h2><br />
+Yes, that's right... dynamic language support in ASP.Net ... and&nbsp;some interesting things I didn't know existed in ASP.Net already,&nbsp;such as no-compile pages - well worth a skim through the&nbsp;whitepaper here (<a href="http://www.asp.net/ironpython/WhitePaper.aspx?tabid=62">http://www.asp.net/ironpython/WhitePaper.aspx?tabid=62</a>)&nbsp;- it's an interesting approach to bringing in dynamic language&nbsp;support to asp.net - and would certainly work for ruby on the CLR&nbsp;as well... probably better actually because ruby's statements are&nbsp;balanced and so you have less problem with whitespace.</p>
 <p>Speaking of the deadly space that is white, It will be&nbsp;interesting to see if they've dealth with this horrible python&nbsp;integration&nbsp;issue at all...</p>
 <p>I haven't seen any evidence of&nbsp;whitespace agnostic additions&nbsp;in the sample code that's been posted, so I'm guessing not... in&nbsp;which case there may be tears before bed time for some developers&nbsp;who want to do quick-and-dirty asp-like code (which I see is one&nbsp;of the advantages of using a dynamic language in this situation)&nbsp;... As it all tends to blow up in your face when your tabs are&nbsp;slightly out of line - something which visual studio might just&nbsp;do for you when it feels like shuffling your html ;o)</p>
-<p>I'm not sure how easy it would be to introduce a whitespace&nbsp;agnostic mode in IronPython for ASP.Net (<a href="http:&#47;&#47;boo.codehaus.org&#47;">Boo's<&#47;a> whitespace agnostic mode, as&nbsp;used&nbsp;in <a href="http:&#47;&#47;www.castleproject.org&#47;monorail&#47;documentation&#47;v1rc2&#47;viewengines&#47;brail&#47;index.html">Brail<&#47;a> is quite elegant...&nbsp; the alternative is to do&nbsp;something like the <a href="http:&#47;&#47;spyce.sourceforge.net&#47;">spyce<&#47;a> framework, using&nbsp;opening and closing braces... which just looks mucky to me&nbsp;because you end up with stuff like this:</p>
+<p>I'm not sure how easy it would be to introduce a whitespace&nbsp;agnostic mode in IronPython for ASP.Net (<a href="http://boo.codehaus.org/">Boo's</a> whitespace agnostic mode, as&nbsp;used&nbsp;in <a href="http://www.castleproject.org/monorail/documentation/v1rc2/viewengines/brail/index.html">Brail</a> is quite elegant...&nbsp; the alternative is to do&nbsp;something like the <a href="http://spyce.sourceforge.net/">spyce</a> framework, using&nbsp;opening and closing braces... which just looks mucky to me&nbsp;because you end up with stuff like this:</p>
 <pre>[[ if display:{ ]]<br />
-<strong>something here<&#47;strong><br />
+<strong>something here</strong><br />
 [[ }else:{ ]]<br />
-<strong>nothing here<&#47;strong><br />
-[[ } ]]<&#47;pre><br />
+<strong>nothing here</strong><br />
+[[ } ]]</pre><br />
 Seems a bit too noisey... the "if display:" is enough to know you&nbsp;need to locate a matching closing block, so adding a construct&nbsp;like "end" should do the trick... which is how it's done in&nbsp;Brail...</p>
 <pre><%if display:%><br />
-<strong>something here<&#47;strong><br />
+<strong>something here</strong><br />
 <%else:%><br />
-<strong>nothing here<&#47;strong><br />
-<%end%><&#47;pre><br />
+<strong>nothing here</strong><br />
+<%end%></pre><br />
 As clean as...</p>

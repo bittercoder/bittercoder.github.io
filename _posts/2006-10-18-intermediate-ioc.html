@@ -26,7 +26,7 @@ comments:
   date: '2006-10-19 07:26:18 +0000'
   date_gmt: '2006-10-19 07:26:18 +0000'
   content: |-
-    Yeah, been using it for a year and a half now... it's grown into a very robust IoC implementation over that period, the generics support added by Ayende (http:&#47;&#47;www.ayende.com&#47;Blog&#47;) is fantastic too... you can do some very cool things :)
+    Yeah, been using it for a year and a half now... it's grown into a very robust IoC implementation over that period, the generics support added by Ayende (http://www.ayende.com/Blog/) is fantastic too... you can do some very cool things :)
 
     Leaves the the Microsoft Patterns &amp; Practice's teams "attempt" at inversion of control in the dust.
 ---
@@ -34,223 +34,223 @@ comments:
   implementation... first off you get a handle of the XML<br />
   configuration, registering components, using existing<br />
   facilities... pretty much getting away largely with cut 'n paste<br />
-  coding.<br &#47;><br />
-  <br &#47;><br />
+  coding.<br /><br />
+  <br /><br />
   Then you get to the intermediate level.. writing basic<br />
   facilities, tweaks to the component model, writing your own sub<br />
   dependency resolvers or component activator, having a go with<br />
-  binsor configuration.<br &#47;><br />
-  <br &#47;><br />
+  binsor configuration.<br /><br />
+  <br /><br />
   I think the third level is reserved for the Castle team alone...<br />
-  ;o)<br &#47;><br />
-  <br &#47;><br />
+  ;o)<br /><br />
+  <br /><br />
   This post is going to be straddling the beginner to intermediate<br />
   kinda level... which is generally all I ever reach with Castle's<br />
   IoC... it's not often you have to dig deeper day-to-day... though<br />
   it's always good to know there is a lot of untapped potential<br />
-  there.<br &#47;><br />
-  <br &#47;><br />
-  So.. for today, say you have a component, like the <a href="http:&#47;&#47;blog.bittercoder.com&#47;PermaLink,guid,b3c7a302-9188-4af2-ac18-1550f1ca7369.aspx">Base4Host<&#47;a>, which has some explicit constructors:<br &#47;><br />
-  <br &#47;></p>
+  there.<br /><br />
+  <br /><br />
+  So.. for today, say you have a component, like the <a href="http://blog.bittercoder.com/PermaLink,guid,b3c7a302-9188-4af2-ac18-1550f1ca7369.aspx">Base4Host</a>, which has some explicit constructors:<br /><br />
+  <br /></p>
 <div style="border: 1px dashed rgb(102, 102, 102); padding: 15px 20px; background: white none repeat scroll 0% 50%; -moz-background-clip: initial; -moz-background-origin: initial; -moz-background-inline-policy: initial; font-family: Courier; font-size: 10pt; color: black;">
-<p style="margin: 0px;">  <span style="color: blue;">public<&#47;span><br />
-      Base4Host(<span style="color: blue;">string<&#47;span> appName,<br />
-      <span style="color: blue;">int<&#47;span> port)<br />
-    <&#47;p></p>
+<p style="margin: 0px;">  <span style="color: blue;">public</span><br />
+      Base4Host(<span style="color: blue;">string</span> appName,<br />
+      <span style="color: blue;">int</span> port)<br />
+    </p></p>
 <p style="margin: 0px;">  {<br />
-    <&#47;p></p>
-<p style="margin: 0px;">  &nbsp;&nbsp;&nbsp; <span style="color: blue;">if<&#47;span><br />
-      (<span style="color: blue;">string<&#47;span>.IsNullOrEmpty(appName))<br />
-      <span style="color: blue;">throw<&#47;span> <span style="color: blue;">new<&#47;span> <span style="color: teal;">ArgumentNullException<&#47;span>(<span style="color: maroon;">"appName"<&#47;span>);<br />
-    <&#47;p></p>
-<p style="margin: 0px;">  &nbsp;&nbsp;&nbsp; <span style="color: blue;">if<&#47;span> (port<br />
-      <= 1024) <span style="color: blue;">throw<&#47;span><br />
-      <span style="color: blue;">new<&#47;span> <span style="color: teal;">ArgumentOutOfRangeException<&#47;span>(<span style="color: maroon;">"port"<&#47;span>,<br />
+    </p></p>
+<p style="margin: 0px;">  &nbsp;&nbsp;&nbsp; <span style="color: blue;">if</span><br />
+      (<span style="color: blue;">string</span>.IsNullOrEmpty(appName))<br />
+      <span style="color: blue;">throw</span> <span style="color: blue;">new</span> <span style="color: teal;">ArgumentNullException</span>(<span style="color: maroon;">"appName"</span>);<br />
+    </p></p>
+<p style="margin: 0px;">  &nbsp;&nbsp;&nbsp; <span style="color: blue;">if</span> (port<br />
+      <= 1024) <span style="color: blue;">throw</span><br />
+      <span style="color: blue;">new</span> <span style="color: teal;">ArgumentOutOfRangeException</span>(<span style="color: maroon;">"port"</span>,<br />
       <span style="color: maroon;">"port should be greater then<br />
-      1024"<&#47;span>);<br />
-    <&#47;p></p>
+      1024"</span>);<br />
+    </p></p>
 <p style="margin: 0px;">  &nbsp;&nbsp;&nbsp; _appName = appName;<br />
-    <&#47;p></p>
+    </p></p>
 <p style="margin: 0px;">  &nbsp;&nbsp;&nbsp; _port = port;<br />
-    <&#47;p></p>
+    </p></p>
 <p style="margin: 0px;">  }<br />
-    <&#47;p></p>
+    </p></p>
 <p style="margin: 0px;">  &nbsp;<br />
-    <&#47;p></p>
-<p style="margin: 0px;">  <span style="color: blue;">public<&#47;span><br />
-      Base4Host(<span style="color: blue;">string<&#47;span> appName,<br />
-      <span style="color: blue;">int<&#47;span> port, <span style="color: blue;">string<&#47;span> root)<br />
-    <&#47;p></p>
-<p style="margin: 0px;">  &nbsp;&nbsp;&nbsp; : <span style="color: blue;">this<&#47;span>(appName, port)<br />
-    <&#47;p></p>
+    </p></p>
+<p style="margin: 0px;">  <span style="color: blue;">public</span><br />
+      Base4Host(<span style="color: blue;">string</span> appName,<br />
+      <span style="color: blue;">int</span> port, <span style="color: blue;">string</span> root)<br />
+    </p></p>
+<p style="margin: 0px;">  &nbsp;&nbsp;&nbsp; : <span style="color: blue;">this</span>(appName, port)<br />
+    </p></p>
 <p style="margin: 0px;">  {<br />
-    <&#47;p></p>
-<p style="margin: 0px;">  &nbsp;&nbsp;&nbsp; <span style="color: blue;">if<&#47;span><br />
-      (<span style="color: blue;">string<&#47;span>.IsNullOrEmpty(root))<br />
-      <span style="color: blue;">throw<&#47;span> <span style="color: blue;">new<&#47;span> <span style="color: teal;">ArgumentNullException<&#47;span>(<span style="color: maroon;">"root"<&#47;span>);&nbsp;&nbsp;&nbsp;<br />
+    </p></p>
+<p style="margin: 0px;">  &nbsp;&nbsp;&nbsp; <span style="color: blue;">if</span><br />
+      (<span style="color: blue;">string</span>.IsNullOrEmpty(root))<br />
+      <span style="color: blue;">throw</span> <span style="color: blue;">new</span> <span style="color: teal;">ArgumentNullException</span>(<span style="color: maroon;">"root"</span>);&nbsp;&nbsp;&nbsp;<br />
       &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;<br />
-    <&#47;p></p>
+    </p></p>
 <p style="margin: 0px;">  &nbsp;&nbsp;&nbsp; _root = root;<br />
-    <&#47;p></p>
+    </p></p>
 <p style="margin: 0px;">  }<br />
-    <&#47;p><br />
-  <&#47;div><br &#47;><br />
+    </p><br />
+  </div><br /><br />
   You can register it the container easy enough, and provide values<br />
   for them in XML configuration, but what if you want to do the<br />
   same programatically... generally your first stop would be to<br />
-  examine the <b>IWindsorContainer<&#47;b> for a suitable overload...<br />
+  examine the <b>IWindsorContainer</b> for a suitable overload...<br />
   alas it doesn't get us far, so we dig in to the underlying<br />
-  <b>IKernel<&#47;b> itself... the kernel exposes some possible<br />
-  candidates:<br &#47;><br />
-  <br &#47;></p>
+  <b>IKernel</b> itself... the kernel exposes some possible<br />
+  candidates:<br /><br />
+  <br /></p>
 <div style="border: 1px dashed rgb(102, 102, 102); padding: 15px 20px; background: white none repeat scroll 0% 50%; -moz-background-clip: initial; -moz-background-origin: initial; -moz-background-inline-policy: initial; font-family: Courier; font-size: 10pt; color: black;">
-<p style="margin: 0px;">  <span style="color: blue;">void<&#47;span><br />
-      AddComponentWithExtendedProperties(<span style="color: teal;">String<&#47;span> key, <span style="color: teal;">Type<&#47;span> classType, <span style="color: teal;">IDictionary<&#47;span> extendedProperties);<br />
-    <&#47;p></p>
-<p style="margin: 0px;">  <span style="color: blue;">void<&#47;span><br />
-      AddComponentWithExtendedProperties(<span style="color: teal;">String<&#47;span> key, <span style="color: teal;">Type<&#47;span> serviceType, <span style="color: teal;">Type<&#47;span> classType, <span style="color: teal;">IDictionary<&#47;span> extendedProperties);<br />
-    <&#47;p><br />
-  <&#47;div><br &#47;><br />
+<p style="margin: 0px;">  <span style="color: blue;">void</span><br />
+      AddComponentWithExtendedProperties(<span style="color: teal;">String</span> key, <span style="color: teal;">Type</span> classType, <span style="color: teal;">IDictionary</span> extendedProperties);<br />
+    </p></p>
+<p style="margin: 0px;">  <span style="color: blue;">void</span><br />
+      AddComponentWithExtendedProperties(<span style="color: teal;">String</span> key, <span style="color: teal;">Type</span> serviceType, <span style="color: teal;">Type</span> classType, <span style="color: teal;">IDictionary</span> extendedProperties);<br />
+    </p><br />
+  </div><br /><br />
   So you experiment with them, but supplying the dictionary of<br />
   extended properties does nothing... hmm... time to file a bug<br />
   report? well no... extended properties having nothing to do with<br />
   satisfying parameter or property dependencies on your component -<br />
-  not directly at least.<br &#47;><br />
-  <br &#47;><br />
+  not directly at least.<br /><br />
+  <br /><br />
   So why don't we just create the component ourselves.. and then<br />
-  add it to the container?<br &#47;><br />
-  <br &#47;><br />
-  Well you can, via the <b>Kernel.AddComponentInstance<&#47;b> method<br />
+  add it to the container?<br /><br />
+  <br /><br />
+  Well you can, via the <b>Kernel.AddComponentInstance</b> method<br />
   but you're going to miss out on some things... for instance the<br />
   startable facility won't be "concerned" with your component, and<br />
-  as such if it implements <b>IStartable<&#47;b> it won't get started<br />
+  as such if it implements <b>IStartable</b> it won't get started<br />
   and stopped... Though I haven't confirmed this, I dont think the<br />
-  container will bother to dispose of any <b>IDisposable<&#47;b><br />
+  container will bother to dispose of any <b>IDisposable</b><br />
   components registered in this fashion either... the container<br />
   doesn't consider itself the owner of the component (and generally<br />
-  this is what we want).<br &#47;><br />
-  <br &#47;><br />
+  this is what we want).<br /><br />
+  <br /><br />
   So we're going to have to get a little more intimate with the<br />
   container implementation ... so every time a component is<br />
-  registered in the container a corresponding <b>ComponentModel<&#47;b><br />
+  registered in the container a corresponding <b>ComponentModel</b><br />
   is generated for the component, this basically keeps track of<br />
-  the:<br &#47;></p>
+  the:<br /></p>
 <ul>
 <li>Components dependencies<br />
-    <&#47;li></p>
-<li>Constructor candidates<br &#47;><br />
-    <&#47;li></p>
+    </li></p>
+<li>Constructor candidates<br /><br />
+    </li></p>
 <li>Parameters (sounds like us...)<br />
-    <&#47;li></p>
+    </li></p>
 <li>Name, implementation type and service type.<br />
-    <&#47;li></p>
+    </li></p>
 <li>Lifecycle, Lifestyle...<br />
-    <&#47;li></p>
+    </li></p>
 <li>And some other stuff you can discover for yourself.<br />
-    <&#47;li><br />
-  <&#47;ul>Now we could get heavy handed and jump into contributing to<br />
+    </li><br />
+  </ul>Now we could get heavy handed and jump into contributing to<br />
   the construction of the component model itself... but it's pretty<br />
   uncessary, we just want to tweak the end result... so we can use<br />
   an event handler on the Kernel -<br />
-  <b>ComponentModelCreated<&#47;b>.<br &#47;><br />
-  <br &#47;><br />
+  <b>ComponentModelCreated</b>.<br /><br />
+  <br /><br />
   So here we have an implementation that solves our problems...<br />
   This is being implemented inside a facility, but you could do<br />
   this anywhere... wire it up in your custom container that's<br />
-  derived from <b>WindsorContainer<&#47;b> maybe, obviously you want to<br />
+  derived from <b>WindsorContainer</b> maybe, obviously you want to<br />
   remove the if statement for checking the Implemenation type is<br />
-  <b>Base4Host<&#47;b> though. :)<br &#47;><br />
-  <br &#47;></p>
+  <b>Base4Host</b> though. :)<br /><br />
+  <br /></p>
 <div style="border: 1px dashed rgb(102, 102, 102); padding: 15px 20px; background: white none repeat scroll 0% 50%; -moz-background-clip: initial; -moz-background-origin: initial; -moz-background-inline-policy: initial; font-family: Courier; font-size: 10pt; color: black;">
-<p style="margin: 0px;">  <span style="color: blue;">private<&#47;span> <span style="color: blue;">const<&#47;span> <span style="color: blue;">string<&#47;span> AdditionalParametersKey =<br />
-      <span style="color: maroon;">"AdditionalParameters"<&#47;span>;<br />
-    <&#47;p></p>
+<p style="margin: 0px;">  <span style="color: blue;">private</span> <span style="color: blue;">const</span> <span style="color: blue;">string</span> AdditionalParametersKey =<br />
+      <span style="color: maroon;">"AdditionalParameters"</span>;<br />
+    </p></p>
 <p style="margin: 0px;">  &nbsp;<br />
-    <&#47;p></p>
-<p style="margin: 0px;">  <span style="color: blue;">private<&#47;span> <span style="color: blue;">void<&#47;span><br />
-      Kernel_ComponentModelCreated(Castle.Core.<span style="color: teal;">ComponentModel<&#47;span> model)<br />
-    <&#47;p></p>
+    </p></p>
+<p style="margin: 0px;">  <span style="color: blue;">private</span> <span style="color: blue;">void</span><br />
+      Kernel_ComponentModelCreated(Castle.Core.<span style="color: teal;">ComponentModel</span> model)<br />
+    </p></p>
 <p style="margin: 0px;">  {<br />
-    <&#47;p></p>
-<p style="margin: 0px;">  &nbsp;&nbsp;&nbsp; <span style="color: blue;">if<&#47;span><br />
-      (model.Implementation == <span style="color: blue;">typeof<&#47;span>(<span style="color: teal;">Base4Host<&#47;span>))<br />
-    <&#47;p></p>
+    </p></p>
+<p style="margin: 0px;">  &nbsp;&nbsp;&nbsp; <span style="color: blue;">if</span><br />
+      (model.Implementation == <span style="color: blue;">typeof</span>(<span style="color: teal;">Base4Host</span>))<br />
+    </p></p>
 <p style="margin: 0px;">  &nbsp;&nbsp;&nbsp; {<br />
-    <&#47;p></p>
-<p style="margin: 0px;">  &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span style="color: blue;">if<&#47;span> ((model.Configuration ==<br />
-      <span style="color: blue;">null<&#47;span>)<br />
-    <&#47;p></p>
+    </p></p>
+<p style="margin: 0px;">  &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; <span style="color: blue;">if</span> ((model.Configuration ==<br />
+      <span style="color: blue;">null</span>)<br />
+    </p></p>
 <p style="margin: 0px;">  &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;<br />
       &amp;&amp;<br />
       model.ExtendedProperties.Contains(AdditionalParametersKey))<br />
-    <&#47;p></p>
+    </p></p>
 <p style="margin: 0px;">  &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {<br />
-    <&#47;p></p>
+    </p></p>
 <p style="margin: 0px;">  &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;<br />
-      <span style="color: teal;">Dictionary<&#47;span><<span style="color: blue;">string<&#47;span>, <span style="color: blue;">object<&#47;span>> additionalParameters =<br />
-      (<span style="color: teal;">Dictionary<&#47;span><<span style="color: blue;">string<&#47;span>, <span style="color: blue;">object<&#47;span>>)model.ExtendedProperties[AdditionalParametersKey];<br />
-    <&#47;p></p>
+      <span style="color: teal;">Dictionary</span><<span style="color: blue;">string</span>, <span style="color: blue;">object</span>> additionalParameters =<br />
+      (<span style="color: teal;">Dictionary</span><<span style="color: blue;">string</span>, <span style="color: blue;">object</span>>)model.ExtendedProperties[AdditionalParametersKey];<br />
+    </p></p>
 <p style="margin: 0px;">  &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;<br />
-      <span style="color: blue;">foreach<&#47;span> (<span style="color: blue;">string<&#47;span> parameterName <span style="color: blue;">in<&#47;span> additionalParameters.Keys)<br />
-    <&#47;p></p>
+      <span style="color: blue;">foreach</span> (<span style="color: blue;">string</span> parameterName <span style="color: blue;">in</span> additionalParameters.Keys)<br />
+    </p></p>
 <p style="margin: 0px;">  &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; {<br />
-    <&#47;p></p>
+    </p></p>
 <p style="margin: 0px;">  &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;<br />
       &nbsp;&nbsp;&nbsp; model.Parameters.Add(parameterName,<br />
-      <span style="color: teal;">Convert<&#47;span>.ToString(additionalParameters[parameterName]));<br />
-    <&#47;p></p>
+      <span style="color: teal;">Convert</span>.ToString(additionalParameters[parameterName]));<br />
+    </p></p>
 <p style="margin: 0px;">  &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; }<br />
-    <&#47;p></p>
+    </p></p>
 <p style="margin: 0px;">  &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; }<br />
-    <&#47;p></p>
+    </p></p>
 <p style="margin: 0px;">  &nbsp;&nbsp;&nbsp; }<br />
-    <&#47;p></p>
+    </p></p>
 <p style="margin: 0px;">  }<br />
-    <&#47;p></p>
+    </p></p>
 <p style="margin: 0px;">  &nbsp;<br />
-    <&#47;p></p>
-<p style="margin: 0px;">  <span style="color: blue;">protected<&#47;span> <span style="color: blue;">override<&#47;span> <span style="color: blue;">void<&#47;span> Init()<br />
-    <&#47;p></p>
+    </p></p>
+<p style="margin: 0px;">  <span style="color: blue;">protected</span> <span style="color: blue;">override</span> <span style="color: blue;">void</span> Init()<br />
+    </p></p>
 <p style="margin: 0px;">  {<br />
-    <&#47;p></p>
+    </p></p>
 <p style="margin: 0px;">  &nbsp;&nbsp;&nbsp; Kernel.ComponentModelCreated +=<br />
-      <span style="color: blue;">new<&#47;span> <span style="color: teal;">ComponentModelDelegate<&#47;span>(Kernel_ComponentModelCreated);<br />
-    <&#47;p></p>
+      <span style="color: blue;">new</span> <span style="color: teal;">ComponentModelDelegate</span>(Kernel_ComponentModelCreated);<br />
+    </p></p>
 <p style="margin: 0px;">  }<br />
-    <&#47;p><br />
-  <&#47;div><br &#47;><br />
+    </p><br />
+  </div><br /><br />
   Now I can register my component by doing something like<br />
-  this:<br &#47;><br />
-  <br &#47;></p>
+  this:<br /><br />
+  <br /></p>
 <div style="border: 1px dashed rgb(102, 102, 102); padding: 15px 20px; background: white none repeat scroll 0% 50%; -moz-background-clip: initial; -moz-background-origin: initial; -moz-background-inline-policy: initial; font-family: Courier; font-size: 10pt; color: black;">
-<p style="margin: 0px;">  <span style="color: teal;">Dictionary<&#47;span><<span style="color: blue;">string<&#47;span>, <span style="color: blue;">object<&#47;span>> additionalParameters =<br />
-      <span style="color: blue;">new<&#47;span> <span style="color: teal;">Dictionary<&#47;span><<span style="color: blue;">string<&#47;span>, <span style="color: blue;">object<&#47;span>>();<br />
-    <&#47;p></p>
-<p style="margin: 0px;">  additionalParameters.Add(<span style="color: maroon;">"appName"<&#47;span>, _applicationName);<br />
-    <&#47;p></p>
-<p style="margin: 0px;">  additionalParameters.Add(<span style="color: maroon;">"port"<&#47;span>, _port);<br />
-    <&#47;p></p>
-<p style="margin: 0px;">  additionalParameters.Add(<span style="color: maroon;">"root"<&#47;span>, _baseDirectory);<br />
-    <&#47;p></p>
+<p style="margin: 0px;">  <span style="color: teal;">Dictionary</span><<span style="color: blue;">string</span>, <span style="color: blue;">object</span>> additionalParameters =<br />
+      <span style="color: blue;">new</span> <span style="color: teal;">Dictionary</span><<span style="color: blue;">string</span>, <span style="color: blue;">object</span>>();<br />
+    </p></p>
+<p style="margin: 0px;">  additionalParameters.Add(<span style="color: maroon;">"appName"</span>, _applicationName);<br />
+    </p></p>
+<p style="margin: 0px;">  additionalParameters.Add(<span style="color: maroon;">"port"</span>, _port);<br />
+    </p></p>
+<p style="margin: 0px;">  additionalParameters.Add(<span style="color: maroon;">"root"</span>, _baseDirectory);<br />
+    </p></p>
 <p style="margin: 0px;">  &nbsp;<br />
-    <&#47;p></p>
-<p style="margin: 0px;">  <span style="color: teal;">Hashtable<&#47;span> properties =<br />
-      <span style="color: blue;">new<&#47;span> <span style="color: teal;">Hashtable<&#47;span>();<br />
-    <&#47;p></p>
+    </p></p>
+<p style="margin: 0px;">  <span style="color: teal;">Hashtable</span> properties =<br />
+      <span style="color: blue;">new</span> <span style="color: teal;">Hashtable</span>();<br />
+    </p></p>
 <p style="margin: 0px;">  properties.Add(AdditionalParametersKey,<br />
       additionalParameters);<br />
-    <&#47;p></p>
+    </p></p>
 <p style="margin: 0px;">  &nbsp;<br />
-    <&#47;p></p>
-<p style="margin: 0px;">  Kernel.AddComponentWithProperties(<span style="color: maroon;">"base4.defaultHost"<&#47;span>, <span style="color: blue;">typeof<&#47;span>(<span style="color: teal;">Base4Host<&#47;span>), properties);<br />
-    <&#47;p><br />
-  <&#47;div><br &#47;><br />
+    </p></p>
+<p style="margin: 0px;">  Kernel.AddComponentWithProperties(<span style="color: maroon;">"base4.defaultHost"</span>, <span style="color: blue;">typeof</span>(<span style="color: teal;">Base4Host</span>), properties);<br />
+    </p><br />
+  </div><br /><br />
   Here we're passing all our additional parameters as a<br />
-  <b>Dictionary<string, object><&#47;b> inside our<br />
-  <b>IDictionary<&#47;b> of additional properties....&nbsp; this isn't<br />
+  <b>Dictionary<string, object></b> inside our<br />
+  <b>IDictionary</b> of additional properties....&nbsp; this isn't<br />
   the most elegant implementation, but this is all code internal to<br />
   a single facility so it's not really important to me... and it<br />
-  gets the job done just fine.<br &#47;><br />
-  <br &#47;><br />
-  <br &#47;><br />
-<&#47;div></p>
+  gets the job done just fine.<br /><br />
+  <br /><br />
+  <br /><br />
+</div></p>

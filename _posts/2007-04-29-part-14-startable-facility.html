@@ -33,39 +33,39 @@ comments:
     ,should only be used where appropriate. For those of you who don&rsquo;t know
     Alex has a great series of posts on using Castle&rsquo;s Windsor container..."
 ---
-<p><img src="http:&#47;&#47;blog.bittercoder.com&#47;images&#47;ioc_tutorial_titles&#47;14_startable_facility.png" &#47;><br &#47;><br />
-<br &#47;><br />
-So this time we're going to have a look at the startable facility (you can find more info on it <a href="http:&#47;&#47;wiki.castleproject.org&#47;index.php&#47;Facility:Startable">here<&#47;a> in the wiki) - the concept of the startable facility is to ensure that components are started as soon as possible, which translates to as soon as all dependencies are available.&nbsp;<br &#47;><br />
-<br &#47;><br />
-Effectively what happens is you create a component, and implement a special interface called <b>IStartable<&#47;b>, which looks like this and is found in the <b>Castle.Core<&#47;b> assembly.<br &#47;><br />
-<br &#47;></p>
+<p><img src="http://blog.bittercoder.com/images/ioc_tutorial_titles/14_startable_facility.png" /><br /><br />
+<br /><br />
+So this time we're going to have a look at the startable facility (you can find more info on it <a href="http://wiki.castleproject.org/index.php/Facility:Startable">here</a> in the wiki) - the concept of the startable facility is to ensure that components are started as soon as possible, which translates to as soon as all dependencies are available.&nbsp;<br /><br />
+<br /><br />
+Effectively what happens is you create a component, and implement a special interface called <b>IStartable</b>, which looks like this and is found in the <b>Castle.Core</b> assembly.<br /><br />
+<br /></p>
 <pre>
-&#47;&#47;&#47;<br />
+///<br />
 <summary>
-&#47;&#47;&#47; Interface for components that wish to be started by the container<br />
-&#47;&#47;&#47; <&#47;summary><br />
+/// Interface for components that wish to be started by the container<br />
+/// </summary><br />
 public interface IStartable<br />
 {<br />
-    &#47;&#47;&#47;<br />
+    ///<br />
 <summary>
-    &#47;&#47;&#47; Starts this instance.<br />
-    &#47;&#47;&#47; <&#47;summary><br />
+    /// Starts this instance.<br />
+    /// </summary><br />
     void Start();</p>
-<p>    &#47;&#47;&#47;<br />
+<p>    ///<br />
 <summary>
-    &#47;&#47;&#47; Stops this instance.<br />
-    &#47;&#47;&#47; <&#47;summary><br />
+    /// Stops this instance.<br />
+    /// </summary><br />
     void Stop();<br />
 }<br />
-<&#47;pre><br &#47;><br />
-And then the startable facility detects any components registered in the container which implement the <b>IStartable<&#47;b> interface and determines if they have any dependencies which still need to be satisfied, if not, then the container will Resolve the component, and start it immediately (by invoking the <b>IStartable.Start<&#47;b> method on it) otherwise it's added to a list of services awaiting startup.<br &#47;><br />
-<br &#47;><br />
-From then on, as components are registered in the container the startable facility will check the list of services awating startup, to see if any of them have all their dependencies available now, if so it will then Resolve the service and again invoke <b>IStartable.Start<&#47;b> on it.<br &#47;> <br &#47;> Now at this point it's worth noting that Start is <span stylesrc="text decoration: underline">not<&#47;span> executed asynchronously - if you block within the Start method then your container will halt loading the configuration etc. till it completes... be careful not to slow down your container startup too much with slow blocking operations with the Start() method.<br &#47;><br />
-<br &#47;><br />
-So let's get into some code... first off I'm going to create a simple http listening service which is capable of serving up a single file... exciting stuff!<br &#47;><br />
-<br &#47;><br />
-Here's the code:<br &#47;><br />
-<br &#47;></p>
+</pre><br /><br />
+And then the startable facility detects any components registered in the container which implement the <b>IStartable</b> interface and determines if they have any dependencies which still need to be satisfied, if not, then the container will Resolve the component, and start it immediately (by invoking the <b>IStartable.Start</b> method on it) otherwise it's added to a list of services awaiting startup.<br /><br />
+<br /><br />
+From then on, as components are registered in the container the startable facility will check the list of services awating startup, to see if any of them have all their dependencies available now, if so it will then Resolve the service and again invoke <b>IStartable.Start</b> on it.<br /> <br /> Now at this point it's worth noting that Start is <span stylesrc="text decoration: underline">not</span> executed asynchronously - if you block within the Start method then your container will halt loading the configuration etc. till it completes... be careful not to slow down your container startup too much with slow blocking operations with the Start() method.<br /><br />
+<br /><br />
+So let's get into some code... first off I'm going to create a simple http listening service which is capable of serving up a single file... exciting stuff!<br /><br />
+<br /><br />
+Here's the code:<br /><br />
+<br /></p>
 <pre>
 public class LameHttpFileServer : IStartable<br />
 {<br />
@@ -129,52 +129,52 @@ public class LameHttpFileServer : IStartable<br />
         output.Close();<br />
     }<br />
 }<br />
-<&#47;pre><br &#47;><br />
-Now, this class doesn't have any constructor dependencies (beyond a little configuration) but we do have a Setter dependency on an <b>ILogger<&#47;b> service - <b>ILogger<&#47;b> is actually a generic abstract of a <i>logger<&#47;i> for a logging framework (a logger being a named&#47;scoped class supporting a number of generic message writing methods) out of the box Castle provides support for both <a href="http:&#47;&#47;www.nlog-project.org&#47;">nlog<&#47;a> and <a href="http:&#47;&#47;logging.apache.org&#47;log4net&#47;">log4net<&#47;a>, however it also contains some lightweight loggers, such as a console logger, which means you can avoid having to write any logging configuration files... so we're going to use that this time... because the loggers are assigned by the container, there's not need to actually reference the type the logger is logging "for", because the container knows that implicitly.<br &#47;><br />
-<br &#47;><br />
-Now let's have a look at the container configuration:<br &#47;><br />
-<br &#47;></p>
+</pre><br /><br />
+Now, this class doesn't have any constructor dependencies (beyond a little configuration) but we do have a Setter dependency on an <b>ILogger</b> service - <b>ILogger</b> is actually a generic abstract of a <i>logger</i> for a logging framework (a logger being a named/scoped class supporting a number of generic message writing methods) out of the box Castle provides support for both <a href="http://www.nlog-project.org/">nlog</a> and <a href="http://logging.apache.org/log4net/">log4net</a>, however it also contains some lightweight loggers, such as a console logger, which means you can avoid having to write any logging configuration files... so we're going to use that this time... because the loggers are assigned by the container, there's not need to actually reference the type the logger is logging "for", because the container knows that implicitly.<br /><br />
+<br /><br />
+Now let's have a look at the container configuration:<br /><br />
+<br /></p>
 <pre>
 <configuration></p>
 <p>  <configSections></p>
 <section name="castle"<br />
-        type="Castle.Windsor.Configuration.AppDomain.CastleSectionHandler, Castle.Windsor" &#47;><br />
-  <&#47;configSections></p>
+        type="Castle.Windsor.Configuration.AppDomain.CastleSectionHandler, Castle.Windsor" /><br />
+  </configSections></p>
 <p>  <castle><br />
     <facilities><br />
       <facility id="startable.facility"<br />
-        type="Castle.Facilities.Startable.StartableFacility, Castle.MicroKernel" &#47;></p>
+        type="Castle.Facilities.Startable.StartableFacility, Castle.MicroKernel" /></p>
 <p>      <facility id="logging.facility"<br />
         type="Castle.Facilities.Logging.LoggingFacility, Castle.Facilities.Logging"<br />
-        loggingApi="console" &#47;>                           </p>
-<p>  <&#47;facilities><br />
+        loggingApi="console" />                           </p>
+<p>  </facilities><br />
     <components></p>
 <p>      <component id="serves->lame.html"<br />
                  type="IoC.Tutorials.Part14.LameHttpFileServer, IoC.Tutorials.Part14"></p>
 <parameters>
-<prefix>http:&#47;&#47;*:8089&#47;<&#47;prefix></p>
-<path>lame.html<&#47;path><br />
-        <&#47;parameters><br />
-      <&#47;component></p>
-<p>    <&#47;components><br />
-  <&#47;castle></p>
-<p><&#47;configuration><br />
-<&#47;pre><br &#47;><br />
-As you can see we have declared two facilities, one for handling the auto-wiring of Loggers into any components with <b>ILogger<&#47;b> constructor parameters or setter dependencies, and secondly the startable facility, which will take care of automatically starting our <b>LameHttpFileServer<&#47;b> for us.<br &#47;><br />
-<br &#47;><br />
-Now, notice we're referencing a file called <span stylesrc="text-decoration: underline">lame.html<&#47;span> - heres what that looks like:<br &#47;><br />
-<br &#47;></p>
+<prefix>http://*:8089/</prefix></p>
+<path>lame.html</path><br />
+        </parameters><br />
+      </component></p>
+<p>    </components><br />
+  </castle></p>
+<p></configuration><br />
+</pre><br /><br />
+As you can see we have declared two facilities, one for handling the auto-wiring of Loggers into any components with <b>ILogger</b> constructor parameters or setter dependencies, and secondly the startable facility, which will take care of automatically starting our <b>LameHttpFileServer</b> for us.<br /><br />
+<br /><br />
+Now, notice we're referencing a file called <span stylesrc="text-decoration: underline">lame.html</span> - heres what that looks like:<br /><br />
+<br /></p>
 <pre>
 <html><br />
     <body></p>
-<h1>Lame.html<&#47;h1></p>
-<h2>Welcome to lame.html file<&#47;h2></p>
-<p>This is the contents of the lame.html file, neat huh?<&#47;p><br />
-    <&#47;body><br />
-<&#47;html><br />
-<&#47;pre><br &#47;><br />
-Now done to business, let's look at the program that's using this server...<br &#47;><br />
-<br &#47;></p>
+<h1>Lame.html</h1></p>
+<h2>Welcome to lame.html file</h2></p>
+<p>This is the contents of the lame.html file, neat huh?</p><br />
+    </body><br />
+</html><br />
+</pre><br /><br />
+Now done to business, let's look at the program that's using this server...<br /><br />
+<br /></p>
 <pre>
 private static void Main(string[] args)<br />
 {<br />
@@ -186,11 +186,11 @@ private static void Main(string[] args)<br />
 }</p>
 <p>private static void GetPage()<br />
 {<br />
-    Console.WriteLine("rnClient: requesting http:&#47;&#47;localhost:8089&#47; ...");<br />
+    Console.WriteLine("rnClient: requesting http://localhost:8089/ ...");<br />
     try<br />
     {<br />
         WebClient client = new WebClient();<br />
-        string content = client.DownloadString("http:&#47;&#47;localhost:8089&#47;");<br />
+        string content = client.DownloadString("http://localhost:8089/");<br />
         Console.WriteLine("Client: success, content follows.rnrn {0}", content);<br />
     }<br />
     catch (WebException ex)<br />
@@ -198,64 +198,64 @@ private static void Main(string[] args)<br />
         Console.WriteLine("Client: Exception occured, message: {0}", ex.Message);<br />
     }<br />
 }<br />
-<&#47;pre><br &#47;><br />
-As you can see what we're doing is:<br &#47;><br />
-<br &#47;></p>
+</pre><br /><br />
+As you can see what we're doing is:<br /><br />
+<br /></p>
 <ol>
-<li>Constructing the container using the configuration.<&#47;li>
-<li>Calling the GetPage method, which will attempt to download the <span style="text-decoration: underline">lame.html<&#47;span>   file from our server (which the container should have started automatically for us)<br />
-  <&#47;li></p>
+<li>Constructing the container using the configuration.</li>
+<li>Calling the GetPage method, which will attempt to download the <span style="text-decoration: underline">lame.html</span>   file from our server (which the container should have started automatically for us)<br />
+  </li></p>
 <li>Disposing of the container (any guesses what that will do?)<br />
-  <&#47;li></p>
+  </li></p>
 <li>And finally calling the GetPage method again, to see if our server is still running.<br />
-  <&#47;li><br />
-<&#47;ol>So, running the program gives us these results:<br &#47;><br />
-<br &#47;><br />
-<b>[Debug] 'IoC.Tutorials.Part14.LameHttpFileServer' Starting LameWebService...<br &#47;><br />
+  </li><br />
+</ol>So, running the program gives us these results:<br /><br />
+<br /><br />
+<b>[Debug] 'IoC.Tutorials.Part14.LameHttpFileServer' Starting LameWebService...<br /><br />
 [Info] 'IoC.Tutorials.Part14.LameHttpFileServer' LameWebService<br />
-Started.<br &#47;><br />
-<br &#47;><br />
-Client: requesting http:&#47;&#47;localhost:8089&#47; ...<br &#47;><br />
-Client: success, content follows.<br &#47;><br />
-<br &#47;><br />
-&nbsp;<html><br &#47;><br />
-&nbsp;&nbsp;&nbsp; <body><br &#47;><br />
+Started.<br /><br />
+<br /><br />
+Client: requesting http://localhost:8089/ ...<br /><br />
+Client: success, content follows.<br /><br />
+<br /><br />
+&nbsp;<html><br /><br />
+&nbsp;&nbsp;&nbsp; <body><br /><br />
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
-<h1>Lame.html<&#47;h1><br &#47;><br />
+<h1>Lame.html</h1><br /><br />
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
 <h2>Welcome to<br />
-lame.html file<&#47;h2><br &#47;><br />
+lame.html file</h2><br /><br />
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <p>This is the<br />
-contents of the lame.html file, neat huh?<&#47;p><br &#47;><br />
-&nbsp;&nbsp;&nbsp; <&#47;body><br &#47;><br />
-<&#47;html><br &#47;><br />
-<br &#47;><br />
+contents of the lame.html file, neat huh?</p><br /><br />
+&nbsp;&nbsp;&nbsp; </body><br /><br />
+</html><br /><br />
+<br /><br />
 [Debug] 'IoC.Tutorials.Part14.LameHttpFileServer' Stopping<br />
-LameWebService...<br &#47;><br />
+LameWebService...<br /><br />
 [Info] 'IoC.Tutorials.Part14.LameHttpFileServer' Stopped<br />
-LameWebService.<br &#47;><br />
-<br &#47;><br />
-Client: requesting http:&#47;&#47;localhost:8089&#47; ...<br &#47;><br />
+LameWebService.<br /><br />
+<br /><br />
+Client: requesting http://localhost:8089/ ...<br /><br />
 Client: Exception occurred, message: Unable to connect to the<br />
-remote server<br &#47;><&#47;b><br &#47;><br />
-As you can see before we disposed of the container our request for the file worked just fine, but after the container had been disposed, it appears the file service has been stopped, and so our client was unable to connect... what caused this?<br &#47;><br />
-<br &#47;><br />
-Well the way the startable service is implemented, it actually applies a couple of lifecycle <span stylesrc="text-decoration: underline">concerns<&#47;span> - a concern is effectively a bit of code that executes when what it's concerned in occurs, in these case the startable facility adds two concerns to a startable component's model.<br &#47;><br />
-<br &#47;><br />
-The first "concern" is a commission concern, which invokes the <b>Start<&#47;b> method upon the component entering the commission step of it's lifecycle, which is immediately after the component instance has been constructed and all it's dependencies and configuration injected.&nbsp;<br &#47;><br />
-<br &#47;><br />
-The second concern is a "decommission" concern, which occurs upon the component is being decommissioned (ie. disposed of, released or purged from the container) this happens to all components the container is holding onto when it is disposed, or when an individual component is released - however in the case of components with a singleton lifestyle, you can't actually release the component prior to disposing of the container (because that would violate the lifestyle) ... so doing something like this:<br &#47;><br />
-<br &#47;></p>
+remote server<br /></b><br /><br />
+As you can see before we disposed of the container our request for the file worked just fine, but after the container had been disposed, it appears the file service has been stopped, and so our client was unable to connect... what caused this?<br /><br />
+<br /><br />
+Well the way the startable service is implemented, it actually applies a couple of lifecycle <span stylesrc="text-decoration: underline">concerns</span> - a concern is effectively a bit of code that executes when what it's concerned in occurs, in these case the startable facility adds two concerns to a startable component's model.<br /><br />
+<br /><br />
+The first "concern" is a commission concern, which invokes the <b>Start</b> method upon the component entering the commission step of it's lifecycle, which is immediately after the component instance has been constructed and all it's dependencies and configuration injected.&nbsp;<br /><br />
+<br /><br />
+The second concern is a "decommission" concern, which occurs upon the component is being decommissioned (ie. disposed of, released or purged from the container) this happens to all components the container is holding onto when it is disposed, or when an individual component is released - however in the case of components with a singleton lifestyle, you can't actually release the component prior to disposing of the container (because that would violate the lifestyle) ... so doing something like this:<br /><br />
+<br /></p>
 <pre>
 LameHttpFileServer server = container.Resolve<LameHttpFileServer>();<br />
 container.Release(server);<br />
-<&#47;pre><br &#47;><br />
+</pre><br /><br />
 In place of disposing the container won't stop the service if it's<br />
-a singleton....<br &#47;><br />
-<br &#47;><br />
-One last though - what would happen if we changed our components lifestyle to <b>[Transient]<&#47;b> instead of the default of singleton, let's create a simple class for testing this idea:<br &#47;><br />
-<br &#47;></p>
+a singleton....<br /><br />
+<br /><br />
+One last though - what would happen if we changed our components lifestyle to <b>[Transient]</b> instead of the default of singleton, let's create a simple class for testing this idea:<br /><br />
+<br /></p>
 <pre>
 [Transient]<br />
 public class StartableExperiment : IStartable<br />
@@ -275,11 +275,11 @@ public class StartableExperiment : IStartable<br />
         Console.WriteLine("Stopped #{0}", _number);<br />
     }<br />
 }<br />
-<&#47;pre><br &#47;><br />
-Now let's write some code to test it... we'll just register the component in code, to avoid having to change our config...<br &#47;><br />
-<br &#47;><br />
-Here's the program itself...<br &#47;><br />
-<br &#47;></p>
+</pre><br /><br />
+Now let's write some code to test it... we'll just register the component in code, to avoid having to change our config...<br /><br />
+<br /><br />
+Here's the program itself...<br /><br />
+<br /></p>
 <pre>
 WindsorContainer container = new WindsorContainer(new XmlInterpreter());</p>
 <p>container.AddComponent("exp", typeof(StartableExperiment));</p>
@@ -288,16 +288,16 @@ container.Release(exp1);<br />
 StartableExperiment exp2 = container.Resolve<StartableExperiment>();<br />
 container.Release(exp2);</p>
 <p>container.Dispose();<br />
-<&#47;pre><br &#47;><br />
-And the results:<br &#47;><br />
-<b><br &#47;><br />
-Started #1<br &#47;><br />
-Started #2<br &#47;><br />
-Stopped #2<br &#47;><br />
-Started #3<br &#47;><br />
-Stopped #3<br &#47;><br />
-Stopped #1<&#47;b><br &#47;><br />
-<br &#47;><br />
-So what's happened is that immediately upon registration a component is created... and can't be disposed (because we can't get a hold of the instance to release it) until the container is disposed... but for the couple of calls to <b>Resolve<&#47;b> and <b>Release<&#47;b> you can see the <b>StartableExperiment<&#47;b> instances are started &amp; stopped during commission &amp; decommission steps in the components life cycle as expected.<br &#47;><br />
-<br &#47;><br />
-So that brings this look at the startable facility to an end... next time we might have another quick look at life cycles to see how else we can use this concept when build components, and maybe after that we'll have a look at some of other lifestyles which are available "out of the box" and how to write our own.<br &#47;></p>
+</pre><br /><br />
+And the results:<br /><br />
+<b><br /><br />
+Started #1<br /><br />
+Started #2<br /><br />
+Stopped #2<br /><br />
+Started #3<br /><br />
+Stopped #3<br /><br />
+Stopped #1</b><br /><br />
+<br /><br />
+So what's happened is that immediately upon registration a component is created... and can't be disposed (because we can't get a hold of the instance to release it) until the container is disposed... but for the couple of calls to <b>Resolve</b> and <b>Release</b> you can see the <b>StartableExperiment</b> instances are started &amp; stopped during commission &amp; decommission steps in the components life cycle as expected.<br /><br />
+<br /><br />
+So that brings this look at the startable facility to an end... next time we might have another quick look at life cycles to see how else we can use this concept when build components, and maybe after that we'll have a look at some of other lifestyles which are available "out of the box" and how to write our own.<br /></p>

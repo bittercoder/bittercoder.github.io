@@ -23,25 +23,25 @@ tags:
 - IoC
 comments: []
 ---
-<p><img src="http:&#47;&#47;blog.bittercoder.com&#47;images&#47;ioc_tutorial_titles&#47;10_setter_injection.png" alt="10_setter_injection.png" border="0" height="189" widthsrc="270" &#47;><br &#47;><br />
-So, lets have a look at setter injection - for this part I'll be refactoring the example in <a href="http:&#47;&#47;blog.bittercoder.com&#47;PermaLink,guid,6ce3f22e-763e-445c-9b96-1ca8e6116c34.aspx"> part 9<&#47;a> ... so if you recall in the last part we had a class that could send messages (to the console at least) - and it had a hard-coded string being used for the format... we'll I think it would be nice to "plug in" different message formatting, if we needed to... so first thing to do is create a necessary abstraction for formatting a message - which I've called the <b>IMessageFormatter<&#47;b> interface:<br &#47;><br />
-<br &#47;></p>
+<p><img src="http://blog.bittercoder.com/images/ioc_tutorial_titles/10_setter_injection.png" alt="10_setter_injection.png" border="0" height="189" widthsrc="270" /><br /><br />
+So, lets have a look at setter injection - for this part I'll be refactoring the example in <a href="http://blog.bittercoder.com/PermaLink,guid,6ce3f22e-763e-445c-9b96-1ca8e6116c34.aspx"> part 9</a> ... so if you recall in the last part we had a class that could send messages (to the console at least) - and it had a hard-coded string being used for the format... we'll I think it would be nice to "plug in" different message formatting, if we needed to... so first thing to do is create a necessary abstraction for formatting a message - which I've called the <b>IMessageFormatter</b> interface:<br /><br />
+<br /></p>
 <pre>
 public interface IMessageFormatter<br />
 {<br />
     string FormatMessage(string from, string to, string body);<br />
 }<br />
-<&#47;pre><br &#47;><br />
-Now, our old method for formatting a message (as part of the <b>SecretMessageSender<&#47;b> class) used to look like this:<br &#47;><br />
-<br &#47;></p>
+</pre><br /><br />
+Now, our old method for formatting a message (as part of the <b>SecretMessageSender</b> class) used to look like this:<br /><br />
+<br /></p>
 <pre>
 public void SendMessage(string to, string body)<br />
 {<br />
     Console.WriteLine("to: {0}rnfrom: {1}rnrn{2}", to, _from, _encoder.Encode(body));<br />
 }<br />
-<&#47;pre><br &#47;><br />
-So we just refactor that out into it's own class, like so:<br &#47;><br />
-<br &#47;></p>
+</pre><br /><br />
+So we just refactor that out into it's own class, like so:<br /><br />
+<br /></p>
 <pre>
 public class DefaultFormatter : IMessageFormatter<br />
 {<br />
@@ -50,9 +50,9 @@ public class DefaultFormatter : IMessageFormatter<br />
         return string.Format("to: {0}rnfrom: {1}rnrn{2}", to, from, body);<br />
     }<br />
 }<br />
-<&#47;pre><br &#47;><br />
-And update the secret message sender to use this default formatter... by default!<br &#47;><br />
-<br &#47;></p>
+</pre><br /><br />
+And update the secret message sender to use this default formatter... by default!<br /><br />
+<br /></p>
 <pre>
 public class SecretMessageSender<br />
 {<br />
@@ -75,11 +75,11 @@ public class SecretMessageSender<br />
         Console.WriteLine(_formatter.FormatMessage(_from, to, encodedBody));<br />
     }<br />
 }<br />
-<&#47;pre><br &#47;><br />
-Now notice we automatically create a default formatter for the class to use... so at this point we can run the program just as in part 9 (Without having to make any changes to the container configuration) and everything works as it did... however, we can also <span style="text-decoration: underline">optionally<&#47;span> override the message formatter by registering an implementation in the container... the MicroKernel is smart enough to discover any publicly accessible properties with setters, look for any implementations, and inject them if they're registered in the container.<br &#47;><br />
-<br &#47;><br />
-So first off lets create a different implementation - I'm going to use <a href="http:&#47;&#47;www.castleproject.org&#47;others&#47;nvelocity&#47;index.html">NVelocity<&#47;a> (a template engine, which is used for one of the View engines that comes with monorail) this time along with a template - so first we have the alternative message formatter class:<br &#47;><br />
-<br &#47;></p>
+</pre><br /><br />
+Now notice we automatically create a default formatter for the class to use... so at this point we can run the program just as in part 9 (Without having to make any changes to the container configuration) and everything works as it did... however, we can also <span style="text-decoration: underline">optionally</span> override the message formatter by registering an implementation in the container... the MicroKernel is smart enough to discover any publicly accessible properties with setters, look for any implementations, and inject them if they're registered in the container.<br /><br />
+<br /><br />
+So first off lets create a different implementation - I'm going to use <a href="http://www.castleproject.org/others/nvelocity/index.html">NVelocity</a> (a template engine, which is used for one of the View engines that comes with monorail) this time along with a template - so first we have the alternative message formatter class:<br /><br />
+<br /></p>
 <pre>
 public class NVelocityMessageFormatter : IMessageFormatter<br />
 {<br />
@@ -104,9 +104,9 @@ public class NVelocityMessageFormatter : IMessageFormatter<br />
 <p>        return writer.ToString();<br />
     }<br />
 }<br />
-<&#47;pre><br &#47;><br />
-And of course, we also need a template file (Which we will call <b>message.vm<&#47;b>) - this is what our template will look like:<br &#47;><br />
-<br &#47;></p>
+</pre><br /><br />
+And of course, we also need a template file (Which we will call <b>message.vm</b>) - this is what our template will look like:<br /><br />
+<br /></p>
 <pre>
 To:   $to<br />
  From: $from<br />
@@ -114,75 +114,75 @@ To:   $to<br />
 <p> ----------------------</p>
 <p> $body</p>
 <p> ----------------------<br />
-<&#47;pre><br &#47;><br />
-And finally the last part of the puzzle is to update the container configuration to include our alternative message formatter:<br &#47;><br />
-<br &#47;></p>
+</pre><br /><br />
+And finally the last part of the puzzle is to update the container configuration to include our alternative message formatter:<br /><br />
+<br /></p>
 <pre>
 <configuration></p>
 <p>  <configSections></p>
 <section name="castle"<br />
-        type="Castle.Windsor.Configuration.AppDomain.CastleSectionHandler, Castle.Windsor" &#47;><br />
-  <&#47;configSections></p>
+        type="Castle.Windsor.Configuration.AppDomain.CastleSectionHandler, Castle.Windsor" /><br />
+  </configSections></p>
 <p>  <castle><br />
     <components><br />
       <component id="encoder.silly"<br />
                  service="IoC.Tutorials.Part10.IEncoder, IoC.Tutorials.Part10"<br />
-                 type="IoC.Tutorials.Part10.SillyEncoder, IoC.Tutorials.Part10" &#47;></p>
+                 type="IoC.Tutorials.Part10.SillyEncoder, IoC.Tutorials.Part10" /></p>
 <p>      <component id="encoder.null"<br />
                  service="IoC.Tutorials.Part10.IEncoder, IoC.Tutorials.Part10"<br />
-                 type="IoC.Tutorials.Part10.NullEncoder, IoC.Tutorials.Part10" &#47;></p>
+                 type="IoC.Tutorials.Part10.NullEncoder, IoC.Tutorials.Part10" /></p>
 <p>      <component id="messageSender"<br />
                  type="IoC.Tutorials.Part10.SecretMessageSender, IoC.Tutorials.Part10"></p>
 <parameters>SecretMessageSender<br />
-          <from>alex@bittercoder.com<&#47;from><br />
-          <encoder>${encoder.null}<&#47;encoder><br />
-        <&#47;parameters><br />
-      <&#47;component></p>
+          <from>alex@bittercoder.com</from><br />
+          <encoder>${encoder.null}</encoder><br />
+        </parameters><br />
+      </component></p>
 <p>      <component id="fancyMessageFormatter"<br />
                  service="IoC.Tutorials.Part10.IMessageFormatter, IoC.Tutorials.Part10"<br />
                  type="IoC.Tutorials.Part10.NVelocityMessageFormatter, IoC.Tutorials.Part10"></p>
 <parameters>
-          <templateFile>message.vm<&#47;templateFile><br />
-        <&#47;parameters><br />
-      <&#47;component></p>
-<p>    <&#47;components><br />
-  <&#47;castle></p>
-<p><&#47;configuration><br />
-<&#47;pre><br &#47;><br />
-And now if we give it a run, we get this output:<br &#47;><br />
-<br &#47;><br />
-<b>To:&nbsp;&nbsp; hammet<br &#47;><br />
-From: alex@bittercoder.com<br &#47;><br />
-Sent: 25&#47;04&#47;2007 6:56:37 p.m.<br &#47;><br />
-<br &#47;><br />
-----------------------<br &#47;><br />
-<br &#47;><br />
-castle is great!<br &#47;><br />
-<br &#47;><br />
-----------------------<&#47;b><br &#47;><br />
-<br &#47;><br />
-So you can now see how a mix of constructor and setter injection can be used to achieve compulsory and optional dependencies - of course, we can also wire up properties to specific implementations - for instance in this last example we could change the config to read:<br &#47;><br />
-<br &#47;></p>
+          <templateFile>message.vm</templateFile><br />
+        </parameters><br />
+      </component></p>
+<p>    </components><br />
+  </castle></p>
+<p></configuration><br />
+</pre><br /><br />
+And now if we give it a run, we get this output:<br /><br />
+<br /><br />
+<b>To:&nbsp;&nbsp; hammet<br /><br />
+From: alex@bittercoder.com<br /><br />
+Sent: 25/04/2007 6:56:37 p.m.<br /><br />
+<br /><br />
+----------------------<br /><br />
+<br /><br />
+castle is great!<br /><br />
+<br /><br />
+----------------------</b><br /><br />
+<br /><br />
+So you can now see how a mix of constructor and setter injection can be used to achieve compulsory and optional dependencies - of course, we can also wire up properties to specific implementations - for instance in this last example we could change the config to read:<br /><br />
+<br /></p>
 <pre>
 <component id="messageSender"<br />
            type="IoC.Tutorials.Part10.SecretMessageSender, IoC.Tutorials.Part10"></p>
 <parameters>SecretMessageSender<br />
-    <from>alex@bittercoder.com<&#47;from><br />
-    <encoder>${encoder.null}<&#47;encoder><br />
-    <Formatter>${fancyMessageFormatter}<&#47;Formatter><br />
-  <&#47;parameters><br />
-<&#47;component></p>
+    <from>alex@bittercoder.com</from><br />
+    <encoder>${encoder.null}</encoder><br />
+    <Formatter>${fancyMessageFormatter}</Formatter><br />
+  </parameters><br />
+</component></p>
 <p><component id="defualtMessageFormatter"<br />
      service="IoC.Tutorials.Part10.IMessageFormatter, IoC.Tutorials.Part10"<br />
-     type="IoC.Tutorials.Part10.DefaultFormatter, IoC.Tutorials.Part10" &#47;>        </p>
+     type="IoC.Tutorials.Part10.DefaultFormatter, IoC.Tutorials.Part10" />        </p>
 <p><component id="fancyMessageFormatter"<br />
            service="IoC.Tutorials.Part10.IMessageFormatter, IoC.Tutorials.Part10"<br />
            type="IoC.Tutorials.Part10.NVelocityMessageFormatter, IoC.Tutorials.Part10"></p>
 <parameters>
-    <templateFile>message.vm<&#47;templateFile><br />
-  <&#47;parameters><br />
-<&#47;component><br />
-<&#47;pre><br &#47;><br />
-Where even though the default message formatter is registered first in the container, the fancy message formatter will be used because it's manually wired up in the <b>messageSender<&#47;b>'s component parameters.<br &#47;><br />
-<br &#47;><br />
+    <templateFile>message.vm</templateFile><br />
+  </parameters><br />
+</component><br />
+</pre><br /><br />
+Where even though the default message formatter is registered first in the container, the fancy message formatter will be used because it's manually wired up in the <b>messageSender</b>'s component parameters.<br /><br />
+<br /><br />
 Next time will be having a look at factories and how to fit in with the Windsor container.</p>

@@ -23,13 +23,13 @@ tags:
 comments: []
 ---
 <p>
-Though I knew you could do it, I never have till today... and that's supplying a type for a generic parameter in another type, which is registered in a container... Of course I didn't <span style="text-decoration: underline">have<&#47;span> to do it that way, but it it kept the configuration a little thinner.<br />
-<&#47;p></p>
+Though I knew you could do it, I never have till today... and that's supplying a type for a generic parameter in another type, which is registered in a container... Of course I didn't <span style="text-decoration: underline">have</span> to do it that way, but it it kept the configuration a little thinner.<br />
+</p></p>
 <p>
   Basically I have some simple WCF services I wanted to host in a container.. here's the service's interface...<br />
-<&#47;p></p>
+</p></p>
 <pre>
-[ServiceContract(Namespace="http:&#47;&#47;localhost&#47;schemas&#47;testrunner&#47;", SessionMode=SessionMode.Required)]<br />
+[ServiceContract(Namespace="http://localhost/schemas/testrunner/", SessionMode=SessionMode.Required)]<br />
 public interface ITestRunner<br />
 {<br />
     [OperationContract]<br />
@@ -37,18 +37,18 @@ public interface ITestRunner<br />
 <p>    [OperationContract]<br />
     TestRunStatus GetRunStatus(Guid testRunId);<br />
 }<br />
-<&#47;pre></p>
+</pre></p>
 <p>
   To get this to work for my implementation I had to do one thing, which was set the InstanceContextMode to "single" for&nbsp;the service implementations behaviour, otherwise the service host would die when I tried to pass in an instance (it expects a type for any other mode)... I haven't dug&nbsp;very&nbsp;deep into WCF, but it would be nice if they supported a mechanism for supplying a component activator instead...<br />
-<&#47;p></p>
+</p></p>
 <pre>
 [ServiceBehavior(InstanceContextMode = InstanceContextMode.Single)]<br />
 public class TestRunner : ITestRunner<br />
 {<br />
-<&#47;pre></p>
+</pre></p>
 <p>
-  Now, I build a component for hosting my service... it implements <a href="http:&#47;&#47;www.castleproject.org&#47;index.php&#47;Facility:Startable">IStartable<&#47;a>...<br />
-<&#47;p></p>
+  Now, I build a component for hosting my service... it implements <a href="http://www.castleproject.org/index.php/Facility:Startable">IStartable</a>...<br />
+</p></p>
 <pre>
 public class HostingWrapper<T> : IStartable<br />
     where T: class<br />
@@ -79,18 +79,18 @@ public class HostingWrapper<T> : IStartable<br />
         _host = null;<br />
     }<br />
 }<br />
-<&#47;pre></p>
+</pre></p>
 <p>
   And then you just need to regsiter it in the container's configuration:<br />
-<&#47;p></p>
+</p></p>
 <pre>
 <components><br />
     <component id="testRunnerService.default"<br />
         service="BoatsForGoats.Services.Testing.ITestRunner, BoatsForGoats.Services"<br />
-        type="BoatsForGoats.Services.Testing.TestRunner, BoatsForGoats.Services" &#47;></p>
+        type="BoatsForGoats.Services.Testing.TestRunner, BoatsForGoats.Services" /></p>
 <p>    <component id="testRunnerHost.default"<br />
-        type="BoatsForGoats.Services.HostingWrapper`1[[BoatsForGoats.Services.Testing.ITestRunner, BoatsForGoats.Services]], BoatsForGoats.Services" &#47;><br />
-<&#47;pre></p>
+        type="BoatsForGoats.Services.HostingWrapper`1[[BoatsForGoats.Services.Testing.ITestRunner, BoatsForGoats.Services]], BoatsForGoats.Services" /><br />
+</pre></p>
 <p>
   About the only tricky thing is that I guessed (incorrectly) that I would only need a single set of square brackets around the generic parameter.<br />
-<&#47;p></p>
+</p></p>

@@ -23,11 +23,11 @@ tags:
 - IoC
 comments: []
 ---
-<p><img src="http:&#47;&#47;blog.bittercoder.com&#47;images&#47;ioc_tutorial_titles&#47;4_switching_configs.png" &#47;><br &#47;><br />
-So, we have all this stuff in a configuration file... but what if  we have two sets of configuration we want to swap between - perhaps one for test and one for live... well here's one way of doing it with the Windsor container.<br &#47;><br />
-<br &#47;><br />
-So this is our component, we use it for demonstrating which configuration is loaded:<br &#47;><br />
-<br &#47;></p>
+<p><img src="http://blog.bittercoder.com/images/ioc_tutorial_titles/4_switching_configs.png" /><br /><br />
+So, we have all this stuff in a configuration file... but what if  we have two sets of configuration we want to swap between - perhaps one for test and one for live... well here's one way of doing it with the Windsor container.<br /><br />
+<br /><br />
+So this is our component, we use it for demonstrating which configuration is loaded:<br /><br />
+<br /></p>
 <pre>
 public class WhatConfigurationService<br />
 {<br />
@@ -38,9 +38,9 @@ public class WhatConfigurationService<br />
         set { _configuration = value; }<br />
     }<br />
 }<br />
-<&#47;pre><br &#47;><br />
-Now here's the applications code:<br &#47;><br />
-<br &#47;></p>
+</pre><br /><br />
+Now here's the applications code:<br /><br />
+<br /></p>
 <pre>
 private static void Main(string[] args)<br />
 {<br />
@@ -49,61 +49,61 @@ private static void Main(string[] args)<br />
 <p>    Console.WriteLine("Configuration: {0}", whatConfiguration.Configuration);</p>
 <p>    Console.Read();<br />
 }<br />
-<&#47;pre><br &#47;><br />
-So we do this&nbsp;by seperating our configuration&nbsp;sets into different files... so we create two configuration files, called:<br &#47;><br />
-<br &#47;></p>
+</pre><br /><br />
+So we do this&nbsp;by seperating our configuration&nbsp;sets into different files... so we create two configuration files, called:<br /><br />
+<br /></p>
 <ul>
 <li>container-debug.config<br />
-  <&#47;li></p>
+  </li></p>
 <li>container-live.config<br />
-  <&#47;li><br />
-<&#47;ul>And here's what they look like:<br &#47;><br />
-<br &#47;><br />
-<span stylesrc="text-decoration: underline">container-debug.config<br &#47;><&#47;span><br &#47;></p>
+  </li><br />
+</ul>And here's what they look like:<br /><br />
+<br /><br />
+<span stylesrc="text-decoration: underline">container-debug.config<br /></span><br /></p>
 <pre>
 <configuration><br />
     <components><br />
       <component id="whatConfig.service" type="IoC.Tutorials.Part4.WhatConfigurationService, IoC.Tutorials.Part4"></p>
 <parameters>
-          <Configuration>Debug<&#47;Configuration><br />
-        <&#47;parameters><br />
-      <&#47;component><br />
-    <&#47;components><br />
-<&#47;configuration><br />
-<&#47;pre><br &#47;><br />
-<span stylesrc="text-decoration: underline">container-live.config<br &#47;><&#47;span><br &#47;></p>
+          <Configuration>Debug</Configuration><br />
+        </parameters><br />
+      </component><br />
+    </components><br />
+</configuration><br />
+</pre><br /><br />
+<span stylesrc="text-decoration: underline">container-live.config<br /></span><br /></p>
 <pre>
 <configuration><br />
   <components><br />
     <component id="whatConfig.service" type="IoC.Tutorials.Part4.WhatConfigurationService, IoC.Tutorials.Part4"></p>
 <parameters>
-        <Configuration>Live<&#47;Configuration><br />
-      <&#47;parameters><br />
-    <&#47;component><br />
-  <&#47;components><br />
-<&#47;configuration><br />
-<&#47;pre><br &#47;><br />
-So if we've moved configuration into seperate files, how does the container know about them.... well, we use <strong>includes<&#47;strong>... so here's our main configuration file now:<br &#47;><br />
-<br &#47;></p>
+        <Configuration>Live</Configuration><br />
+      </parameters><br />
+    </component><br />
+  </components><br />
+</configuration><br />
+</pre><br /><br />
+So if we've moved configuration into seperate files, how does the container know about them.... well, we use <strong>includes</strong>... so here's our main configuration file now:<br /><br />
+<br /></p>
 <pre>
 <configuration></p>
 <p>  <configSections></p>
 <section name="castle"<br />
-        type="Castle.Windsor.Configuration.AppDomain.CastleSectionHandler, Castle.Windsor" &#47;><br />
-  <&#47;configSections></p>
+        type="Castle.Windsor.Configuration.AppDomain.CastleSectionHandler, Castle.Windsor" /><br />
+  </configSections></p>
 <p>  <castle><br />
-    <!--<include uri="file:&#47;&#47;container-debug.config" &#47;>--><br />
-    <include uri="file:&#47;&#47;container-live.config" &#47;><br />
-  <&#47;castle></p>
-<p><&#47;configuration><br />
-<&#47;pre><br &#47;><br />
-So you can see that to shift between the debug and live configurations we just swap between including one configuration and another...<br &#47;><br />
-<br &#47;><br />
-And when live is uncommented, running the program gives us this output:<br &#47;><br />
-<b><br &#47;><br />
-Configuration: Live<&#47;b><br &#47;><br />
-<br &#47;><br />
-There are other ways to achieve the same thing, but this is often the easiest to understand... also take careful note of that <strong>uri<&#47;strong> attribute on the include element... you don't just have to use the <b>file:&#47;&#47;<&#47;b> scheme - you can include resources (embedded in your assemblies) or extend the resource subsystem with additional support for your own types of resources - but before you do, be sure to have a look at the list of out of the box possibilities <a href="http:&#47;&#47;www.castleproject.org&#47;container&#47;documentation&#47;trunk&#47;usersguide&#47;includes.html"> here<&#47;a>.<br &#47;><br />
-<br &#47;><br />
-One question that was asked about during Architecture Camp was how container configuration could be synchronized between multiple servers, and includes provide one possibility, because you can place your shared configuration on a network share, or implement your own special resource type, that could for instance get the configuration from a webservice.<br &#47;><br />
+    <!--<include uri="file://container-debug.config" />--><br />
+    <include uri="file://container-live.config" /><br />
+  </castle></p>
+<p></configuration><br />
+</pre><br /><br />
+So you can see that to shift between the debug and live configurations we just swap between including one configuration and another...<br /><br />
+<br /><br />
+And when live is uncommented, running the program gives us this output:<br /><br />
+<b><br /><br />
+Configuration: Live</b><br /><br />
+<br /><br />
+There are other ways to achieve the same thing, but this is often the easiest to understand... also take careful note of that <strong>uri</strong> attribute on the include element... you don't just have to use the <b>file://</b> scheme - you can include resources (embedded in your assemblies) or extend the resource subsystem with additional support for your own types of resources - but before you do, be sure to have a look at the list of out of the box possibilities <a href="http://www.castleproject.org/container/documentation/trunk/usersguide/includes.html"> here</a>.<br /><br />
+<br /><br />
+One question that was asked about during Architecture Camp was how container configuration could be synchronized between multiple servers, and includes provide one possibility, because you can place your shared configuration on a network share, or implement your own special resource type, that could for instance get the configuration from a webservice.<br /><br />
 Next time we'll look at introducing configuration parameters, which is another way to deal with the problems of having to switch between configs at runtime - and can make your configuration easier to read and maintain too.</p>

@@ -31,12 +31,12 @@ comments:
 ---
 <h1>
   Back once more...<br />
-<&#47;h1>I decided to spend ten minutes implementing a version of the last post which didn't require us to generate a function definition for a python method with a generic number of parameters... it's actually not too hard.<br &#47;><br />
-<br &#47;><br />
-First off, the key to solving this problem is to generate a Type for our custom delegate - for performance reasons you would want to cache the results, but we won't do that here... Also I think it would be more apropriate for the first 0->9 parameters that we just return a generic Func delegate (generic Func &amp; Proc delegates are going to be part of .Net 3.0, as mentioned <a href="http:&#47;&#47;blogs.msdn.com&#47;ericlippert&#47;archive&#47;2006&#47;06&#47;21&#47;641831.aspx">here<&#47;a> - At the moment I use something similar from the <a href="http:&#47;&#47;wiki.ayende.com&#47;wiki&#47;index.php?title=Rhino.Commons">RhinoCommons<&#47;a> library, have a look <a href="http:&#47;&#47;svn.berlios.de&#47;svnroot&#47;repos&#47;rhino-mocks&#47;trunk&#47;rhino-commons&#47;Rhino.Commons&#47;DelegateDefinations.cs">here<&#47;a>)<br &#47;><br />
-<br &#47;><br />
-So, first off we build a helper method for generating our delegate - just heavy use of emit here, based off an example on MSDN:<br &#47;><br />
-<br &#47;></p>
+</h1>I decided to spend ten minutes implementing a version of the last post which didn't require us to generate a function definition for a python method with a generic number of parameters... it's actually not too hard.<br /><br />
+<br /><br />
+First off, the key to solving this problem is to generate a Type for our custom delegate - for performance reasons you would want to cache the results, but we won't do that here... Also I think it would be more apropriate for the first 0->9 parameters that we just return a generic Func delegate (generic Func &amp; Proc delegates are going to be part of .Net 3.0, as mentioned <a href="http://blogs.msdn.com/ericlippert/archive/2006/06/21/641831.aspx">here</a> - At the moment I use something similar from the <a href="http://wiki.ayende.com/wiki/index.php?title=Rhino.Commons">RhinoCommons</a> library, have a look <a href="http://svn.berlios.de/svnroot/repos/rhino-mocks/trunk/rhino-commons/Rhino.Commons/DelegateDefinations.cs">here</a>)<br /><br />
+<br /><br />
+So, first off we build a helper method for generating our delegate - just heavy use of emit here, based off an example on MSDN:<br /><br />
+<br /></p>
 <pre>
 public Type CreateCustomDelegate(Type returnType, params Type[] parameterTypes)<br />
 {<br />
@@ -61,11 +61,11 @@ public Type CreateCustomDelegate(Type returnType, params Type[] parameterTypes)<
     methodBuilder.SetImplementationFlags(MethodImplAttributes.Managed | MethodImplAttributes.Runtime);</p>
 <p>    return typeBuilder.CreateType();<br />
 }<br />
-<&#47;pre><br &#47;><br />
-Basically it goes through the motions of building a delegate type, derived from <b>MulticastDelegate<&#47;b> with our selected output type and parameter types...<br &#47;><br />
-<br &#47;><br />
-Now to put that type to use:<br &#47;><br />
-<br &#47;></p>
+</pre><br /><br />
+Basically it goes through the motions of building a delegate type, derived from <b>MulticastDelegate</b> with our selected output type and parameter types...<br /><br />
+<br /><br />
+Now to put that type to use:<br /><br />
+<br /></p>
 <pre>
 [Test]<br />
 public void WithCustomDelegate()<br />
@@ -91,29 +91,29 @@ public void WithCustomDelegate()<br />
 <p>            Delegate myDelegate = (Delegate) result;<br />
             Assert.AreEqual("alex is 26 years old", myDelegate.DynamicInvoke(values.ToArray()));<br />
         };</p>
-<p>    &#47;&#47; try it with our two keys in the dictionary</p>
+<p>    // try it with our two keys in the dictionary</p>
 <p>    testCore();</p>
-<p>    &#47;&#47; try it with another key in the dictionary</p>
+<p>    // try it with another key in the dictionary</p>
 <p>    context.Add("monkey_colour", "brown");<br />
     testCore();<br />
 }<br />
-<&#47;pre><br &#47;><br />
+</pre><br /><br />
 Our test creates our custom delegate type for the number of parameters we have, and then we use that when invoking the<br />
-<b>PythonEngine.CreateMethod<&#47;b><<i>TDelegate<&#47;i>>(<i>string<&#47;i> statements, <i>IList<&#47;i><<i>string<&#47;i>> parameters) method.<br &#47;><br />
-<br &#47;><br />
+<b>PythonEngine.CreateMethod</b><<i>TDelegate</i>>(<i>string</i> statements, <i>IList</i><<i>string</i>> parameters) method.<br /><br />
+<br /><br />
 Here we have to do a little reflection, simply because we cant directly use a local variable of type "Type" as a generic type<br />
-parameter, so we grab the generic method, set the parameter and then invoke it.<br &#47;><br />
-<br &#47;><br />
-However in the end, as you can see we get a real Delegate, which we can use <b>DynamicInvoke<&#47;b> upon.<br &#47;><br />
-<br &#47;><br />
+parameter, so we grab the generic method, set the parameter and then invoke it.<br /><br />
+<br /><br />
+However in the end, as you can see we get a real Delegate, which we can use <b>DynamicInvoke</b> upon.<br /><br />
+<br /><br />
 This is actually pretty handy, and it's certainly a lot more script-friendly, compared to the alternative of forcing users to<br />
-look up values from context by index ie.<br &#47;><br />
-<br &#47;><br />
+look up values from context by index ie.<br /><br />
+<br /><br />
 &nbsp;&nbsp;&nbsp; context['user'] + ' is ' + str(context['age']) +<br />
-' years old'<br &#47;><br />
-<br &#47;><br />
-vs.<br &#47;><br />
-<br &#47;><br />
-&nbsp;&nbsp;&nbsp; user + ' is ' + str(age) + ' years old'<br &#47;><br />
-<br &#47;><br />
+' years old'<br /><br />
+<br /><br />
+vs.<br /><br />
+<br /><br />
+&nbsp;&nbsp;&nbsp; user + ' is ' + str(age) + ' years old'<br /><br />
+<br /><br />
 I know what I prefer ;o)</p>

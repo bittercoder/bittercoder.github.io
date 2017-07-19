@@ -23,71 +23,71 @@ tags:
 comments: []
 ---
 <p>
-  Nothing particularly interesting to report, while I'm sitting here watching a custom-built automated test suite chug away (which incidentally takes approximately 5 hours to run... at 100% CPU usage on 1 core... ugh) -&nbsp;I thought I'd muck around with Iron python and base4... my inspiration was this <a href="http:&#47;&#47;www.base4.net&#47;quickstarts&#47;cool&#47;OnTheFly.aspx">"On the fly" schema creation<&#47;a>&nbsp;on the base4 site, however I wanted to just grab an existing assembly (from the server no less) and start using it's types in Iron Python... it's pretty easy (and quite cool, think about the implications of no references, every time you run your app the schema might have magically grown some more features ;o)<br />
-<&#47;p></p>
+  Nothing particularly interesting to report, while I'm sitting here watching a custom-built automated test suite chug away (which incidentally takes approximately 5 hours to run... at 100% CPU usage on 1 core... ugh) -&nbsp;I thought I'd muck around with Iron python and base4... my inspiration was this <a href="http://www.base4.net/quickstarts/cool/OnTheFly.aspx">"On the fly" schema creation</a>&nbsp;on the base4 site, however I wanted to just grab an existing assembly (from the server no less) and start using it's types in Iron Python... it's pretty easy (and quite cool, think about the implications of no references, every time you run your app the schema might have magically grown some more features ;o)<br />
+</p></p>
 <h2>
   Getting Started...<br />
-<&#47;h2></p>
+</h2></p>
 <p>
 First off, lets fire up the trusty iron python console... I like colours and being able to tab through member lists, so I'm going to throw in some command line parameters...<br />
-<&#47;p></p>
+</p></p>
 <pre>
 ipy -X:TabCompletion -X:ColorfulConsole<br />
-<&#47;pre></p>
+</pre></p>
 <p>
-  Cool, consoles up and running so lets get down to business... first things first, loading up the <strong>Base4.Storage<&#47;strong> assembly...<br />
-<&#47;p></p>
+  Cool, consoles up and running so lets get down to business... first things first, loading up the <strong>Base4.Storage</strong> assembly...<br />
+</p></p>
 <pre>
 import sys<br />
 import clr<br />
 sys.path.Add("C:Program FilesBase4 Solutions LtdBase4 version 2.1.1.85")<br />
 clr.AddReferenceToFile("Base4.Storage.dll")<br />
 from Base4.Storage import *<br />
-<&#47;pre></p>
+</pre></p>
 <p>
   All done... now before we can do anything useful, we'll need to setup our default connection string (read: default context)...<br />
-<&#47;p></p>
+</p></p>
 <pre>
-StorageContext.SetDefault("tcp:&#47;&#47;Server:@localhost:999&#47;Base4_default")<br />
-<&#47;pre></p>
+StorageContext.SetDefault("tcp://Server:@localhost:999/Base4_default")<br />
+</pre></p>
 <h2>
   This is the amiga speaking...<br />
-<&#47;h2></p>
+</h2></p>
 <p>
-  Now the fun begins... if you have <strong>System.Speech<&#47;strong> available, grab that puppy too... because deep down we all know that the thrill of making your computer talk still exists... especially if you started out your days on an Apple or better yet Amiga...<br />
-<&#47;p></p>
+  Now the fun begins... if you have <strong>System.Speech</strong> available, grab that puppy too... because deep down we all know that the thrill of making your computer talk still exists... especially if you started out your days on an Apple or better yet Amiga...<br />
+</p></p>
 <pre>
 clr.AddReference("System.Speech")<br />
 from System.Speech.Synthesis import *<br />
 synth = SpeechSynthesizer()<br />
-<&#47;pre></p>
+</pre></p>
 <p>
   Sweet, now lets view (or listen) for all the available schema assemblies...<br />
-<&#47;p></p>
+</p></p>
 <pre>
 for asmFile in StorageContext.FindAll[SchemaAssemblyFile]():<br />
     synth.SpeakAsync(asmFile.Name)<br />
     print asmFile.Name<br />
-<&#47;pre></p>
+</pre></p>
 <h2>
   Loading the schema...<br />
-<&#47;h2></p>
+</h2></p>
 <p>
 At this point you'll end up with a list of the assembly files (and hopefully, your machine will be droning away notifying of<br />
 you just what they're called... ;o) in my case I have&nbsp;a little "Experiment.dll", so lets load that up... I'm pressed for time so I won't be putting in speech detection for selecting the appropriate schema, though it's both entirely possible, and pretty easy to do...<br />
-<&#47;p></p>
+</p></p>
 <pre>
 asmFile = StorageContext.FindOne[SchemaAssemblyFile]("Name='Experiment.dll'","")<br />
 assembly = experimentAssembly.LoadAssembly()<br />
 clr.AddReference(assembly)<br />
 from Experiment import *<br />
-<&#47;pre></p>
+</pre></p>
 <p>
   And yes, the strongly typed schema is now there for me to play with...<br />
-<&#47;p></p>
+</p></p>
 <p>
   The experiment schema contains among other things an "Order" type, which holds a collection of "OrderLine" line's... so we can now do this:<br />
-<&#47;p></p>
+</p></p>
 <pre>
 order = Order()<br />
 line1 = OrderLine()<br />
@@ -95,7 +95,7 @@ line1.UnitCost = 30<br />
 line1.NumberOfUnits = 2<br />
 order.OrderLines.Add(line1)<br />
 order.Save()<br />
-<&#47;pre></p>
+</pre></p>
 <p>
   I think it makes quite a handy diagnostic tool, especially when you start considering that your dev, test and live environments may all have different schema versions...&nbsp; it could certainly save a lot of stuffing around - it would be fairly tedious to repeat this exercise in C# by comparison (especially once you've written a few useful helper functions in&nbsp;your own "base4" python module... I could shorten this entire post to 3 or 4 lines instead).<br />
-<&#47;p></p>
+</p></p>

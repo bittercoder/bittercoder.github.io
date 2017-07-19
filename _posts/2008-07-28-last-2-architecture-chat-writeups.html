@@ -29,15 +29,15 @@ comments:
     Reegenerator. The customized code generator would look something like:\n<i>\npublic
     class PassItOn : Generators.CodeRenderer\n{\n        public const string CustomToolName
     = \"MSLinqToSQLGenerator\";\n        public override Generators.RenderResults
-    Render()\n        {\n            byte[] ctResults = <b>base.RunOtherCustomTool(CustomToolName)<&#47;b>;\n
+    Render()\n        {\n            byte[] ctResults = <b>base.RunOtherCustomTool(CustomToolName)</b>;\n
     \           string results = System.Text.Encoding.Default.GetString(ctResults);\n
-    \           return new Generators.RenderResults(results);\n        }\n}\n<&#47;i>\nThe
+    \           return new Generators.RenderResults(results);\n        }\n}\n</i>\nThe
     RunOtherCustomTool method invokes an existing custom tool code generator and returns
     the results that would have otherwise been saved in the .Designer.cs file. Once
     you have the results you can parse and alter them in any way you like and pass
     the results back to Visual Studio to be saved instead of the original. \nThe example
     solution from the Customize Standard Designers Generated Code section of the <a
-    href=\"http:&#47;&#47;www.reegenerator.com&#47;TemplatesGallery.htm\" rel=\"nofollow\">http:&#47;&#47;www.reegenerator.com&#47;TemplatesGallery.htm<&#47;a>
+    href=\"http://www.reegenerator.com/TemplatesGallery.htm\" rel=\"nofollow\">http://www.reegenerator.com/TemplatesGallery.htm</a>
     template gallery page, contains a class named PassItOn in the CustomizeDesigners
     project. The code is similar to the code above but with comments and with constants
     defined for LINQtoSQL Settings, Resources and Datasets.\nIf you have a specific
@@ -48,12 +48,12 @@ comments:
 <p>As a brief summary:</p>
 <p>Plenty of talk about Lightweight code-gen and run-time vs.&nbsp;post-compile IL weaving, debugging integration etc. Hard to cover&nbsp;all the little facets that were explorer - but it's been&nbsp;interesting - it seems like more developers are starting to dabble&nbsp;with IL.</p>
 <p>We talked about approaches for introducing cross-cutting behavior&nbsp;such as versioning and history to your data access and approaches&nbsp;for flowing metadata from your domain model up to the UI (including&nbsp;searching, validation etc.) and ways to index, query and flow the&nbsp;information across boundaries in the application.</p>
-<p>As a tangent to this I've been talking about how I've been using&nbsp;MDA&#47;MDG to drive the domain model generation (including things like&nbsp;validation, search annotations etc.).</p>
+<p>As a tangent to this I've been talking about how I've been using&nbsp;MDA/MDG to drive the domain model generation (including things like&nbsp;validation, search annotations etc.).</p>
 <p>We talked about the recent S3 outages and approaches for placing&nbsp;resources on both European and US data centers simultaneously, and&nbsp;possible ways to mitigate the double-upload bandwidth costs.</p>
 <p>Discussions (sparked originally from a email discussion on the NZ&nbsp;dotnet user group) around hiding the implementation details of your&nbsp;ORM from the rest of your application - and the practicalities of&nbsp;how deep this needs to go, using linq through boundaries etc.</p>
-<p>Discussions around injecting logic into generated source code, both&nbsp;in asp.net&#47;winforms generated code as well as possible ways to&nbsp;intercept custom tool generation so you could manipulate the&nbsp;output.</p>
-<p><a href="http:&#47;&#47;ssdl-wiki.cs.technion.ac.il&#47;wiki&#47;index.php&#47;Spartan_programming"><br />
-Spartan programming<&#47;a> got a mention - Peter felt it aligned with&nbsp;alot of his current coding style.</p>
-<p>Embedding <a href="http:&#47;&#47;andrewpeters.net&#47;category&#47;nhaml&#47;">NHaml<&#47;a> as a view&nbsp;engine in non-MVC applications, and the general experience with&nbsp;different view engines including &nbsp;<a href="http:&#47;&#47;www.castleproject.org&#47;monorail&#47;documentation&#47;v1rc2&#47;viewengines&#47;brail&#47;index.html">Brail<&#47;a>, <a href="http:&#47;&#47;www.asp.net&#47;mvc&#47;">ASP.NET<&#47;a> MVC's&nbsp;default ASPX View engine etc.&nbsp; (Including the error reporting&nbsp;and debugging experience) - We also talked briefly about the<br />
-<a href="http:&#47;&#47;dev.dejardin.org&#47;">Spark view engine<&#47;a>, which&nbsp;looks to be like it could be quite palatable to non developers&nbsp;while still offering a useful syntax for developers.</p>
+<p>Discussions around injecting logic into generated source code, both&nbsp;in asp.net/winforms generated code as well as possible ways to&nbsp;intercept custom tool generation so you could manipulate the&nbsp;output.</p>
+<p><a href="http://ssdl-wiki.cs.technion.ac.il/wiki/index.php/Spartan_programming"><br />
+Spartan programming</a> got a mention - Peter felt it aligned with&nbsp;alot of his current coding style.</p>
+<p>Embedding <a href="http://andrewpeters.net/category/nhaml/">NHaml</a> as a view&nbsp;engine in non-MVC applications, and the general experience with&nbsp;different view engines including &nbsp;<a href="http://www.castleproject.org/monorail/documentation/v1rc2/viewengines/brail/index.html">Brail</a>, <a href="http://www.asp.net/mvc/">ASP.NET</a> MVC's&nbsp;default ASPX View engine etc.&nbsp; (Including the error reporting&nbsp;and debugging experience) - We also talked briefly about the<br />
+<a href="http://dev.dejardin.org/">Spark view engine</a>, which&nbsp;looks to be like it could be quite palatable to non developers&nbsp;while still offering a useful syntax for developers.</p>
 <p>If anyone has any topic suggestions for next weeks chat just leave&nbsp;a comment on this post or flick me an email.</p>

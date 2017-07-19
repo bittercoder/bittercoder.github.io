@@ -31,37 +31,37 @@ comments:
     an easier option!
 ---
 <p>
-Well, I've started working with the latest drop of Base4.net (<a href="http:&#47;&#47;www.base4.net&#47;Blog.aspx?ID=140">version 2.1<&#47;a>) - in fact I've decided to take the plunge and actually start using it for the project I'm currently working on (a work project, rather then a home project) so I should be giving it a pretty good thrashing over the next 3-6 months.&nbsp; I already had a rough schema in place, so I generated types from it using the bundled web admin... It seems pretty cool... though I've struck a few things:<br &#47;><br />
-<&#47;p></p>
+Well, I've started working with the latest drop of Base4.net (<a href="http://www.base4.net/Blog.aspx?ID=140">version 2.1</a>) - in fact I've decided to take the plunge and actually start using it for the project I'm currently working on (a work project, rather then a home project) so I should be giving it a pretty good thrashing over the next 3-6 months.&nbsp; I already had a rough schema in place, so I generated types from it using the bundled web admin... It seems pretty cool... though I've struck a few things:<br /><br />
+</p></p>
 <ul>
-<li>nvarchar(256) fields seems to show up as being 512 characters in length within base4.net...&nbsp; I'm not sure if this is a bug with the schema interrogation, guess we'll find out as a I dig further in ;o) - though it's only skin deep of course, as you can change them to 256 with a quick edit.<br &#47;><br />
-  <&#47;li></p>
-<li>I managed to create an assembly that was invalid... not sure how ;o) I could look at in reflector .Net, but base4 wasn't having a bar of it (even though it had generated it) - I must have screwed up a relationship somewhere, but I wasn't really sure... ended up just dumping it and starting from scratch again.<br &#47;><br />
-  <&#47;li></p>
-<li>It doesn't seem that easy to refactor existing schema's using the web designer... while I was learning it would have been good to generate a schema, play with the assembly, then start editing and generate again... instead I ended up having to save the schema to disk, delete, edit, and recreate.&nbsp; Still, it's pretty slick :)<br &#47;><br />
-  <&#47;li><br />
-<&#47;ul>I think though it probably all comes down to:<br &#47;></p>
+<li>nvarchar(256) fields seems to show up as being 512 characters in length within base4.net...&nbsp; I'm not sure if this is a bug with the schema interrogation, guess we'll find out as a I dig further in ;o) - though it's only skin deep of course, as you can change them to 256 with a quick edit.<br /><br />
+  </li></p>
+<li>I managed to create an assembly that was invalid... not sure how ;o) I could look at in reflector .Net, but base4 wasn't having a bar of it (even though it had generated it) - I must have screwed up a relationship somewhere, but I wasn't really sure... ended up just dumping it and starting from scratch again.<br /><br />
+  </li></p>
+<li>It doesn't seem that easy to refactor existing schema's using the web designer... while I was learning it would have been good to generate a schema, play with the assembly, then start editing and generate again... instead I ended up having to save the schema to disk, delete, edit, and recreate.&nbsp; Still, it's pretty slick :)<br /><br />
+  </li><br />
+</ul>I think though it probably all comes down to:<br /></p>
 <ul>
 <li>My urge to make things happen without understanding the in's and outs of base4.net<br />
-  <&#47;li></p>
-<li>Horses for courses, the web admin is great for getting off to ground with base4.net, but I think I'll have to get down and dirty with the xml pretty soon...<br &#47;><br />
-  <&#47;li><br />
-<&#47;ul>Though I can't discuss the project, I can discuss what I'll be building it in... so we have:<br &#47;></p>
+  </li></p>
+<li>Horses for courses, the web admin is great for getting off to ground with base4.net, but I think I'll have to get down and dirty with the xml pretty soon...<br /><br />
+  </li><br />
+</ul>Though I can't discuss the project, I can discuss what I'll be building it in... so we have:<br /></p>
 <ul>
 <li>Base4.Net<br />
-  <&#47;li></p>
+  </li></p>
 <li>SQL 2005<br />
-  <&#47;li></p>
+  </li></p>
 <li>Castle (Monorail &amp; IoC)<br />
-  <&#47;li></p>
+  </li></p>
 <li>NLog (or log4net... though I'm loosing faith in the latter)<br />
-  <&#47;li></p>
+  </li></p>
 <li>NUnit<br />
-  <&#47;li></p>
+  </li></p>
 <li>RhinoMocks<br />
-  <&#47;li></p>
+  </li></p>
 <li>Splicer.Net<br />
-  <&#47;li></p>
+  </li></p>
 <li>Some COM &amp; Unmanaged code for audio processing<br />
-  <&#47;li><br />
-<&#47;ul>This is also the first time I've used monorail for a commercial project (we already use a lot of the facilities and the windsor container in the Syzmk RMP product) so it's certainly some interesting times... as we progress I'll give some feedback on both the Monorail and Base4.Net "user experience" :)</p>
+  </li><br />
+</ul>This is also the first time I've used monorail for a commercial project (we already use a lot of the facilities and the windsor container in the Syzmk RMP product) so it's certainly some interesting times... as we progress I'll give some feedback on both the Monorail and Base4.Net "user experience" :)</p>

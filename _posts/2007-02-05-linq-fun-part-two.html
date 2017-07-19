@@ -25,15 +25,15 @@ comments: []
 <pre>
 EpisodeParser episodeParser = new EpisodeParser();</p>
 <p>YouTubeSearcher searcher = new YouTubeSearcher(DeveloperId);</p>
-<p>&#47;&#47; get a list of all the parts we are interested in</p>
+<p>// get a list of all the parts we are interested in</p>
 <p>IEnumerable<EpisodePart> parts = (from result in searcher.QueryByTags("QI", "Quite", "Interesting")<br />
                                 select episodeParser.Parse(result))<br />
                                 .Where(p => p.SeriesNumber > 0 && p.EpisodeNumber > 0 && p.PartNumber > 0)<br />
                                 .Distinct();<br />
-<&#47;pre></p>
+</pre></p>
 <p>Obviously what I've done here is probably rather poor style, surely&nbsp;the where clause could have been inside the select statement??...&nbsp;but I'm just trying to illustrate how you can mix the two&nbsp;notations... next we're going to group the results up using some&nbsp;nested "group by" and object projections... this is disgustingly&nbsp;easy, what more can you say about it.</p>
 <pre>
-&#47;&#47; group those parts</p>
+// group those parts</p>
 <p>var allSeries = from part in parts<br />
                 group part by part.SeriesNumber into series<br />
                 orderby series.Key<br />
@@ -47,30 +47,30 @@ EpisodeParser episodeParser = new EpisodeParser();</p>
                                                select chunk<br />
                                        }<br />
                     };<br />
-<&#47;pre></p>
-<p>Great, I think that saved us a lot of time, compared to doing it&nbsp;ourselves in C# 2.0...&nbsp; let's now generate a little page to&nbsp;view the results - for now I'm just writing code in NUnit fixtures&nbsp;- so we'll use Console.WriteLine... though in a website I would&nbsp;probably just use some quite similar <a href="http:&#47;&#47;wiki.castleproject.org&#47;index.php&#47;MonoRail:Brail">brail<&#47;a>&nbsp;template code.</p>
+</pre></p>
+<p>Great, I think that saved us a lot of time, compared to doing it&nbsp;ourselves in C# 2.0...&nbsp; let's now generate a little page to&nbsp;view the results - for now I'm just writing code in NUnit fixtures&nbsp;- so we'll use Console.WriteLine... though in a website I would&nbsp;probably just use some quite similar <a href="http://wiki.castleproject.org/index.php/MonoRail:Brail">brail</a>&nbsp;template code.</p>
 <pre>
 foreach (var series in allSeries)<br />
 {<br />
     Console.WriteLine("<br />
-<h3>Series {0}<&#47;h3>rn", series.SeriesNumber);<br />
+<h3>Series {0}</h3>rn", series.SeriesNumber);<br />
     foreach (var episode in series.Episodes)<br />
     {<br />
         Console.WriteLine("<br />
-<h4>Episode {0}<&#47;h4>rn", episode.EpisodeNumber);</p>
+<h4>Episode {0}</h4>rn", episode.EpisodeNumber);</p>
 <p>        foreach (var author in episode.Parts.GroupBy(p => p.Result.Author))<br />
         {<br />
             Console.WriteLine("
-<div>Author: <strong>{0}<&#47;strong>rn", author.Key);</p>
+<div>Author: <strong>{0}</strong>rn", author.Key);</p>
 <p>            foreach(var part in author)<br />
             {<br />
                 YouTubeResult result = part.Result;<br />
-                Console.WriteLine("<a href="{0}">part {1} &nbsp;<img src="{2}" &#47;><&#47;a>", result.Url, part.PartNumber, result.ThumbUrl);<br />
+                Console.WriteLine("<a href="{0}">part {1} &nbsp;<img src="{2}" /></a>", result.Url, part.PartNumber, result.ThumbUrl);<br />
             }<br />
         }<br />
     }<br />
 }<br />
-<&#47;pre></p>
-<p>I've also dumped the output from this to an html page, if you'd&nbsp;like to have a <a style="font-weight: bold;" href="http:&#47;&#47;blog.bittercoder.com&#47;content&#47;binary&#47;linq_results.html">look&nbsp;at it<&#47;a>.</p>
-<p>Next time I might have a look at storing the results of the youtube&nbsp;query with <a href="http:&#47;&#47;www.base4.net&#47;">base4<&#47;a> and writing&nbsp;some code for a little daemon which can identify newly posted&nbsp;episode parts on a periodic basis... which should all lead towards&nbsp;implementing the RSS feed capability I discussed in &nbsp;<a href="http:&#47;&#47;blog.bittercoder.com&#47;PermaLink,guid,39ebe80f-8ebe-4dc8-a2ab-dbf721b15742.aspx">part one<&#47;a>.</p>
+</pre></p>
+<p>I've also dumped the output from this to an html page, if you'd&nbsp;like to have a <a style="font-weight: bold;" href="http://blog.bittercoder.com/content/binary/linq_results.html">look&nbsp;at it</a>.</p>
+<p>Next time I might have a look at storing the results of the youtube&nbsp;query with <a href="http://www.base4.net/">base4</a> and writing&nbsp;some code for a little daemon which can identify newly posted&nbsp;episode parts on a periodic basis... which should all lead towards&nbsp;implementing the RSS feed capability I discussed in &nbsp;<a href="http://blog.bittercoder.com/PermaLink,guid,39ebe80f-8ebe-4dc8-a2ab-dbf721b15742.aspx">part one</a>.</p>
 <p>But for now I'm off to enjoy the sun!</p>

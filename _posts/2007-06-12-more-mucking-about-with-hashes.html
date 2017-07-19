@@ -21,113 +21,113 @@ tags: []
 comments: []
 ---
 <p>
-  So, I got a comment on the last post about <a href="http:&#47;&#47;blog.bittercoder.com&#47;PermaLink,guid,d1831805-dbf7-4b74-a6fd-2e9ed437c3d9.aspx">hashes<&#47;a> <a href="http:&#47;&#47;tempuri.org&#47;tempuri.html">from<br />
-  lambdas<&#47;a> (from <a href="http:&#47;&#47;blog.ashmind.com&#47;">Andrey<br />
-  Shchekin<&#47;a>)... It pointed out the fact that you don't need to<br />
+  So, I got a comment on the last post about <a href="http://blog.bittercoder.com/PermaLink,guid,d1831805-dbf7-4b74-a6fd-2e9ed437c3d9.aspx">hashes</a> <a href="http://tempuri.org/tempuri.html">from<br />
+  lambdas</a> (from <a href="http://blog.ashmind.com/">Andrey<br />
+  Shchekin</a>)... It pointed out the fact that you don't need to<br />
   use expressions at all... which hilights an observation that I<br />
   hadn't made myself - such that the lambda parameter<br />
   names&nbsp;are available in the generated delegate... which of<br />
-  course makes perfect sense!<br &#47;><br />
-<&#47;p></p>
+  course makes perfect sense!<br /><br />
+</p></p>
 <p>
   So given:<br />
-<&#47;p></p>
+</p></p>
 <p>
-  <strong>Func<string, T> func = Name => "Value";<&#47;strong><br />
-<&#47;p></p>
+  <strong>Func<string, T> func = Name => "Value";</strong><br />
+</p></p>
 <p>
   You can get the lambda parameter "Name" from the function<br />
-  delegate by calling:<br &#47;><br />
-  <br &#47;><br />
-  <strong>func.Method.GetParameters()[0].Name<&#47;strong> (would<br />
-  return "Name")<br &#47;><br />
-  <br &#47;><br />
+  delegate by calling:<br /><br />
+  <br /><br />
+  <strong>func.Method.GetParameters()[0].Name</strong> (would<br />
+  return "Name")<br /><br />
+  <br /><br />
   Here's the revised Hash method from Andrey:<br />
-<&#47;p></p>
+</p></p>
 <p>
   public Dictionary<string, T> Hash<T>(params<br />
-  Func<string, T>[] args)<br &#47;><br />
-  where T : class<br &#47;><br />
-  {<br &#47;><br />
+  Func<string, T>[] args)<br /><br />
+  where T : class<br /><br />
+  {<br /><br />
   &nbsp;&nbsp;&nbsp; var items = new Dictionary<string,<br />
-  T>();<br &#47;><br />
-  &nbsp;&nbsp;&nbsp; foreach (var func in args)<br &#47;><br />
-  &nbsp;&nbsp;&nbsp; {<br &#47;><br />
+  T>();<br /><br />
+  &nbsp;&nbsp;&nbsp; foreach (var func in args)<br /><br />
+  &nbsp;&nbsp;&nbsp; {<br /><br />
   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; var item =<br />
-  func(null);<br &#47;><br />
+  func(null);<br /><br />
   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
-  items.Add(func.Method.GetParameters()[0].Name, item);<br &#47;><br />
-  &nbsp;&nbsp;&nbsp; }<br &#47;><br />
-  &nbsp;&nbsp;&nbsp; return items;<br &#47;><br />
+  items.Add(func.Method.GetParameters()[0].Name, item);<br /><br />
+  &nbsp;&nbsp;&nbsp; }<br /><br />
+  &nbsp;&nbsp;&nbsp; return items;<br /><br />
   }<br />
-<&#47;p></p>
+</p></p>
 <p>
   very elegant and simple :)<br />
-<&#47;p></p>
+</p></p>
 <p>
   He even did some stats, which I suspect are probably a lot more<br />
-  accurate then my inital observations:<br &#47;><br />
-  <br &#47;><br />
-  For 10000 consecutive calls:<br &#47;><br />
-  <br &#47;><br />
-<&#47;p></p>
+  accurate then my inital observations:<br /><br />
+  <br /><br />
+  For 10000 consecutive calls:<br /><br />
+  <br /><br />
+</p></p>
 <table style="width: 298px; height: 87px;" border="1" cellpaddingsrc="1" cellspacing="1">
 <tbody>
 <tr>
 <td>
         WithAdd<br />
-      <&#47;td></p>
+      </td></p>
 <td>
         10.0144ms<br />
-      <&#47;td><br />
-    <&#47;tr></p>
+      </td><br />
+    </tr></p>
 <tr>
 <td>
         WithLambdas<br />
-      <&#47;td></p>
+      </td></p>
 <td>
         9713.968ms<br />
-      <&#47;td><br />
-    <&#47;tr></p>
+      </td><br />
+    </tr></p>
 <tr>
 <td>
         WithLambdasConstantsOnly<br />
-      <&#47;td></p>
+      </td></p>
 <td>
         240.3456ms<br />
-      <&#47;td><br />
-    <&#47;tr></p>
+      </td><br />
+    </tr></p>
 <tr>
 <td>
         WithDelegates<br />
-      <&#47;td></p>
+      </td></p>
 <td>
         30.0432ms<br />
-      <&#47;td><br />
-    <&#47;tr><br />
-  <&#47;tbody><br />
-<&#47;table>Now what about multiple parameters... so far I can't think<br />
+      </td><br />
+    </tr><br />
+  </tbody><br />
+</table>Now what about multiple parameters... so far I can't think<br />
 of any uses I would have for it... perhaps a 2 level configuration<br />
-dictionary?<br &#47;></p>
+dictionary?<br /></p>
 <p>
-  [Test]<br &#47;><br />
-  public void HashTwoLevelDict()<br &#47;><br />
-  {<br &#47;><br />
+  [Test]<br /><br />
+  public void HashTwoLevelDict()<br /><br />
+  {<br /><br />
   &nbsp;&nbsp;&nbsp; Dictionary<string, Dictionary<string,<br />
-  object>> config = this.Hash<object>(<br &#47;><br />
+  object>> config = this.Hash<object>(<br /><br />
   &nbsp;&nbsp;&nbsp;&nbsp; (Connection, DriverClass) =><br />
-  typeof(SqlClientDriver),<br &#47;><br />
+  typeof(SqlClientDriver),<br /><br />
   &nbsp;&nbsp;&nbsp;&nbsp; (Dialect, DialectClass) =><br />
-  typeof(MsSql2000Dialect),<br &#47;><br />
+  typeof(MsSql2000Dialect),<br /><br />
   &nbsp;&nbsp;&nbsp;&nbsp; (Connection, Provider) =><br />
-  typeof(DriverConnectionProvider),<br &#47;><br />
+  typeof(DriverConnectionProvider),<br /><br />
   &nbsp;&nbsp;&nbsp;&nbsp; (Connection, ConnectionString)<br />
   =>"Data Source=.;Initial Catalog=test;Integrated<br />
   Security=SSPI");<br />
-<&#47;p></p>
+</p></p>
 <p>
   &nbsp;&nbsp;&nbsp; Assert.AreEqual(typeof(SqlClientDriver),<br />
-  config["Connection"]["DriverClass"]);<br &#47;><br />
+  config["Connection"]["DriverClass"]);<br /><br />
   }<br />
-<&#47;p>Who knows... I look forward to seeing how Lambdas get used and<br />
-abused for non-functional programming tasks :)<br &#47;></p>
+</p>Who knows... I look forward to seeing how Lambdas get used and<br />
+abused for non-functional programming tasks :)<br /></p>

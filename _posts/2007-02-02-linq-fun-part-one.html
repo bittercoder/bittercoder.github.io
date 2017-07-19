@@ -21,28 +21,28 @@ tags:
 - LINQ
 comments: []
 ---
-<p>Well, the recent musings of <a href="http:&#47;&#47;www.base4.net&#47;Blog.aspx">Alex James<&#47;a> have caught my interest around LINQ (part <a href="http:&#47;&#47;www.base4.net&#47;Blog.aspx?ID=300">one<&#47;a> and <a href="http:&#47;&#47;www.base4.net&#47;Blog.aspx?ID=304">two<&#47;a>) - and so I thought I would start having a play with LINQ and using it to query some well known web sites... and decided to go with dragging some info out of youtube...<br &#47;><br />
-<br &#47;><br />
-Basically, I like <a href="http:&#47;&#47;www.tvrage.com&#47;shows&#47;id-4920">QI<&#47;a> (also known as Quite Interesting - british comedy show) - and there's a lot of episodes on <a href="http:&#47;&#47;www.youtube.com&#47;">youtube<&#47;a>, querying on the tags "QI", "Quite" &amp; "Interesting" returns about 1000 results... almost every result represents a part of an episode... and most people posting are kind enough to include something in the title or description of the video which lets you know which episode and series it belongs to...<br &#47;><br />
-<br &#47;><br />
-However it's going to take some effort to actually start watching at series 1, episode 1 and work your way through the episodes in the right order by endlessly browsing youtube's search results... unless we start "value adding" - creating an "episodic" view over youtube's data.<br &#47;><br />
-<br &#47;><br />
-At this point you could put your magic hat on and wish for features from you're youtube "episodes" site:<br &#47;></p>
+<p>Well, the recent musings of <a href="http://www.base4.net/Blog.aspx">Alex James</a> have caught my interest around LINQ (part <a href="http://www.base4.net/Blog.aspx?ID=300">one</a> and <a href="http://www.base4.net/Blog.aspx?ID=304">two</a>) - and so I thought I would start having a play with LINQ and using it to query some well known web sites... and decided to go with dragging some info out of youtube...<br /><br />
+<br /><br />
+Basically, I like <a href="http://www.tvrage.com/shows/id-4920">QI</a> (also known as Quite Interesting - british comedy show) - and there's a lot of episodes on <a href="http://www.youtube.com/">youtube</a>, querying on the tags "QI", "Quite" &amp; "Interesting" returns about 1000 results... almost every result represents a part of an episode... and most people posting are kind enough to include something in the title or description of the video which lets you know which episode and series it belongs to...<br /><br />
+<br /><br />
+However it's going to take some effort to actually start watching at series 1, episode 1 and work your way through the episodes in the right order by endlessly browsing youtube's search results... unless we start "value adding" - creating an "episodic" view over youtube's data.<br /><br />
+<br /><br />
+At this point you could put your magic hat on and wish for features from you're youtube "episodes" site:<br /></p>
 <ul>
-<li>Perhaps an RSS feed notifying me of new episodes as they're listed on youtube daily.<br &#47;><br />
-  <&#47;li></p>
+<li>Perhaps an RSS feed notifying me of new episodes as they're listed on youtube daily.<br /><br />
+  </li></p>
 <li>A nice way to see a series, it's episodes, and each part that I need to play.<br />
-  <&#47;li></p>
-<li>Maybe some aggregation of episode summaries from another web site for each episode (in this case I'm thinking maybe <a href="http:&#47;&#47;www.tvrage.com&#47;">TVRage.Com<&#47;a>...)<br />
-  <&#47;li><br />
-<&#47;ul>So you can quickly see that we can start making something virtually out of nothing, like MacGyver... but much lamer and without the hair.<br &#47;><br />
-<br &#47;><br />
-First things first, I started having a look at YouTube's API - you can search by tags and get plenty of info back from their REST web service, but you can only get 20 results per page, 20 results isn't much cop so I built a simple class which gives access to the whole set of search results as an <b>IEnumerable<<&#47;b>YouTubeResult<b>><&#47;b> - here's the code for that:<br &#47;><br />
-<br &#47;></p>
+  </li></p>
+<li>Maybe some aggregation of episode summaries from another web site for each episode (in this case I'm thinking maybe <a href="http://www.tvrage.com/">TVRage.Com</a>...)<br />
+  </li><br />
+</ul>So you can quickly see that we can start making something virtually out of nothing, like MacGyver... but much lamer and without the hair.<br /><br />
+<br /><br />
+First things first, I started having a look at YouTube's API - you can search by tags and get plenty of info back from their REST web service, but you can only get 20 results per page, 20 results isn't much cop so I built a simple class which gives access to the whole set of search results as an <b>IEnumerable<</b>YouTubeResult<b>></b> - here's the code for that:<br /><br />
+<br /></p>
 <pre>
 public class YouTubeSearcher<br />
 {<br />
-    private const string TagQuery = "http:&#47;&#47;www.youtube.com&#47;api2_rest?method=youtube.videos.list_by_tag&amp;dev_id={0}&amp;tag={1}&amp;page={2}";<br />
+    private const string TagQuery = "http://www.youtube.com/api2_rest?method=youtube.videos.list_by_tag&amp;dev_id={0}&amp;tag={1}&amp;page={2}";<br />
     private string _developerId;</p>
 <p>    public YouTubeSearcher(string developerId)<br />
     {<br />
@@ -76,18 +76,18 @@ public class YouTubeSearcher<br />
 <p>            string uri = string.Format(TagQuery, _developerId, tag, page);<br />
             XPathDocument xpd = new XPathDocument(uri);</p>
 <p>            XPathNavigator xpn = xpd.CreateNavigator();</p>
-<p>            XPathNodeIterator xniError = xpn.Select(@"&#47;ut_response");</p>
+<p>            XPathNodeIterator xniError = xpn.Select(@"/ut_response");</p>
 <p>            xniError.MoveNext();</p>
 <p>            if (xniError.Current.GetAttribute("status", String.Empty) == "fail")<br />
             {<br />
-                string expression = "&#47;ut_response&#47;error&#47;description";<br />
+                string expression = "/ut_response/error/description";<br />
                 string errorText = xpn.SelectSingleNode(expression).InnerXml;</p>
 <p>                throw new YouTubeException("Error occured while querying youtube: {0}", errorText);<br />
             }</p>
 <p>            try<br />
             {<br />
                 XPathNodeIterator xni =<br />
-                    xpn.Select(@"&#47;ut_response&#47;video_list&#47;video");</p>
+                    xpn.Select(@"/ut_response/video_list/video");</p>
 <p>                while (xni.MoveNext())<br />
                 {<br />
                     XPathNavigator navigator = xni.Current;</p>
@@ -113,19 +113,19 @@ public class YouTubeSearcher<br />
         }<br />
     }<br />
 }<br />
-<&#47;pre><br &#47;><br />
-Following on from that we need to parse each search result and attempt to pull out it's episode information:<br &#47;></p>
+</pre><br /><br />
+Following on from that we need to parse each search result and attempt to pull out it's episode information:<br /></p>
 <ul>
-<li>Series Number<br &#47;><br />
-  <&#47;li></p>
+<li>Series Number<br /><br />
+  </li></p>
 <li>Episode Number<br />
-  <&#47;li></p>
-<li>Part Number<br &#47;><br />
-  <&#47;li><br />
-<&#47;ul>At this point we might also make the assumption that parts should be grouped by the user who posted them - in case the same episode has been posted twice by two users (quite likely, people are silly).<br &#47;><br />
-<br &#47;><br />
-Parsing part information could be done using successive LINQ queries, but It's actually not that pleasant considering we're generally interogating only two text fields - the title for the clip, and it's description - horses for courses - so instead I built a quick 'n dirty "<b>EpisodeParser<&#47;b>" class... here's the code for that:<br &#47;><br />
-<br &#47;></p>
+  </li></p>
+<li>Part Number<br /><br />
+  </li><br />
+</ul>At this point we might also make the assumption that parts should be grouped by the user who posted them - in case the same episode has been posted twice by two users (quite likely, people are silly).<br /><br />
+<br /><br />
+Parsing part information could be done using successive LINQ queries, but It's actually not that pleasant considering we're generally interogating only two text fields - the title for the clip, and it's description - horses for courses - so instead I built a quick 'n dirty "<b>EpisodeParser</b>" class... here's the code for that:<br /><br />
+<br /></p>
 <pre>
 public class EpisodeParser<br />
 {<br />
@@ -153,15 +153,15 @@ public class EpisodeParser<br />
             contributor.Contribute(ep);<br />
         }</p>
 <p>        return ep;</p>
-<p>        &#47;*<br />
+<p>        /*<br />
       * QI Series 4 EpisodePart 12 (part 3)<br />
-      * s2e10 part 1&#47;4<br />
-      * Qi Series 1 Ep 5 Part 1&#47;3<br />
+      * s2e10 part 1/4<br />
+      * Qi Series 1 Ep 5 Part 1/3<br />
       * QI 2x01<br />
       * Take Out 1<br />
       * QI Pilot EpisodePart part 6<br />
       * S2E09<br />
-      *&#47;<br />
+      */<br />
     }</p>
 <p>    private class SeriesContributor : AbstractContributor<br />
     {<br />
@@ -217,7 +217,7 @@ public class EpisodeParser<br />
         {<br />
             int partOf = 0;<br />
             int parts = 0;</p>
-<p>            if (SplitNumber(episodePart, ref partOf, ref parts, '&#47;'))<br />
+<p>            if (SplitNumber(episodePart, ref partOf, ref parts, '/'))<br />
             {<br />
                 AssignPartNumber(episodePart, partOf);<br />
             }<br />
@@ -246,18 +246,18 @@ public class EpisodeParser<br />
         }<br />
     }<br />
 }<br />
-<&#47;pre><br &#47;><br />
-At this point we have the building blocks for starting to write some LINQ queries... here's my first test - running a basic "select all"...<br &#47;><br />
-<br &#47;></p>
+</pre><br /><br />
+At this point we have the building blocks for starting to write some LINQ queries... here's my first test - running a basic "select all"...<br /><br />
+<br /></p>
 <pre>
 YouTubeSearcher searcher = new YouTubeSearcher(DeveloperId);</p>
 <p>IEnumerable<YouTubeResult> results = from result<br />
                                      in searcher.QueryByTags("QI", "Quite", "Interesting")<br />
                                      select result;</p>
 <p>Console.WriteLine("total results: {0}", results.Count());<br />
-<&#47;pre><br &#47;><br />
-Trying a more explicit style of query, and parsing episodes:<br &#47;><br />
-<br &#47;></p>
+</pre><br /><br />
+Trying a more explicit style of query, and parsing episodes:<br /><br />
+<br /></p>
 <pre>
 EpisodeParser episodeParser = new EpisodeParser();</p>
 <p>YouTubeSearcher searcher = new YouTubeSearcher(DeveloperId);</p>
@@ -269,17 +269,17 @@ EpisodeParser episodeParser = new EpisodeParser();</p>
 {<br />
     Console.WriteLine(part);<br />
 }<br />
-<&#47;pre><br &#47;><br />
-Which will let us know which episodes in series 1 exist...<br &#47;><br />
-<br &#47;><br />
-Bit of a rush, but next time I'll start digging in a little deeper...<br &#47;><br />
-<br &#47;><br />
-At this point though it's worth noting that we have some stuff for free because of <b>IEnumerable<<&#47;b>T<b>><&#47;b>...<br &#47;></p>
+</pre><br /><br />
+Which will let us know which episodes in series 1 exist...<br /><br />
+<br /><br />
+Bit of a rush, but next time I'll start digging in a little deeper...<br /><br />
+<br /><br />
+At this point though it's worth noting that we have some stuff for free because of <b>IEnumerable<</b>T<b>></b>...<br /></p>
 <ul>
-<li>Search results are being processed as their yielded, if we're   just looking for the first matching item for a query we can stop without having to request additional result pages on a match is made.<br &#47;><br />
-  <&#47;li></p>
-<li>Same goes for episodes, we only parse them as they are required - no unnecessary overhead.<br &#47;><br />
-  <&#47;li><br />
-<&#47;ul>So far nothing has required LINQ, but I think we'll start to see it being a great time saver come the next couple of parts... compared to writing the code ourselves.<br &#47;><br />
-<br &#47;><br />
+<li>Search results are being processed as their yielded, if we're   just looking for the first matching item for a query we can stop without having to request additional result pages on a match is made.<br /><br />
+  </li></p>
+<li>Same goes for episodes, we only parse them as they are required - no unnecessary overhead.<br /><br />
+  </li><br />
+</ul>So far nothing has required LINQ, but I think we'll start to see it being a great time saver come the next couple of parts... compared to writing the code ourselves.<br /><br />
+<br /><br />
 We shall see!</p>

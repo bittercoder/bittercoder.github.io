@@ -21,11 +21,11 @@ tags:
 - Volta
 comments: []
 ---
-<p>So my last post was a quick look at&nbsp;<a href="http:&#47;&#47;blog.bittercoder.com&#47;PermaLink,guid,5c3b516d-d02d-4708-9be5-efc44e853c0d.aspx">Volta &amp; WinForms<&#47;a> (if you wonder why I was using WinForms&nbsp;rather then web, I just figured it'd be a good place to start,&nbsp;without the complications of what can&#47;can not be translated to&nbsp;javascript) - I haven't really been keeping track of what other&nbsp;people are doing with Volta, but there have been a couple of posts&nbsp;from Microsoft bloggers, including Wes Dyer (on &nbsp;<a href="http:&#47;&#47;blogs.msdn.com&#47;dragoman&#47;archive&#47;2007&#47;12&#47;07&#47;tier-split-refactoring-winforms-applications-with-volta.aspx">tier splitting a web application<&#47;a>) and Drargos Manolescu (on&nbsp;<a href="http:&#47;&#47;blogs.msdn.com&#47;dragoman&#47;archive&#47;2007&#47;12&#47;07&#47;tier-split-refactoring-winforms-applications-with-volta.aspx">tier splitting a winforms application<&#47;a>) - hopefully some of the<br />
+<p>So my last post was a quick look at&nbsp;<a href="http://blog.bittercoder.com/PermaLink,guid,5c3b516d-d02d-4708-9be5-efc44e853c0d.aspx">Volta &amp; WinForms</a> (if you wonder why I was using WinForms&nbsp;rather then web, I just figured it'd be a good place to start,&nbsp;without the complications of what can/can not be translated to&nbsp;javascript) - I haven't really been keeping track of what other&nbsp;people are doing with Volta, but there have been a couple of posts&nbsp;from Microsoft bloggers, including Wes Dyer (on &nbsp;<a href="http://blogs.msdn.com/dragoman/archive/2007/12/07/tier-split-refactoring-winforms-applications-with-volta.aspx">tier splitting a web application</a>) and Drargos Manolescu (on&nbsp;<a href="http://blogs.msdn.com/dragoman/archive/2007/12/07/tier-split-refactoring-winforms-applications-with-volta.aspx">tier splitting a winforms application</a>) - hopefully some of the<br />
 other members on the Volta team will pick up the gauntlet and start&nbsp;blogging shortly too.</p>
-<p>This post is going to be very short (if you ignore the code&nbsp;snippets) - we've already seen how classes can be split into two,&nbsp;one being the client proxy the other the service implementation -&nbsp;but what happens if a class is used in the client and server but&nbsp;isn't fixed&#47;pinned to run on a specific Tier via the RunAt&nbsp;attribute... that's the focus of this post.</p>
-<p>So, in this example - I'm going to add a helper class to my&nbsp;previous example from the last <a href="http:&#47;&#47;blog.bittercoder.com&#47;PermaLink,guid,5c3b516d-d02d-4708-9be5-efc44e853c0d.aspx"><br />
-post<&#47;a> - which just formats some text all "pretty" like:</p>
+<p>This post is going to be very short (if you ignore the code&nbsp;snippets) - we've already seen how classes can be split into two,&nbsp;one being the client proxy the other the service implementation -&nbsp;but what happens if a class is used in the client and server but&nbsp;isn't fixed/pinned to run on a specific Tier via the RunAt&nbsp;attribute... that's the focus of this post.</p>
+<p>So, in this example - I'm going to add a helper class to my&nbsp;previous example from the last <a href="http://blog.bittercoder.com/PermaLink,guid,5c3b516d-d02d-4708-9be5-efc44e853c0d.aspx"><br />
+post</a> - which just formats some text all "pretty" like:</p>
 <pre>
 public class HelperClass<br />
 {<br />
@@ -34,7 +34,7 @@ public class HelperClass<br />
         return string.Format("--> {0} <--", text);<br />
     }<br />
 }<br />
-<&#47;pre><br />
+</pre><br />
 Now I'll update my service to use pretty formatting:</p>
 <pre>
 [RunAt("Server")]<br />
@@ -46,7 +46,7 @@ public class SomeService<br />
         return _helper.PrettyFormat(string.Format("Welcome: {0}", name));<br />
     }<br />
 }<br />
-<&#47;pre></p>
+</pre></p>
 <p>And lastly, I'll add an additional button called&nbsp;"welcomeLocalButton" which when clicked will make use of the helper&nbsp;to format some text on the client, instead of calling the&nbsp;WelcomeMessage method on the service.</p>
 <pre>
 public partial class Form1 : Form<br />
@@ -66,15 +66,15 @@ public partial class Form1 : Form<br />
         welcomeOutput.AppendText(helper.PrettyFormat("Welcome Local " + nameTextBox.Text));<br />
     }<br />
 }<br />
-<&#47;pre></p>
+</pre></p>
 <p>So this is how the app looks now...</p>
-<p><img src="http:&#47;&#47;blog.bittercoder.com&#47;images&#47;6_welcome_local_winforms.png" alt="" &#47;></p>
+<p><img src="http://blog.bittercoder.com/images/6_welcome_local_winforms.png" alt="" /></p>
 <p>Compile and run - everything works as expected, now looking at the&nbsp;generated client and server assemblies we see both contain... the&nbsp;same class - yep that's right it just duplicates the class in both&nbsp;the client and server tiers, without changing it at all.</p>
 <p>Now for windows forms this doesn't appear as all that much of a&nbsp;miracle (it's still nice, we wouldn't want helper classes being&nbsp;turned into implicit services just because they're used across&nbsp;tiers)... but for web or other target platforms (such as embedded<br />
-devices) this is where the elegance begins to kick in, not only are&nbsp;you able to declaratively specify where code is executing, but if&nbsp;you don't specify&#47;fix (I wonder what the correct terminology is&nbsp;here?) a type to a specific tier you get the best of both worlds&nbsp;i.e. code that's native assemblies on the origin&#47;server side and&nbsp;javascript implementations on the client side.</p>
-<p>So to demonstrate the web equivalent I whipped up the following&nbsp;example - I was trying to think of something interesting that would&nbsp;be useful to do client and server-side - and thought, perhaps I&nbsp;would use Andrew's <a href="http:&#47;&#47;andrewpeters.net&#47;inflectornet&#47;">Inflector.Net<&#47;a> - sadly&nbsp;there are a few issues with that, namely Regex isn't supported out&nbsp;of the box in Volta (which is a real shame, this is something I&nbsp;would've have expected to have been in the preview - regex being&nbsp;such a swiss army knife, especially for scripting) - so instead I&nbsp;picked something a little simpler - the Ordinalize functionality&nbsp;from Inflector, and just stripped out the other unrequired methods&nbsp;which would give us grief.</p>
+devices) this is where the elegance begins to kick in, not only are&nbsp;you able to declaratively specify where code is executing, but if&nbsp;you don't specify/fix (I wonder what the correct terminology is&nbsp;here?) a type to a specific tier you get the best of both worlds&nbsp;i.e. code that's native assemblies on the origin/server side and&nbsp;javascript implementations on the client side.</p>
+<p>So to demonstrate the web equivalent I whipped up the following&nbsp;example - I was trying to think of something interesting that would&nbsp;be useful to do client and server-side - and thought, perhaps I&nbsp;would use Andrew's <a href="http://andrewpeters.net/inflectornet/">Inflector.Net</a> - sadly&nbsp;there are a few issues with that, namely Regex isn't supported out&nbsp;of the box in Volta (which is a real shame, this is something I&nbsp;would've have expected to have been in the preview - regex being&nbsp;such a swiss army knife, especially for scripting) - so instead I&nbsp;picked something a little simpler - the Ordinalize functionality&nbsp;from Inflector, and just stripped out the other unrequired methods&nbsp;which would give us grief.</p>
 <p>So the example is pretty simple, we have a web page that looks like&nbsp;this:</p>
-<p><img src="http:&#47;&#47;blog.bittercoder.com&#47;images&#47;3_ordinalizer.png" alt="" &#47;></p>
+<p><img src="http://blog.bittercoder.com/images/3_ordinalizer.png" alt="" /></p>
 <p>You enter a number, it get's ordinalized, either via a remote call&nbsp;or a client-side call... so let's take a quick look at the code,&nbsp;first we have the ordinalize method:</p>
 <pre>
 public static class Inflector<br />
@@ -100,7 +100,7 @@ public static class Inflector<br />
         }<br />
     }<br />
 }<br />
-<&#47;pre></p>
+</pre></p>
 <p>Then we have the server-side OrdinalizerService:</p>
 <pre>
 [RunAtOrigin]<br />
@@ -113,7 +113,7 @@ public class OrdinalizerService<br />
 <p>    [Async]<br />
     public extern void Ordinalize(string number, Callback<string> callback);<br />
 }<br />
-<&#47;pre></p>
+</pre></p>
 <p>And finally we have the UI code:</p>
 <pre>
 public partial class VoltaPage1 : Page<br />
@@ -147,18 +147,18 @@ public partial class VoltaPage1 : Page<br />
         button2 = Document.GetById<Button>("Button2");<br />
     }<br />
 }<br />
-<&#47;pre></p>
+</pre></p>
 <p>So... what's left after the tier-split?</p>
 <p>Well if you open up reflector and look at either the client or the&nbsp;server assembly - you will still see the same Inflector class i.e.&nbsp;just like the previous winforms example it just copies it to both&nbsp;tiers - and that's it... no magic at this point, because the&nbsp;process of transforming the class to javascript doesn't occur&nbsp;untill runtime.&nbsp; Though obviously it does need to copy it&nbsp;because the client and service layer are entirely&nbsp;independent.</p>
 <p>I could stop there - but I'm sure many people are curious as to&nbsp;just what the javascript looks like :)</p>
-<p>So just to round this post out - we'll take a brief look at the&nbsp;generated javascript - so if you use a tool like firebug while&nbsp;loading a page developed with volta you will see <strong>alot<&#47;strong> of&nbsp;activity going on as individual types are loaded one by one from&nbsp;the server, like so...</p>
-<p><img src="http:&#47;&#47;blog.bittercoder.com&#47;images&#47;4_loading_assemblies_js.PNG" alt="" &#47;></p>
+<p>So just to round this post out - we'll take a brief look at the&nbsp;generated javascript - so if you use a tool like firebug while&nbsp;loading a page developed with volta you will see <strong>alot</strong> of&nbsp;activity going on as individual types are loaded one by one from&nbsp;the server, like so...</p>
+<p><img src="http://blog.bittercoder.com/images/4_loading_assemblies_js.PNG" alt="" /></p>
 <p>There are pages and pages of these calls... though there are plans&nbsp;to reduce the number of round trips in the future (obviously a&nbsp;round trip per type is a pretty bad idea in a complex app) but you&nbsp;need to keep your eye on the prize... Volta is not competing with&nbsp;meticulously hand crafted MVC web-based solutions with little&nbsp;sprinkles of Ajax here and there... the benefits would come from&nbsp;employing it where the complexity and drudgery of client side<br />
 scripting is overwhelming and large amounts of asynchronous&nbsp;messages are being exchanged between client and server... at least&nbsp;that's where I see a sweet spot... obviously there are plenty of&nbsp;other side-effects as well (ubiquitous refactoring springs to&nbsp;mind).</p>
 <p>Now if you scroll down past all the standard (BCL) and volta&nbsp;related types you eventually find... no mention of the Inflector&nbsp;type.</p>
 <p>No magic here though - just type a value into the textbox and click&nbsp;Ordinalize Local - and flick back to Firebug's console... and you&nbsp;will see a request being made for the Inflector type - types are&nbsp;lazy loaded - makes a lot of sense, when you might have types only&nbsp;required by a single UI element on the screen that the user never&nbsp;touches.</p>
 <p>So here's the request for the inflector type:</p>
-<p><img src="http:&#47;&#47;blog.bittercoder.com&#47;images&#47;5_inflector_js_request.PNG" alt="" &#47;></p>
+<p><img src="http://blog.bittercoder.com/images/5_inflector_js_request.PNG" alt="" /></p>
 <p>Notice the two query string parameters a (assembly) and t (type)&nbsp;... and now if we were to flick over to the response tab, we would&nbsp;see the javascript produced for that type (see below)</p>
 <p>Notice it adds this type to the list of types in the assembly,&nbsp;maintaining the same symantecs between javascript and the .net&nbsp;framework - obviously the javascript is a little scary, especially&nbsp;considering all the existing variable names have been lost - but&nbsp;for all that it's quite readable:</p>
 <pre>
@@ -185,7 +185,7 @@ var CurrentAssembly = Assemblies["VoltaWeb.Client, Version=1.0.0.0, Culture=neut
     var methRef_2 = GetMethodRef(typRef_3, "GetHashCode", [typRef_5]);<br />
     var methRef_3 = GetMethodRef(typRef_3, "Finalize", [typRef_6]);<br />
     var Methods = {};</p>
-<p>    Methods["meth_13"&#47;*VoltaWeb.Inflector.Ordinalize*&#47;] = function _VoltaWeb_Inflector_Ordinalize_System_String_(param_2) {</p>
+<p>    Methods["meth_13"/*VoltaWeb.Inflector.Ordinalize*/] = function _VoltaWeb_Inflector_Ordinalize_System_String_(param_2) {</p>
 <p>        var asmRef_0 = Assembly.References.ref_0();<br />
         var typDef_0 = GetTypeDef(asmRef_0, "System.Int32");<br />
         var typDef_1 = GetTypeDef(asmRef_0, "System.String");<br />
@@ -201,7 +201,7 @@ var CurrentAssembly = Assemblies["VoltaWeb.Client, Version=1.0.0.0, Culture=neut
 <p>        while (true) switch($next) {<br />
             case 0:<br />
                 {<br />
-                    loc_3 = methDef_0(param_2)&#47;*System.Int32.Parse(System.String)*&#47;;<br />
+                    loc_3 = methDef_0(param_2)/*System.Int32.Parse(System.String)*/;<br />
                     loc_4 = loc_3 % 100;<br />
                     var br1 = loc_4 < 11;</p>
 <p>                    if (br1 || br1 === "") {<br />
@@ -214,7 +214,7 @@ var CurrentAssembly = Assemblies["VoltaWeb.Client, Version=1.0.0.0, Culture=neut
                         continue;<br />
                     }<br />
                     return methDef_1(param_2, "th")</p>
-<p>                    &#47;*System.String.Concat(System.String,System.String)*&#47;;</p>
+<p>                    /*System.String.Concat(System.String,System.String)*/;</p>
 <p>                    $next = 40;<br />
                 }<br />
             case 40:<br />
@@ -238,24 +238,24 @@ var CurrentAssembly = Assemblies["VoltaWeb.Client, Version=1.0.0.0, Culture=neut
             case 70:<br />
                 {<br />
                     return methDef_1(param_2, "st")<br />
-                    &#47;*System.String.Concat(System.String,System.String)*&#47;;<br />
+                    /*System.String.Concat(System.String,System.String)*/;<br />
                     $next = 82;<br />
                 }<br />
             case 82:<br />
                 {<br />
                     return methDef_1(param_2, "nd")<br />
-                    &#47;*System.String.Concat(System.String,System.String)*&#47;;<br />
+                    /*System.String.Concat(System.String,System.String)*/;<br />
                     $next = 94;<br />
                 }<br />
             case 94:<br />
                 {<br />
-                    return methDef_1(param_2, "rd")&#47;*System.String.Concat(System.String,System.String)*&#47;;<br />
+                    return methDef_1(param_2, "rd")/*System.String.Concat(System.String,System.String)*/;<br />
                     $next = 106;<br />
                 }<br />
             case 106:<br />
                 {<br />
                     return methDef_1(param_2, "th")<br />
-                    &#47;*System.String.Concat(System.String,System.String)*&#47;;<br />
+                    /*System.String.Concat(System.String,System.String)*/;<br />
                 }<br />
         }<br />
     };</p>
@@ -273,7 +273,7 @@ var CurrentAssembly = Assemblies["VoltaWeb.Client, Version=1.0.0.0, Culture=neut
     Ret["PublicMethods"] = {};<br />
     Ret["PublicMethods"]["Ordinalize"] = {};<br />
     Ret["PublicMethods"]["Ordinalize"][GetSignature([typRef_0, typRef_0])] = "meth_13";<br />
-    &#47;*VoltaWeb.Inflector.Ordinalize*&#47;<br />
+    /*VoltaWeb.Inflector.Ordinalize*/<br />
     Ret["Assembly"] = CurrentAssembly;<br />
     Ret["Name"] = "VoltaWeb.Inflector";<br />
     Ret["Initializer"] = (function(instance){<br />
@@ -282,9 +282,9 @@ var CurrentAssembly = Assemblies["VoltaWeb.Client, Version=1.0.0.0, Culture=neut
     Ret["TypeInitializer"] = (function(_vT){});<br />
     return Ret;<br />
 })();<br />
-<&#47;pre></p>
+</pre></p>
 <p>Now the above output was generated because I had enabled "verbose&nbsp;javascript output" - by default this isn't on, but can be enabled&nbsp;via a check box on the Volta tab, in the properties for the Volta&nbsp;project:</p>
-<p><img src="http:&#47;&#47;blog.bittercoder.com&#47;images&#47;7_volta_tab_options.PNG" alt="" height="77" border="1" &#47;></p>
+<p><img src="http://blog.bittercoder.com/images/7_volta_tab_options.PNG" alt="" height="77" border="1" /></p>
 <p>For those people who care about their javascript being compacted,&nbsp;this is what the non-verbose equivalent looked like, which has no&nbsp;comments or unnecessary whitespace - though with all the qualified&nbsp;type name strings sprinkled everywhere I think the javascript's&nbsp;always going to be a little weighty, and I do wonder if perhaps&nbsp;they couldn't eliminate the need for a lot of them in the&nbsp;non-verbose javascript via some variables being introduced at the&nbsp;top - just look how many times the "System.String" literal is&nbsp;sprinkled around in this small class.</p>
 <pre>
 var CurrentAssembly = Assemblies["VoltaPrelude, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35"];CurrentAssembly.TypeDefs["Microsoft.LiveLabs.Volta.JavaScript.Global"] = (function(){</p>
@@ -340,5 +340,5 @@ var CurrentAssembly = Assemblies["VoltaPrelude, Version=1.0.0.0, Culture=neutral
 <p>rv._vT = GetTypeDef(Assembly, "Microsoft.LiveLabs.Volta.JavaScript.Arguments");}return rv;};Ret["Methods"] = Methods;var VTable = {};VTable[nA] = mA;VTable[nB] = mB;VTable[nC] = mC;VTable[nD] = mD;Ret["VTable"] = VTable;var Parents = {};Parents[lI.Id] = true;Parents[lJ.Id] = true;Ret["Parents"] = Parents;Ret["PublicMethods"] = {};Ret["PublicMethods"]["DecodeURI"] = {};Ret["PublicMethods"]["DecodeURI"][GetSignature([lA, lA])] = "eEI";Ret["PublicMethods"]["DecodeURIComponent"] = {};Ret["PublicMethods"]["DecodeURIComponent"][GetSignature([lA, lA])] = "eEJ";Ret["PublicMethods"]["EncodeURI"] = {};Ret["PublicMethods"]["EncodeURI"][GetSignature([lA, lA])] = "eEK";Ret["PublicMethods"]["EncodeURIComponent"] = {};Ret["PublicMethods"]["EncodeURIComponent"][GetSignature([lA, lA])] = "eEL";Ret["PublicMethods"]["Escape"] = {};Ret["PublicMethods"]["Escape"][GetSignature([lA, lA])] = "eEM";Ret["PublicMethods"]["Eval"] = {};Ret["PublicMethods"]["Eval"][GetSignature([lA, lB])] = "eEN";Ret["PublicMethods"]["Eval"][GetSignature([lA, lC])] = "eEO";Ret["PublicMethods"]["get_Infinity"] = {};Ret["PublicMethods"]["get_Infinity"][GetSignature([lD])] = "eEP";Ret["PublicMethods"]["IsFinite"] = {};Ret["PublicMethods"]["IsFinite"][GetSignature([lD, lE])] = "eEQ";Ret["PublicMethods"]["IsNaN"] = {};Ret["PublicMethods"]["IsNaN"][GetSignature([lD, lE])] = "eER";Ret["PublicMethods"]["get_NaN"] = {};Ret["PublicMethods"]["get_NaN"][GetSignature([lD])] = "eES";Ret["PublicMethods"]["ParseFloat"] = {};Ret["PublicMethods"]["ParseFloat"][GetSignature([lA, lD])] = "eET";Ret["PublicMethods"]["ParseInt"] = {};Ret["PublicMethods"]["ParseInt"][GetSignature([lA, lD])] = "eEU";Ret["PublicMethods"]["ParseInt"][GetSignature([lA, lF, lD])] = "eEV";Ret["PublicMethods"]["TypeOf"] = {};Ret["PublicMethods"]["TypeOf"][GetSignature([lB, lA])] = "eEW";Ret["PublicMethods"]["InstanceOf"] = {};Ret["PublicMethods"]["InstanceOf"][GetSignature([lB, lG, lE])] = "eEX";Ret["PublicMethods"]["InstanceOf"][GetSignature([lB, lA, lE])] = "eEY";Ret["PublicMethods"]["get_Undefined"] = {};Ret["PublicMethods"]["get_Undefined"][GetSignature([lB])] = "eEZ";Ret["PublicMethods"]["Unescape"] = {};Ret["PublicMethods"]["Unescape"][GetSignature([lA, lA])] = "eE0";Ret["PublicMethods"]["get_Arguments"] = {};Ret["PublicMethods"]["get_Arguments"][GetSignature([lH])] = "eE1";Ret["Assembly"] = CurrentAssembly;Ret["Name"] = "Microsoft.LiveLabs.Volta.JavaScript.Global";Ret["Initializer"] = (function(instance){</p>
 <p>return instance;});Ret["TypeInitializer"] = (function(_vT){</p>
 <p>});return Ret;})();<br />
-<&#47;pre></p>
-<p>At any rate I'm going to wrap it up there for now... work to do,&nbsp;but I have to say for a very early preview Volta is proving&nbsp;surprisingly&nbsp;robust - I really hope in the long term it becomes a&nbsp;product in and of itself, rather then being reabsorbed - to me it's&nbsp;a logical approach to reducing complexity in a lot of what we do&nbsp;today - especially when it comes to embracing the <a href="http:&#47;&#47;en.wikipedia.org&#47;wiki&#47;Don%27t_repeat_yourself">DRY<&#47;a>&nbsp;principal.</p>
+</pre></p>
+<p>At any rate I'm going to wrap it up there for now... work to do,&nbsp;but I have to say for a very early preview Volta is proving&nbsp;surprisingly&nbsp;robust - I really hope in the long term it becomes a&nbsp;product in and of itself, rather then being reabsorbed - to me it's&nbsp;a logical approach to reducing complexity in a lot of what we do&nbsp;today - especially when it comes to embracing the <a href="http://en.wikipedia.org/wiki/Don%27t_repeat_yourself">DRY</a>&nbsp;principal.</p>

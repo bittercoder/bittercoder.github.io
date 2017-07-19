@@ -24,12 +24,12 @@ tags:
 comments: []
 ---
 <p>
-  <img src="http:&#47;&#47;blog.bittercoder.com&#47;images&#47;ioc_tutorial_titles&#47;8_implementations_by_key.png" alt="8_implementations_by_key.png" border="0" height="189" width="270" &#47;><br &#47;><br />
-  So far we've looked at registering one implementation for any one service, you could call them the "default" implementation, because it's the implementation the container returns when you   ask for that service... but your not limited to only having one implementation registered, and the way to do this is by giving each implementation that's registered a unique key.<br &#47;><br />
-  <br &#47;> There are many reasons for doing this... but in this example we'll look at one reason - because we want to vary the configuration info used...<br &#47;><br />
-  <br &#47;>  So here's our component's code:<br &#47;><br />
-  <br &#47;><br />
-<&#47;p></p>
+  <img src="http://blog.bittercoder.com/images/ioc_tutorial_titles/8_implementations_by_key.png" alt="8_implementations_by_key.png" border="0" height="189" width="270" /><br /><br />
+  So far we've looked at registering one implementation for any one service, you could call them the "default" implementation, because it's the implementation the container returns when you   ask for that service... but your not limited to only having one implementation registered, and the way to do this is by giving each implementation that's registered a unique key.<br /><br />
+  <br /> There are many reasons for doing this... but in this example we'll look at one reason - because we want to vary the configuration info used...<br /><br />
+  <br />  So here's our component's code:<br /><br />
+  <br /><br />
+</p></p>
 <pre>
 public class FileReader<br />
 {<br />
@@ -44,34 +44,34 @@ public class FileReader<br />
         return File.ReadAllText(_fileName);<br />
     }<br />
 }<br />
-<&#47;pre><br &#47;><br />
-It's a simple class which lets us read the contents of a file as many times as we like... so we're going to try registering it twice, with different configurations (and different identifiers) in the container.<br &#47;><br />
-<br &#47;></p>
+</pre><br /><br />
+It's a simple class which lets us read the contents of a file as many times as we like... so we're going to try registering it twice, with different configurations (and different identifiers) in the container.<br /><br />
+<br /></p>
 <pre>
 <configuration></p>
 <p>  <configSections></p>
 <section name="castle"<br />
-        type="Castle.Windsor.Configuration.AppDomain.CastleSectionHandler, Castle.Windsor" &#47;><br />
-  <&#47;configSections></p>
+        type="Castle.Windsor.Configuration.AppDomain.CastleSectionHandler, Castle.Windsor" /><br />
+  </configSections></p>
 <p>  <castle><br />
     <components><br />
       <component id="reader.file1" type="IoC.Tutorials.Part8.FileReader, IoC.Tutorials.Part8"></p>
 <parameters>
-          <FileName>file1.txt<&#47;FileName><br />
-        <&#47;parameters><br />
-      <&#47;component><br />
+          <FileName>file1.txt</FileName><br />
+        </parameters><br />
+      </component><br />
       <component id="reader.file2" type="IoC.Tutorials.Part8.FileReader, IoC.Tutorials.Part8"></p>
 <parameters>
-          <FileName>file2.txt<&#47;FileName><br />
-        <&#47;parameters><br />
-      <&#47;component><br />
-    <&#47;components><br />
-  <&#47;castle></p>
-<p><&#47;configuration><br />
-<&#47;pre><br &#47;><br />
+          <FileName>file2.txt</FileName><br />
+        </parameters><br />
+      </component><br />
+    </components><br />
+  </castle></p>
+<p></configuration><br />
+</pre><br /><br />
 So far so good, lets have a look at the app itself - notice that the file1Reader and file2Reader instances are "resolved" with an extra parameter - which is the id, or key, used to select a<br />
-particular implementation... but what about the default instance, which reader will that be?<br &#47;><br />
-<br &#47;></p>
+particular implementation... but what about the default instance, which reader will that be?<br /><br />
+<br /></p>
 <pre>
 static void Main(string[] args)<br />
 {<br />
@@ -84,60 +84,60 @@ static void Main(string[] args)<br />
     Console.WriteLine("File2 contents: {0}", file2Reader.ReadToEnd());</p>
 <p>    Console.Read();<br />
 }<br />
-<&#47;pre></p>
-<p style="margin: 0px;"><br &#47;><br />
-<&#47;p>And here's the results of running the program:<br &#47;><br />
-<b><br &#47;><br />
-Default contents: This is the contents of file 1.<br &#47;><br />
-File1 contents: This is the contents of file 1.<br &#47;><br />
-File2 contents: This is the contents of file 2.<&#47;b><br &#47;><br />
-<br &#47;><br />
-So you can see that <b>file1Reader<&#47;b> and <b>defaultReader<&#47;b> are the same - and file1Reader was the first FileReader to be registered in the container -and that's the rule, the first one<br />
-registered is the default... which is another example of convention over configuration with Castle, rather then having to explicitly denote which is the default with some more xml noise.<br &#47;> <br &#47;><br />
+</pre></p>
+<p style="margin: 0px;"><br /><br />
+</p>And here's the results of running the program:<br /><br />
+<b><br /><br />
+Default contents: This is the contents of file 1.<br /><br />
+File1 contents: This is the contents of file 1.<br /><br />
+File2 contents: This is the contents of file 2.</b><br /><br />
+<br /><br />
+So you can see that <b>file1Reader</b> and <b>defaultReader</b> are the same - and file1Reader was the first FileReader to be registered in the container -and that's the rule, the first one<br />
+registered is the default... which is another example of convention over configuration with Castle, rather then having to explicitly denote which is the default with some more xml noise.<br /> <br /><br />
 Though with a little thinking you can find plenty of ways to access implementations by key to solve certain problems, for the<br />
 unimaginative ... how about an application where you can provide a uri to send plain text messages to ... and depending on the scheme<br />
-you need to find an implementation that can do the work of sending the message.<br &#47;><br />
-<br &#47;><br />
-You have a bunch of destinations, addressed by Uri...<br &#47;></p>
+you need to find an implementation that can do the work of sending the message.<br /><br />
+<br /><br />
+You have a bunch of destinations, addressed by Uri...<br /></p>
 <ul>
-<li>file:&#47;&#47;c:&#47;temp&#47;log.txt<br />
-  <&#47;li></p>
-<li>ftp:&#47;&#47;ftp.google.com&#47;log.txt<br />
-  <&#47;li></p>
-<li>http:&#47;&#47;www.bittercoder.com&#47;SimpleMessageService.aspx<br />
-  <&#47;li></p>
-<li>fax:&#47;&#47;64215559555<br &#47;><br />
-  <&#47;li><br />
-<&#47;ul>And then you can just register the implementations&#47;schemes you wish to support...<br &#47;></p>
+<li>file://c:/temp/log.txt<br />
+  </li></p>
+<li>ftp://ftp.google.com/log.txt<br />
+  </li></p>
+<li>http://www.bittercoder.com/SimpleMessageService.aspx<br />
+  </li></p>
+<li>fax://64215559555<br /><br />
+  </li><br />
+</ul>And then you can just register the implementations/schemes you wish to support...<br /></p>
 <ul>
 <li>messageSender.file<br />
-  <&#47;li></p>
+  </li></p>
 <li>messageSender.ftp<br />
-  <&#47;li></p>
+  </li></p>
 <li>messageSender.http<br />
-  <&#47;li></p>
+  </li></p>
 <li>messageSender.fax<br />
-  <&#47;li><br />
-<&#47;ul>And then look them up as required, using something like<br &#47;><br />
-<br &#47;></p>
+  </li><br />
+</ul>And then look them up as required, using something like<br /><br />
+<br /></p>
 <pre>
 Uri uri;<br />
-&#47;&#47; blah blah blah<br />
+// blah blah blah<br />
 string key = "messageSender."+ uri.Scheme;<br />
 if (container.Kernel.HasComponent(key))<br />
 {<br />
     ISender sender = container.Resolve<ISender>(key);<br />
-    &#47;&#47; send the message at this point...<br />
+    // send the message at this point...<br />
     sender.SendMessage("hi there");<br />
 }<br />
 else<br />
 {<br />
-    &#47;&#47; no implementation registered...<br />
+    // no implementation registered...<br />
     throw new NotImplementedException("no sender registered for scheme: " + uri.Scheme);<br />
 }<br />
-<&#47;pre><br &#47;><br />
+</pre><br /><br />
 Personally I wouldn't do this ;o) but there's certainly no technical reason why you couldn't... notice how we check that a<br />
 component is registered for that key - we could just let the container throw an exception... but then we wouldn't know how to<br />
-check that a container has a certain key registered in it, would we!<br &#47;><br />
-<br &#47;><br />
-The next part will be on constructor injection... and following that setter injection.<br &#47;></p>
+check that a container has a certain key registered in it, would we!<br /><br />
+<br /><br />
+The next part will be on constructor injection... and following that setter injection.<br /></p>

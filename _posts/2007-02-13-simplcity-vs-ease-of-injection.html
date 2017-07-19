@@ -41,12 +41,12 @@ private Func<DateTime> _nowFunction;</p>
     _maxExecutions = maxExecutions;<br />
     _trialDuration = trialDuration;<br />
 }<br />
-<&#47;pre></p>
+</pre></p>
 <p>But I'm starting to wonder if this code doesn't smell a bit if I start using it other places... for instance:</p>
 <ul>
-<li>Could I supply an alternative delegate via the <a href="http:&#47;&#47;wiki.castleproject.org&#47;index.php&#47;Container">castle container<&#47;a>...?<&#47;li>
-<li>Could I mock out the nowFunction parameter easily using something like <a href="http:&#47;&#47;www.ayende.com&#47;projects&#47;rhino-mocks&#47;downloads.aspx">RhinoMocks<&#47;a> and still have it participate in constraints...?<&#47;li><br />
-<&#47;ul><br />
+<li>Could I supply an alternative delegate via the <a href="http://wiki.castleproject.org/index.php/Container">castle container</a>...?</li>
+<li>Could I mock out the nowFunction parameter easily using something like <a href="http://www.ayende.com/projects/rhino-mocks/downloads.aspx">RhinoMocks</a> and still have it participate in constraints...?</li><br />
+</ul><br />
 I'm thinking in the case of mocking it out you would probably need to implement some interfaces which lines up with the generic delegates (Func<Ret,T1,T2...> and Proc<T1,T2...> etc.) - so I would end mocking out an IFuncEvaluator<Ret> interface (or in this case IFuncEvaluator<DateTime>) -which would implement a method "T Evaluate();"... and the pass an anonymous delegate which in turn invokes the mocked IFuncEvaluator<Ret>.</p>
 <p>Though maybe I've missed something and mocking out delegates is doable with the current RhinoMocks..?</p>
 <p>As for being able to inject a value for the nowFunction parameter, I'm thinking a nice solution would be to actually wire it up to a method on another service declaratively i.e.</p>
@@ -54,18 +54,18 @@ I'm thinking in the case of mocking it out you would probably need to implement 
 <component id="trialUpdater" type="MyLib.TrialUpdater, MyLib" ></p>
 <parameters>
     <nowFunction><br />
-      <method service="clockService" method="GetCurrentTime" &#47;><br />
-    <&#47;nowFunction><br />
-  <&#47;parameters><br />
-<&#47;component><br />
-<&#47;pre></p>
+      <method service="clockService" method="GetCurrentTime" /><br />
+    </nowFunction><br />
+  </parameters><br />
+</component><br />
+</pre></p>
 <p>Which I believe should be doable using a facility and a type converter... but I'm sure the devil's in the detail :)</p>
 <p>At any rate, just a minor distraction, back to work.</p>
 <p>As an aside the clocks a pretty boring example, but there are times<br />
 when you want to manipulate the time for instance:</p>
 <ul>
-<li>If you want to manipulate the time (return dates as UTC instead of Local)<&#47;li>
-<li>Clamp the current Time so it's limited to a certain level of accuracy... perhaps you have an external expectation that all dates will be recorded at a 10ms level of accuracy (perhaps you want to align database timestamps with timestamps within your application).<&#47;li>
-<li>Perhaps your application uses the clock to work with snapshots of your domain model in the past.<&#47;li><br />
-<&#47;ul><br />
-How many people are actually using anonymous delegates and generic Func<T...> &#47; Proc<T...>'s in their day to day coding for tasks like this?</p>
+<li>If you want to manipulate the time (return dates as UTC instead of Local)</li>
+<li>Clamp the current Time so it's limited to a certain level of accuracy... perhaps you have an external expectation that all dates will be recorded at a 10ms level of accuracy (perhaps you want to align database timestamps with timestamps within your application).</li>
+<li>Perhaps your application uses the clock to work with snapshots of your domain model in the past.</li><br />
+</ul><br />
+How many people are actually using anonymous delegates and generic Func<T...> / Proc<T...>'s in their day to day coding for tasks like this?</p>

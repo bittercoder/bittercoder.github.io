@@ -24,43 +24,43 @@ comments: []
 ---
 <h2>
   Trac<br />
-<&#47;h2></p>
+</h2></p>
 <h2>
   I know it's not .Net, but that's not always a bad thing...<br />
-<&#47;h2>Well I tend to keep my eye out for things which take my fancy, or more importantly, free things that take my fancy...<br &#47;><br />
-<br &#47;><br />
-<a href="http:&#47;&#47;trac.edgewall.org&#47;">Trac<&#47;a> is one of those things, a project management and bug database web app written in Python, written by <a href="http:&#47;&#47;www.edgewall.org&#47;">edgewall software<&#47;a>... it's actually pretty cool... for RoR enthusiasts they're probably aware of it's existence already (considering <a href="http:&#47;&#47;dev.rubyonrails.org&#47;">RoR use this<&#47;a> for manging their bugs and patches)<br &#47;><br />
-<br &#47;><br />
-First off, you can run it on windows...&nbsp; though a *nix is generally better, and it's not too hard to get going - took me about half an hour... second thing, it's a lot better once you install a few <a href="http:&#47;&#47;www.trac-hacks.org&#47;">hacks<&#47;a> especially:<br &#47;></p>
+</h2>Well I tend to keep my eye out for things which take my fancy, or more importantly, free things that take my fancy...<br /><br />
+<br /><br />
+<a href="http://trac.edgewall.org/">Trac</a> is one of those things, a project management and bug database web app written in Python, written by <a href="http://www.edgewall.org/">edgewall software</a>... it's actually pretty cool... for RoR enthusiasts they're probably aware of it's existence already (considering <a href="http://dev.rubyonrails.org/">RoR use this</a> for manging their bugs and patches)<br /><br />
+<br /><br />
+First off, you can run it on windows...&nbsp; though a *nix is generally better, and it's not too hard to get going - took me about half an hour... second thing, it's a lot better once you install a few <a href="http://www.trac-hacks.org/">hacks</a> especially:<br /></p>
 <ul>
 <li>
-    <a href="http:&#47;&#47;trac.edgewall.org&#47;wiki&#47;WebAdmin">WebAdmin<&#47;a><br />
-  <&#47;li></p>
+    <a href="http://trac.edgewall.org/wiki/WebAdmin">WebAdmin</a><br />
+  </li></p>
 <li>
-    <a href="http:&#47;&#47;www.trac-hacks.org&#47;wiki&#47;AccountManagerPlugin">AccountManagerPlugin<&#47;a><br />
-  <&#47;li></p>
+    <a href="http://www.trac-hacks.org/wiki/AccountManagerPlugin">AccountManagerPlugin</a><br />
+  </li></p>
 <li>
-    <a href="http:&#47;&#47;www.trac-hacks.org&#47;wiki&#47;XmlRpcPlugin">XmlRpcPlugin<&#47;a><br />
-  <&#47;li><br />
-<&#47;ul>Now, at this point what makes it good?<br &#47;></p>
+    <a href="http://www.trac-hacks.org/wiki/XmlRpcPlugin">XmlRpcPlugin</a><br />
+  </li><br />
+</ul>Now, at this point what makes it good?<br /></p>
 <ul>
 <li>SVN Integration<br />
-  <&#47;li></p>
+  </li></p>
 <li>Wiki Integration<br />
-  <&#47;li></p>
+  </li></p>
 <li>Extensibility and community support<br />
-  <&#47;li><br />
-<&#47;ul>Basically I can check in code with comments containing wiki markup and references to existing "tickets" logged in the system... The wiki integration incidentally is my primary motivation for looking so closely at using this for some of the projects I've been working on... I'm a liability to Seismic Technologies... documenting build processes etc. in a wiki are one way we can minimize that... We already have a customer-focused wiki, but it doesn't encourage maintenance on a day-to-day basis like this product does.<br &#47;><br />
-<br &#47;><br />
-secondary to that is the very good subversion integration, a must considering that's the only source control system I use.<br &#47;></p>
+  </li><br />
+</ul>Basically I can check in code with comments containing wiki markup and references to existing "tickets" logged in the system... The wiki integration incidentally is my primary motivation for looking so closely at using this for some of the projects I've been working on... I'm a liability to Seismic Technologies... documenting build processes etc. in a wiki are one way we can minimize that... We already have a customer-focused wiki, but it doesn't encourage maintenance on a day-to-day basis like this product does.<br /><br />
+<br /><br />
+secondary to that is the very good subversion integration, a must considering that's the only source control system I use.<br /></p>
 <h2>
   Creating tickets via XML-RPC in C#<br />
-<&#47;h2>Now the last hack I suggested exposes plenty of functionality in the system via XML RPC... at which point we can start logging bugs remotely, from C#... to do this we'll need a copy of the <a href="http:&#47;&#47;www.xml-rpc.net&#47;">xmlrpc.net library<&#47;a><br &#47;><br />
-<br &#47;><br />
-I'm not conducting a tutorial here ;o) but if Trac takes your fancy you might find this code handy... first off this is our interface for logging tickets in Trac - incidentally this is only a small subset of the funcionality exposed.<br &#47;><br />
-<br &#47;></p>
+</h2>Now the last hack I suggested exposes plenty of functionality in the system via XML RPC... at which point we can start logging bugs remotely, from C#... to do this we'll need a copy of the <a href="http://www.xml-rpc.net/">xmlrpc.net library</a><br /><br />
+<br /><br />
+I'm not conducting a tutorial here ;o) but if Trac takes your fancy you might find this code handy... first off this is our interface for logging tickets in Trac - incidentally this is only a small subset of the funcionality exposed.<br /><br />
+<br /></p>
 <pre>
-[XmlRpcUrl("http:&#47;&#47;localhost&#47;trac&#47;login&#47;xmlrpc")]<br />
+[XmlRpcUrl("http://localhost/trac/login/xmlrpc")]<br />
 public interface ITicket : IXmlRpcProxy<br />
 {<br />
     [XmlRpcMethod("ticket.query")]<br />
@@ -94,9 +94,9 @@ public interface ITicket : IXmlRpcProxy<br />
 <p>    [XmlRpcMethod("ticket.milestone.getAll")]<br />
     string[] GetAllMilestones();<br />
 }<br />
-<&#47;pre><br &#47;><br />
-Now, tickets have a bunch of attributes associated with them...<br &#47;><br />
-<br &#47;></p>
+</pre><br /><br />
+Now, tickets have a bunch of attributes associated with them...<br /><br />
+<br /></p>
 <pre>
 public static class TicketAttributes<br />
 {<br />
@@ -114,14 +114,14 @@ public static class TicketAttributes<br />
     public const string Description = "description";<br />
     public const string Priority = "priority";<br />
 }<br />
-<&#47;pre><br &#47;><br />
-And we can make ticket information easier to get a hold of with a simple class:<br &#47;><br />
-<br &#47;></p>
+</pre><br /><br />
+And we can make ticket information easier to get a hold of with a simple class:<br /><br />
+<br /></p>
 <pre>
-&#47;&#47;&#47;<br />
+///<br />
 <summary>
-&#47;&#47;&#47; represents the information for a ticket<br />
-&#47;&#47;&#47; <&#47;summary><br />
+/// represents the information for a ticket<br />
+/// </summary><br />
 public class TicketInfo<br />
 {<br />
     private int _ticketId;<br />
@@ -144,38 +144,38 @@ public class TicketInfo<br />
         _lastModified = DateHelper.ParseUnixTimestamp((int)values[2]);<br />
         _attributes = (XmlRpcStruct)values[3];<br />
     }</p>
-<p>    &#47;&#47;&#47;<br />
+<p>    ///<br />
 <summary>
-    &#47;&#47;&#47; The identifier for this ticket<br />
-    &#47;&#47;&#47; <&#47;summary><br />
+    /// The identifier for this ticket<br />
+    /// </summary><br />
     public int TicketId<br />
     {<br />
         get { return _ticketId; }<br />
         set { _ticketId = value; }<br />
     }</p>
-<p>    &#47;&#47;&#47;<br />
+<p>    ///<br />
 <summary>
-    &#47;&#47;&#47; date and time the ticket was created<br />
-    &#47;&#47;&#47; <&#47;summary><br />
+    /// date and time the ticket was created<br />
+    /// </summary><br />
     public DateTime Created<br />
     {<br />
         get { return _created; }<br />
         set { _created = value; }<br />
     }</p>
-<p>    &#47;&#47;&#47;<br />
+<p>    ///<br />
 <summary>
-    &#47;&#47;&#47; date and time the ticket was last modified<br />
-    &#47;&#47;&#47; <&#47;summary><br />
+    /// date and time the ticket was last modified<br />
+    /// </summary><br />
     public DateTime LastModified<br />
     {<br />
         get { return _lastModified; }<br />
         set { _lastModified = value; }<br />
     }</p>
-<p>    &#47;&#47;&#47;<br />
+<p>    ///<br />
 <summary>
-    &#47;&#47;&#47; The attributes for this ticket, this will include any additional fields<br />
-    &#47;&#47;&#47; that aren't defined explicitly as members of this class.<br />
-    &#47;&#47;&#47; <&#47;summary><br />
+    /// The attributes for this ticket, this will include any additional fields<br />
+    /// that aren't defined explicitly as members of this class.<br />
+    /// </summary><br />
     public XmlRpcStruct Attributes<br />
     {<br />
         get<br />
@@ -272,9 +272,9 @@ public class TicketInfo<br />
     }</p>
 <p>    #endregion<br />
 }<br />
-<&#47;pre><br &#47;><br />
-And last of all we have a class for managing tickets.. by the way this isn't complete, I haven't finished writing it because this is just one of my back burner projects...<br &#47;><br />
-<br &#47;></p>
+</pre><br /><br />
+And last of all we have a class for managing tickets.. by the way this isn't complete, I haven't finished writing it because this is just one of my back burner projects...<br /><br />
+<br /></p>
 <pre>
 public class TicketManager<br />
 {<br />
@@ -338,13 +338,13 @@ public class TicketManager<br />
         if (ticket.TicketId <= 0) throw new ArgumentException("ticketId must be greater then 0");<br />
     }<br />
 }<br />
-<&#47;pre><br &#47;><br />
-About the only trick here is that some of the date values get returned as unix time stamps so you need to convert them...<br &#47;><br />
-<br &#47;></p>
+</pre><br /><br />
+About the only trick here is that some of the date values get returned as unix time stamps so you need to convert them...<br /><br />
+<br /></p>
 <pre>
 public static DateTime ParseUnixTimestamp(double timestamp)<br />
 {<br />
     return new DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds(timestamp);<br />
 }<br />
-<&#47;pre><br &#47;><br />
-Because the Syzmk Rich Media Processor product I work on is a clearing house for simple messages among other things... It becomes a small jump from here (about 30 lines of C# code, 5 for a quick and dirty "IronPython" script) to start submitting tasks and bugs via email or mobile... who knows, it could be handy if you get a call while your out of the office and need to log a bug or task.<br &#47;></p>
+</pre><br /><br />
+Because the Syzmk Rich Media Processor product I work on is a clearing house for simple messages among other things... It becomes a small jump from here (about 30 lines of C# code, 5 for a quick and dirty "IronPython" script) to start submitting tasks and bugs via email or mobile... who knows, it could be handy if you get a call while your out of the office and need to log a bug or task.<br /></p>

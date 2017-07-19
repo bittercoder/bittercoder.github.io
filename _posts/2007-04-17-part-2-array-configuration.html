@@ -23,11 +23,11 @@ tags:
 - IoC
 comments: []
 ---
-<p><img src="http:&#47;&#47;blog.bittercoder.com&#47;images&#47;ioc_tutorial_titles&#47;2_more_config_arrays.png" &#47;><br &#47;><br />
-So welcome to part 2, today we're going to look at some more config - this time it's arrays...<br &#47;><br />
-<br &#47;><br />
-So we have a class, that tells us when we can down tools and go to the beach...<br &#47;><br />
-<br &#47;></p>
+<p><img src="http://blog.bittercoder.com/images/ioc_tutorial_titles/2_more_config_arrays.png" /><br /><br />
+So welcome to part 2, today we're going to look at some more config - this time it's arrays...<br /><br />
+<br /><br />
+So we have a class, that tells us when we can down tools and go to the beach...<br /><br />
+<br /></p>
 <pre>
 public class HolidayService<br />
 {<br />
@@ -56,11 +56,11 @@ public class HolidayService<br />
 <p>        return false;<br />
     }<br />
 }<br />
-<&#47;pre><br &#47;><br />
-We can set the days we are allowed off by adding dates to the holidays array...<br &#47;><br />
-<br &#47;><br />
-So lets look at our code for running this service:<br &#47;><br />
-<br &#47;></p>
+</pre><br /><br />
+We can set the days we are allowed off by adding dates to the holidays array...<br /><br />
+<br /><br />
+So lets look at our code for running this service:<br /><br />
+<br /></p>
 <pre>
 internal class Program<br />
 {<br />
@@ -81,40 +81,40 @@ internal class Program<br />
 <p>        Console.Read();<br />
     }<br />
 }<br />
-<&#47;pre><br &#47;><br />
-The service configuration is just like last time, we have the component registered with no parameters... so if we run the program we shall see on the screen:<br &#47;><br />
-<br &#47;><br />
-<b>xmas is only for management!<br &#47;><br />
-new year, you haven't done all the work for last year!<br &#47;><&#47;b><br &#47;><br />
-Mum will be dissapointed, she'd done a roast 'n all... so lets get some configuration in their so we can have a few days off...<br &#47;><br />
-<br &#47;></p>
+</pre><br /><br />
+The service configuration is just like last time, we have the component registered with no parameters... so if we run the program we shall see on the screen:<br /><br />
+<br /><br />
+<b>xmas is only for management!<br /><br />
+new year, you haven't done all the work for last year!<br /></b><br /><br />
+Mum will be dissapointed, she'd done a roast 'n all... so lets get some configuration in their so we can have a few days off...<br /><br />
+<br /></p>
 <pre>
 <configuration></p>
 <p>  <configSections></p>
 <section name="castle"<br />
-        type="Castle.Windsor.Configuration.AppDomain.CastleSectionHandler, Castle.Windsor" &#47;><br />
-  <&#47;configSections></p>
+        type="Castle.Windsor.Configuration.AppDomain.CastleSectionHandler, Castle.Windsor" /><br />
+  </configSections></p>
 <p>  <castle><br />
     <components><br />
       <component id="holidays.service" type="IoC.Tutorials.Part2.HolidayService, IoC.Tutorials.Part2" ></p>
 <parameters>
           <Holidays><br />
             <array><br />
-              <item>2007-12-24<&#47;item><br />
-              <item>2007-12-25<&#47;item><br />
-              <item>2008-1-1<&#47;item><br />
-            <&#47;array><br />
-          <&#47;Holidays><br />
-        <&#47;parameters><br />
-      <&#47;component><br />
-    <&#47;components><br />
-  <&#47;castle></p>
-<p><&#47;configuration><br />
-<&#47;pre><br &#47;><br />
-Now let's see if we're going to have a merry xmas and a happy new year - a quick run of our application....<br &#47;><br />
-<br &#47;><br />
-merry xmas!<br &#47;><br />
-happy new year<br &#47;><br />
-<br &#47;><br />
-You don't just have to use arrays either, you can do lists too - though I didn't show them here, just use <strong>list<&#47;strong> instead of <strong>array<&#47;strong> in the xml configuration...<br &#47;><br />
-<br &#47;> See you for part 3 where we do dictionary configurations.<br &#47;></p>
+              <item>2007-12-24</item><br />
+              <item>2007-12-25</item><br />
+              <item>2008-1-1</item><br />
+            </array><br />
+          </Holidays><br />
+        </parameters><br />
+      </component><br />
+    </components><br />
+  </castle></p>
+<p></configuration><br />
+</pre><br /><br />
+Now let's see if we're going to have a merry xmas and a happy new year - a quick run of our application....<br /><br />
+<br /><br />
+merry xmas!<br /><br />
+happy new year<br /><br />
+<br /><br />
+You don't just have to use arrays either, you can do lists too - though I didn't show them here, just use <strong>list</strong> instead of <strong>array</strong> in the xml configuration...<br /><br />
+<br /> See you for part 3 where we do dictionary configurations.<br /></p>

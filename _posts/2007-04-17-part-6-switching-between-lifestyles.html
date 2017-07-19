@@ -31,20 +31,20 @@ comments:
   content: |-
     Yeah, it's a good point - generally speaking most projects leveraging Castle windsor tend to have:
 
-    A Reference to <strong>Castle.Core<&#47;strong> for any components being registered in the container... to access interfaces such as <strong>IStartable<&#47;strong>, and attributes like <strong>[Transient]<&#47;strong>.
+    A Reference to <strong>Castle.Core</strong> for any components being registered in the container... to access interfaces such as <strong>IStartable</strong>, and attributes like <strong>[Transient]</strong>.
 
-    And of course for the main assembly&#47;application that instantiates the container itself they will also need a reference to the <strong>Castle.Core<&#47;strong>, <strong>Castle.MicroKernel<&#47;strong>, <strong>Castle.DynamicProxy2<&#47;strong> and <strong>Castle.Windsor<&#47;strong>.
+    And of course for the main assembly/application that instantiates the container itself they will also need a reference to the <strong>Castle.Core</strong>, <strong>Castle.MicroKernel</strong>, <strong>Castle.DynamicProxy2</strong> and <strong>Castle.Windsor</strong>.
 ---
-<p><img src="http:&#47;&#47;blog.bittercoder.com&#47;images&#47;ioc_tutorial_titles&#47;6_switching_lifestyles.png" &#47;><br &#47;><br />
+<p><img src="http://blog.bittercoder.com/images/ioc_tutorial_titles/6_switching_lifestyles.png" /><br /><br />
 Switching lifestyles is the theme of this post... so what's that<br />
-all about?<br &#47;><br />
-<br &#47;><br />
-Well first off - what is a lifestyle, in basic terms it specifies how many instances will be available at any one time from the container - so at the one extreme we have components with a transient lifestyle, where any requests from those components will return new instances - and at the opposite end of the spectrum we have singleton components, where there is only one instance for the whole container - there are other types of lifestyle, but we'll leave those for another post.<br &#47;><br />
-<br &#47;><br />
-So first off - castle is all about convention over configuration, and by convention a component in the container is a singleton... so in this example we'll look into ways in which you can switch a components lifestyle to being transient.<br &#47;><br />
-<br &#47;><br />
-First off, heres our component:<br &#47;><br />
-<br &#47;></p>
+all about?<br /><br />
+<br /><br />
+Well first off - what is a lifestyle, in basic terms it specifies how many instances will be available at any one time from the container - so at the one extreme we have components with a transient lifestyle, where any requests from those components will return new instances - and at the opposite end of the spectrum we have singleton components, where there is only one instance for the whole container - there are other types of lifestyle, but we'll leave those for another post.<br /><br />
+<br /><br />
+So first off - castle is all about convention over configuration, and by convention a component in the container is a singleton... so in this example we'll look into ways in which you can switch a components lifestyle to being transient.<br /><br />
+<br /><br />
+First off, heres our component:<br /><br />
+<br /></p>
 <pre>
 public class AddingService<br />
 {<br />
@@ -58,9 +58,9 @@ public class AddingService<br />
         get { return _total; }<br />
     }<br />
 }<br />
-<&#47;pre><br &#47;><br />
-It lets us add stuff... how neat is that... lets see our program:<br &#47;><br />
-<br &#47;></p>
+</pre><br /><br />
+It lets us add stuff... how neat is that... lets see our program:<br /><br />
+<br /></p>
 <pre>
 private static void Main(string[] args)<br />
 {<br />
@@ -75,32 +75,32 @@ private static void Main(string[] args)<br />
                       catsHerded.Total);</p>
 <p>    Console.Read();<br />
 }<br />
-<&#47;pre><br &#47;><br />
-And if we run it:<br &#47;><br />
-<br &#47;><br />
-<b>You have counted 75 sheep and herded 75 angry cats<&#47;b><br &#47;><br />
-<br &#47;><br />
-That doesn't seem right - our service is retaining a count, so we want a fresh instance of the class every time we request it - which means we should shift our component to the "transient" lifestyle - lets have a go at doing it with configuration, by adding the lifestyle attribute to the components definition.<br &#47;><br />
-<br &#47;></p>
+</pre><br /><br />
+And if we run it:<br /><br />
+<br /><br />
+<b>You have counted 75 sheep and herded 75 angry cats</b><br /><br />
+<br /><br />
+That doesn't seem right - our service is retaining a count, so we want a fresh instance of the class every time we request it - which means we should shift our component to the "transient" lifestyle - lets have a go at doing it with configuration, by adding the lifestyle attribute to the components definition.<br /><br />
+<br /></p>
 <pre>
 <configuration></p>
 <p>  <configSections></p>
 <section name="castle"<br />
-        type="Castle.Windsor.Configuration.AppDomain.CastleSectionHandler, Castle.Windsor" &#47;><br />
-  <&#47;configSections></p>
+        type="Castle.Windsor.Configuration.AppDomain.CastleSectionHandler, Castle.Windsor" /><br />
+  </configSections></p>
 <p>  <castle><br />
     <components><br />
-      <component id="adding.service" type="IoC.Tutorials.Part6.AddingService, IoC.Tutorials.Part6" lifestyle="transient" &#47;><br />
-    <&#47;components><br />
-  <&#47;castle></p>
-<p><&#47;configuration><br />
-<&#47;pre><br &#47;><br />
-And now if we run it again:<br &#47;><br />
-<br &#47;><br />
-<b>You have counted 60 sheep and herded 15 angry cats<&#47;b><br &#47;><br />
-<br &#47;><br />
-That looks a bit better... but I propose that in many cases when your writing a component you know what it's lifestyle should be, before it's ever registered in a container - for instance in this case this class should always be transient, so we can actually decorate the class with a "Transient" attribute and can skip having to put the lifestyle in the configuration, this is how that would look:<br &#47;><br />
-<br &#47;></p>
+      <component id="adding.service" type="IoC.Tutorials.Part6.AddingService, IoC.Tutorials.Part6" lifestyle="transient" /><br />
+    </components><br />
+  </castle></p>
+<p></configuration><br />
+</pre><br /><br />
+And now if we run it again:<br /><br />
+<br /><br />
+<b>You have counted 60 sheep and herded 15 angry cats</b><br /><br />
+<br /><br />
+That looks a bit better... but I propose that in many cases when your writing a component you know what it's lifestyle should be, before it's ever registered in a container - for instance in this case this class should always be transient, so we can actually decorate the class with a "Transient" attribute and can skip having to put the lifestyle in the configuration, this is how that would look:<br /><br />
+<br /></p>
 <pre>
 [Transient]<br />
 public class AddingService<br />
@@ -115,7 +115,7 @@ public class AddingService<br />
         get { return _total; }<br />
     }<br />
 }<br />
-<&#47;pre><br &#47;><br />
-There are other lifestyles available to use - it's worth having a look through the castle <a href="http:&#47;&#47;wiki.castleproject.org&#47;index.php&#47;IoC:Lifecycle_and_lifestyles"> wiki<&#47;a> for more details... and we'll probably cover them in another post.<br &#47;><br />
-<br &#47;><br />
+</pre><br /><br />
+There are other lifestyles available to use - it's worth having a look through the castle <a href="http://wiki.castleproject.org/index.php/IoC:Lifecycle_and_lifestyles"> wiki</a> for more details... and we'll probably cover them in another post.<br /><br />
+<br /><br />
 In the next part we will cover switching out implementations of components themselves.</p>

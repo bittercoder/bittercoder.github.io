@@ -29,7 +29,7 @@ comments:
   date_gmt: '2007-06-14 10:53:55 +0000'
   content: Thanks for the code!  I'm looking forward to digging into this soon.
 ---
-<p><a href="http:&#47;&#47;blog.bittercoder.com&#47;content&#47;binary&#47;AnnotationsCode.zip">Here's the code<&#47;a> for my last post on <a href="http:&#47;&#47;blog.bittercoder.com&#47;PermaLink,guid,2e0e231a-e837-4585-aaab-79999bdcb484.aspx">Annotations<&#47;a> - I tidied up a few things up (it's still very basic but it does work) there's a single test fixture to give you a guide for usage... so things like:<br &#47;></p>
+<p><a href="http://blog.bittercoder.com/content/binary/AnnotationsCode.zip">Here's the code</a> for my last post on <a href="http://blog.bittercoder.com/PermaLink,guid,2e0e231a-e837-4585-aaab-79999bdcb484.aspx">Annotations</a> - I tidied up a few things up (it's still very basic but it does work) there's a single test fixture to give you a guide for usage... so things like:<br /></p>
 <pre>
     [Test]<br />
     public void QueryStoreForClassAnnotationsWithCertainKey()<br />
@@ -45,7 +45,7 @@ comments:
             .ToList();</p>
 <p>        Assert.AreEqual(2, results.Count);<br />
     }<br />
-<&#47;pre></p>
+</pre></p>
 <p>And also the equivalent thing is possible for members... though I suspect annotating members isn't all that useful in most cases...</p>
 <pre>
   [Test]<br />
@@ -55,15 +55,15 @@ comments:
       ClassA target2 = new ClassA();<br />
       ClassA target3 = new ClassA();</p>
 <p>      target1.Annotate(() => target1.FirstName,<br />
-          CamelCase => true); &#47;&#47; annotating a property<br />
+          CamelCase => true); // annotating a property<br />
       target1.Annotate(() => target1.Field,<br />
-          Ignored => true); &#47;&#47; annotating a field<br />
+          Ignored => true); // annotating a field<br />
       target2.Annotate(() => target2.Execute(),<br />
-          Parsed => true); &#47;&#47; annotating a method<br />
+          Parsed => true); // annotating a method<br />
       target3.Annotate(Parsed => true);</p>
 <p>      var results = AnnotationStore.Members<br />
           .Where(p => p.HasKey("CamelCase"))<br />
           .ToList();</p>
 <p>      Assert.AreEqual(1, results.Count);<br />
   }<br />
-<&#47;pre></p>
+</pre></p>

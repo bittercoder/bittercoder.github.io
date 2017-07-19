@@ -21,24 +21,24 @@ tags: []
 comments: []
 ---
 <p>
-  So I see both <a href="http:&#47;&#47;andrewpeters.net&#47;2007&#47;07&#47;03&#47;73&#47;">Andrew<&#47;a>, <a href="http:&#47;&#47;community.softteq.com&#47;blogs&#47;nick&#47;archive&#47;2007&#47;07&#47;03&#47;languages-only-part-of-the-equation.aspx">Nick<&#47;a> and <a href="http:&#47;&#47;www.base4.net&#47;Blog.aspx?ID=515">Alex<br />
-  J<&#47;a> have some thoughts on languages, and of course <a href="http:&#47;&#47;rowansimpson.com&#47;">Rowans<&#47;a> post sparked it off... and<br />
+  So I see both <a href="http://andrewpeters.net/2007/07/03/73/">Andrew</a>, <a href="http://community.softteq.com/blogs/nick/archive/2007/07/03/languages-only-part-of-the-equation.aspx">Nick</a> and <a href="http://www.base4.net/Blog.aspx?ID=515">Alex<br />
+  J</a> have some thoughts on languages, and of course <a href="http://rowansimpson.com/">Rowans</a> post sparked it off... and<br />
   people talk about beautiful languages, mentioning expressiveness<br />
   in the same breath.&nbsp;<br />
-<&#47;p></p>
+</p></p>
 <p>
   Personally I love how expressive Ruby is -&nbsp;I think<br />
   potentially because I got my first exposure to ruby after reading<br />
-  <a href="http:&#47;&#47;poignantguide.net&#47;ruby&#47;">Why's poignant<br />
-  guide<&#47;a>&nbsp;a while back (I see there are new chapters<br />
+  <a href="http://poignantguide.net/ruby/">Why's poignant<br />
+  guide</a>&nbsp;a while back (I see there are new chapters<br />
   ...oooh) which was quite surreal compared to how I say learnt C++<br />
   (from reading the Borland Turbo C++ manual when I was 11, also my<br />
   first exposure to OOP)...<br />
-<&#47;p></p>
+</p></p>
 <p>
   When I code in ruby I feel like I'm telling stories... I dig that<br />
   :)<br />
-<&#47;p></p>
+</p></p>
 <p>
   So Alex J mentioned that extension methods let us achieve much of<br />
   the syntactic sugar that ruby provides (though obviously in<br />
@@ -49,45 +49,45 @@ comments: []
   help but feel that a language which is very expressive, isn't<br />
   necessarily the easiest to manipulate and refactor, so I may not<br />
   be as productive and it may not feel as fluent to me... I quite<br />
-  liked this <a href="http:&#47;&#47;resharper.blogspot.com&#47;2007&#47;07&#47;of-tools-and-languages.html">resharper horizons post<&#47;a>&nbsp;which suggests that tooling<br />
+  liked this <a href="http://resharper.blogspot.com/2007/07/of-tools-and-languages.html">resharper horizons post</a>&nbsp;which suggests that tooling<br />
   support should probably influence future language design - could<br />
   that requirement possibly fight against an increased level of<br />
   expressiveness in a language, will compromises need to made, or<br />
   is nirvana just around the corner?<br />
-<&#47;p>As for C# vs VB.Net - large clumsy keywords are only a<br />
+</p>As for C# vs VB.Net - large clumsy keywords are only a<br />
 probablem until something like Resharper steps in... when I'm<br />
 developing I see a lot of unusued space on the right hand side of<br />
 the editor with C#... if VB.Net fills it up, and I'm not typing any<br />
 harder to get there, why should I care - hell it'll probably make a<br />
 VB.Net Resharper Jedi look more impressive then the C# equivalent,<br />
-he'll be producing more characters ;o)<br &#47;></p>
+he'll be producing more characters ;o)<br /></p>
 <p>
   OK, well I figured this post should at least have some code...<br />
-  I'd feel uneasy otherwise... so how about:<br &#47;><br />
-<&#47;p></p>
+  I'd feel uneasy otherwise... so how about:<br /><br />
+</p></p>
 <pre>
 public static class CommonExtensions{    public static Action<Action<int>> LoopTo(this int start, int end)    {        return new Action<Action<int>>(action => To(start, end).ForEach(i => action(i)));    }     public static IEnumerable<int> To(this int start, int end)    {        if (end < start)            for (int i = start; i > end - 1; i--)                yield return i;        else            for (int i = start; i < end + 1; i++)                yield return i;       }     public static void ForEach<T>(this IEnumerable<T> sequence, Action<T> action)    {        foreach (T item in sequence) action(item);    }     public static void PrintLine(this object o)    {        Console.WriteLine(o);    }}<br />
-<&#47;pre></p>
+</pre></p>
 <p>
-  <br &#47;><br />
-  So now we could try and do this....<br &#47;><br />
+  <br /><br />
+  So now we could try and do this....<br /><br />
   <!--<br />
-{rtf1ansiansicpglang1024noproof1252uc1 deff0{fonttbl{f0fnilfcharset0fprq1 Courier New;}}{colortbl;??red0green128blue0;red255green255blue255;red0green0blue0;}??fs20 cf1 &#47;&#47; rubypar ??cf0 (10..20).each { |i| puts i }par ??cf1 &#47;&#47; C#par ??cf0 10.LoopTo(20) (i => i.PrintLine());}<br />
+{rtf1ansiansicpglang1024noproof1252uc1 deff0{fonttbl{f0fnilfcharset0fprq1 Courier New;}}{colortbl;??red0green128blue0;red255green255blue255;red0green0blue0;}??fs20 cf1 // rubypar ??cf0 (10..20).each { |i| puts i }par ??cf1 // C#par ??cf0 10.LoopTo(20) (i => i.PrintLine());}<br />
 --><br />
-<&#47;p></p>
+</p></p>
 <pre>
-&#47;&#47; ruby(10..20).each { |i| puts i }&#47;&#47; C#10.LoopTo(20) ( i => i.PrintLine() );<br />
-<&#47;pre></p>
+// ruby(10..20).each { |i| puts i }// C#10.LoopTo(20) ( i => i.PrintLine() );<br />
+</pre></p>
 <p>
-  <br &#47;><br />
+  <br /><br />
   Alas I don't think C# will ever match ruby in this game, no<br />
   matter how we try to nudge it there... and until the development<br />
   community figures out where the healthy place is to draw the line<br />
   in the attempt, we may be doing more harm then good by pushing<br />
-  for it, sacrificing discoverability&#47;maintainability for<br />
+  for it, sacrificing discoverability/maintainability for<br />
   expressiveness.&nbsp;&nbsp; Maybe that's just dogma, and<br />
   expressiveness makes code inherently easier to maintain in the<br />
-  first place, so we don't need to care.... time will tell.<br &#47;><br />
-  <br &#47;><br />
+  first place, so we don't need to care.... time will tell.<br /><br />
+  <br /><br />
   Of course I could be wrong, I am&nbsp;a little sleepy ;o)<br />
-<&#47;p></p>
+</p></p>

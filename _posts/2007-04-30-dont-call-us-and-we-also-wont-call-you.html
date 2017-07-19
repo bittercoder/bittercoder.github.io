@@ -22,8 +22,8 @@ comments: []
 ---
 <p>Been doing a little WCF today... I augmented a partial message<br />
 class on a client with some additional properties, including<br />
-this:<br &#47;><br />
-<br &#47;></p>
+this:<br /><br />
+<br /></p>
 <pre>
 private bool _partOfResults = true;</p>
 <p>public bool PartOfResults<br />
@@ -31,17 +31,17 @@ private bool _partOfResults = true;</p>
     get { return _partOfResults; }<br />
     set { _partOfResults = value; }<br />
 }<br />
-<&#47;pre><br &#47;><br />
+</pre><br /><br />
 Now I assumed by default the any messages would have<br />
-<b>PartOfResults<&#47;b> set to <b>true<&#47;b>... just like it used to<br />
-work with ye olde <b>XmlSerializer<&#47;b> ;o)<br &#47;><br />
-<br &#47;><br />
+<b>PartOfResults</b> set to <b>true</b>... just like it used to<br />
+work with ye olde <b>XmlSerializer</b> ;o)<br /><br />
+<br /><br />
 But actually no ... WCF doesn't invoke the constructor - surprised<br />
 I hadn't noticed until now - particularly annoying is of course my<br />
 unit tests were passing because I was calling the default<br />
 constructor on the message... so first of all I decided to cheat<br />
-and just implement the method like this:<br &#47;><br />
-<br &#47;></p>
+and just implement the method like this:<br /><br />
+<br /></p>
 <pre>
 private bool _partOfResults;</p>
 <p>public bool PartOfResults<br />
@@ -49,18 +49,18 @@ private bool _partOfResults;</p>
     get { return !_partOfResults; }<br />
     set { _partOfResults = !value; }<br />
 }<br />
-<&#47;pre><br &#47;></p>
+</pre><br /></p>
 <p>
   But I didn't like the implications ;o) so I went and actually<br />
-  looked up how to make it work properly:<br &#47;><br />
-  <br &#47;><br />
-<&#47;p></p>
+  looked up how to make it work properly:<br /><br />
+  <br /><br />
+</p></p>
 <pre>
 [OnDeserialized]<br />
 private void InitializeExtraFields(StreamingContext context)<br />
 {<br />
     _partOfResults = true;<br />
 }<br />
-<&#47;pre><br &#47;><br />
+</pre><br /><br />
 Pretty boring ;o) just surprised me because I haven't done much WCF<br />
-since it went final.<br &#47;></p>
+since it went final.<br /></p>

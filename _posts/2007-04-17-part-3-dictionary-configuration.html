@@ -35,13 +35,13 @@ comments:
 
     I will be looking to move them onto the using.castleproject.org Wiki once the whole set is complete, in the mean time I'm just keeping them on my Wiki to gauge some feedback from people, and also to capture a few additional blog subscribers at the same time :)
 ---
-<p><img src="http:&#47;&#47;blog.bittercoder.com&#47;images&#47;ioc_tutorial_titles&#47;3_more_config_dictionaries.png" &#47;></p>
+<p><img src="http://blog.bittercoder.com/images/ioc_tutorial_titles/3_more_config_dictionaries.png" /></p>
 <p>
-  So in this part we look at creating a component which has a dictionary which gets configured... in this case we're creating a little service to handle word substitutions...<br &#47;><br />
-  <br &#47;><br />
-  So lets have a look at the service:<br &#47;><br />
-  <br &#47;><br />
-<&#47;p></p>
+  So in this part we look at creating a component which has a dictionary which gets configured... in this case we're creating a little service to handle word substitutions...<br /><br />
+  <br /><br />
+  So lets have a look at the service:<br /><br />
+  <br /><br />
+</p></p>
 <pre>
 public class AliasService<br />
 {<br />
@@ -61,9 +61,9 @@ public class AliasService<br />
 <p>        return term;<br />
     }<br />
 }<br />
-<&#47;pre><br &#47;><br />
-And the application code that uses the service:<br &#47;><br />
-<br &#47;></p>
+</pre><br /><br />
+And the application code that uses the service:<br /><br />
+<br /></p>
 <pre>
 static void Main(string[] args)<br />
 {<br />
@@ -76,39 +76,39 @@ static void Main(string[] args)<br />
     }</p>
 <p>    Console.Read();<br />
 }<br />
-<&#47;pre><br &#47;><br />
-Our component is again registered without any parameters, lets run it and see what pearls of wisdom it can share:<br &#47;><br />
-<br &#47;><br />
-<b>a dog at my homework<&#47;b><br &#47;><br />
-<br &#47;><br />
-Hmm... I'm not sure that's a great excuse for late delivery... let's do some configuration and try again:<br &#47;><br />
-<br &#47;></p>
+</pre><br /><br />
+Our component is again registered without any parameters, lets run it and see what pearls of wisdom it can share:<br /><br />
+<br /><br />
+<b>a dog at my homework</b><br /><br />
+<br /><br />
+Hmm... I'm not sure that's a great excuse for late delivery... let's do some configuration and try again:<br /><br />
+<br /></p>
 <pre>
 <configuration></p>
 <p>  <configSections></p>
 <section name="castle"<br />
-        type="Castle.Windsor.Configuration.AppDomain.CastleSectionHandler, Castle.Windsor" &#47;><br />
-  <&#47;configSections></p>
+        type="Castle.Windsor.Configuration.AppDomain.CastleSectionHandler, Castle.Windsor" /><br />
+  </configSections></p>
 <p>  <castle><br />
     <components><br />
       <component id="aliases.service" type="IoC.Tutorials.Part3.AliasService, IoC.Tutorials.Part3"></p>
 <parameters>
           <Aliases><br />
             <dictionary><br />
-              <entry key="dog">duck<&#47;entry><br />
-              <entry key="ate">broke<&#47;entry><br />
-              <entry key="homework">code<&#47;entry><br />
-            <&#47;dictionary><br />
-          <&#47;Aliases><br />
-        <&#47;parameters><br />
-      <&#47;component><br />
-    <&#47;components><br />
-  <&#47;castle></p>
-<p><&#47;configuration><br />
-<&#47;pre><br &#47;><br />
-So, you can see we map keys to values via an entry key... and here's the result:<br &#47;><br />
-<br &#47;><br />
-<b>a duck broke my code<br &#47;><br />
-<br &#47;><&#47;b>You may need to tweak the mappings, depending on what you actually broke...<br &#47;><br />
-<br &#47;><br />
-Now at this point you might be wondering just how the strings are getting converted into strongly typed values for the last 3 parts - and to be honest, you won't need to know most of time, just do what "seems" right and it'll probably work... but when it doesn't, check out the castle projects wiki topic on <a href="http:&#47;&#47;wiki.castleproject.org&#47;index.php&#47;IoC:Component_parameters%2C_configuration_and_type_converters">component parameters, configuration and type converters<&#47;a>.</p>
+              <entry key="dog">duck</entry><br />
+              <entry key="ate">broke</entry><br />
+              <entry key="homework">code</entry><br />
+            </dictionary><br />
+          </Aliases><br />
+        </parameters><br />
+      </component><br />
+    </components><br />
+  </castle></p>
+<p></configuration><br />
+</pre><br /><br />
+So, you can see we map keys to values via an entry key... and here's the result:<br /><br />
+<br /><br />
+<b>a duck broke my code<br /><br />
+<br /></b>You may need to tweak the mappings, depending on what you actually broke...<br /><br />
+<br /><br />
+Now at this point you might be wondering just how the strings are getting converted into strongly typed values for the last 3 parts - and to be honest, you won't need to know most of time, just do what "seems" right and it'll probably work... but when it doesn't, check out the castle projects wiki topic on <a href="http://wiki.castleproject.org/index.php/IoC:Component_parameters%2C_configuration_and_type_converters">component parameters, configuration and type converters</a>.</p>

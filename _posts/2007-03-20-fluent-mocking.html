@@ -39,8 +39,8 @@ Expect.Call(textAlignTaggedValue.Update()).Return(true);</p>
 <p>Element destinationElement = repository.DynamicMock<Element>();<br />
 Expect.Call(destinationElement.TaggedValues).Return(taggedValuesCollection).Repeat.Any();</p>
 <p>repository.ReplayAll();<br />
-<&#47;pre></p>
-<p>So in this case we have an "<strong>Element<&#47;strong>", which has&nbsp;a collection of "<strong>TaggedValues<&#47;strong>", and we have two&nbsp;tagged values "<strong>OneTaggedValue<&#47;strong>" and&nbsp;"<strong>AnotherTaggedValue<&#47;strong>", and for each we are&nbsp;updating their values, and then invoking&nbsp;"<strong>Update<&#47;strong>()" on them to flush the changes...</p>
+</pre></p>
+<p>So in this case we have an "<strong>Element</strong>", which has&nbsp;a collection of "<strong>TaggedValues</strong>", and we have two&nbsp;tagged values "<strong>OneTaggedValue</strong>" and&nbsp;"<strong>AnotherTaggedValue</strong>", and for each we are&nbsp;updating their values, and then invoking&nbsp;"<strong>Update</strong>()" on them to flush the changes...</p>
 <p>To help solidify that, here's an example of what we're expecting&nbsp;to happen to our element (Element, Collection and TaggedValue are&nbsp;all interfaces from a COM interop assembly, in case you were&nbsp;wondering):</p>
 <pre>
     Element element;</p>
@@ -51,8 +51,8 @@ Expect.Call(destinationElement.TaggedValues).Return(taggedValuesCollection).Repe
     TaggedValue anotherTaggedValue = (TaggedValue)element.TaggedValues.GetByName("AnotherTaggedValue");<br />
     anotherTaggedValue.Value = "AnotherExpectedValue";<br />
     anotherTaggedValue.Update();<br />
-<&#47;pre></p>
-<p>Now normally in this case I take unit tests once I've got&nbsp;"<strong>green<&#47;strong>" and refactor the mocking code out a&nbsp;bit... so in the above case I'd probably end up with something&nbsp;like:</p>
+</pre></p>
+<p>Now normally in this case I take unit tests once I've got&nbsp;"<strong>green</strong>" and refactor the mocking code out a&nbsp;bit... so in the above case I'd probably end up with something&nbsp;like:</p>
 <pre>
 MockRepository repository = new MockRepository();</p>
 <p>Collection taggedValuesCollection = repository.DynamicMock<Collection>();<br />
@@ -61,7 +61,7 @@ AddTaggedValueSetter(repository, taggedValuesCollection, "AnotherTaggedValue", "
 <p>Element destinationElement = repository.DynamicMock<Element>();<br />
 Expect.Call(destinationElement.TaggedValues).Return(taggedValuesCollection).Repeat.Any();</p>
 <p>repository.ReplayAll();<br />
-<&#47;pre></p>
+</pre></p>
 <p>Which works...&nbsp;generally quite well... but lately I've been&nbsp;moving away from that approach and instead have been refactoring&nbsp;the setup code into a fluent interface... which I've found to be&nbsp;a lot easier to maintain and extend (and tends to be a little&nbsp;more re-usable across multiple test&nbsp;fixtures...)&nbsp;So for example, this is what the setup code for the above mock&nbsp;element is now:</p>
 <pre>
 MockRepository repository = new MockRepository();</p>
@@ -72,5 +72,5 @@ MockRepository repository = new MockRepository();</p>
     .HasTaggedValue("AnotherTaggedValue").ExpectSetValue("AnotherExpectedValue")<br />
     .Complete(repository);</p>
 <p>repository.ReplayAll();<br />
-<&#47;pre></p>
+</pre></p>
 <p>I'm just skimming the surface of what I've been doing, but it might be food for thought for anyone working on similar projects... anyone else doing similar things?</p>
