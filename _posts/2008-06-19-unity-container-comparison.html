@@ -1,0 +1,47 @@
+---
+layout: post
+status: publish
+published: true
+title: Unity container comparison
+author:
+  display_name: bittercoder
+  login: admin
+  email: alex@devdefined.com
+  url: http://blog.bittercoder.com/
+author_login: admin
+author_email: alex@devdefined.com
+author_url: http://blog.bittercoder.com/
+wordpress_id: 83488725
+wordpress_url: http://blog.bittercoder.com/?p=83488725
+date: '2008-06-19 00:45:04 +0000'
+date_gmt: '2008-06-19 00:45:04 +0000'
+categories:
+- ".Net"
+tags:
+- castle windsor
+- Unity
+comments:
+- id: 60
+  author: Alex Henderson
+  author_email: bittercoder@gmail.com
+  author_url: http://blog.bittercoder.com/
+  date: '2008-06-19 19:40:56 +0000'
+  date_gmt: '2008-06-19 19:40:56 +0000'
+  content: Yeah, I've certainly had projects that go that way as well, I was just
+    thinking in regards to more mundane IoC usage... like repositories, services etc.
+    in a Monorail&#47;MVC app.  I suppose being able to set a default lifestyle at
+    the container level would probably solve the problem - though that defeats convention
+    over configuration.
+---
+<p>If you recall many moons ago I posted a <a href="http:&#47;&#47;wiki.bittercoder.com&#47;Default.aspx?Page=ContainerTutorials">series&nbsp;of articles<&#47;a> on the <a href="http:&#47;&#47;www.castleproject.org&#47;container&#47;index.html">Castle&nbsp;Project's IOC Container<&#47;a> "Windsor" teaching the fundamentals of&nbsp;IoC with a practical bent - lots of people liked them, and I still&nbsp;get feedback every now and then from people starting to use windsor&nbsp;and finding them useful.</p>
+<p>At any rate <a href="http:&#47;&#47;aardvarkblogs.wordpress.com&#47;">Michael&nbsp;McGuire<&#47;a> was once such person who read those tutorials a year or&nbsp;so ago and has now started a series of his own - mirroring my&nbsp;castle container tutorials but with the P&amp;P <a href="http:&#47;&#47;www.codeplex.com&#47;unity">Unity<&#47;a> container instead - you&nbsp;can find it <a href="http:&#47;&#47;aardvarkblogs.wordpress.com&#47;">here<&#47;a>.</p>
+<p>As someone who has not given Unity much more then a brief skim it's&nbsp;a nice way to quickly get up to speed on some of the key&nbsp;differences.</p>
+<p>So far after reading a couple of articles I've learnt.</p>
+<ul>
+<li>You need to implement your own type converters for things&nbsp;like arrays or dictionaries in configuration.<&#47;li>
+<li>Configuration syntax is not particularly human-friendly,&nbsp;obviously designed for management via a tool&nbsp; - requiring&nbsp;the entry of full types all over the spot like&nbsp;"Microsoft.Practices.Unity.Configuration.TypeInjectionElement,&nbsp;Microsoft.Practices.Unity.Configuration" - just to register a&nbsp;component!<&#47;li>
+<li>Default lifestyle is transient... hmmm.. personally I think&nbsp;singleton is more-often the norm for me when writing&nbsp;applications, but it really depends on how the container is being&nbsp;used&#47;abused I guess.<&#47;li>
+<li>Support for multiple configurations looks a little more baked&nbsp;in - but this is trivial stuff to implement in most&nbsp;containers.<&#47;li><br />
+<&#47;ul><br />
+I'll be interested to see how decorator chains etc. are&nbsp;implemented in Unity.</p>
+<p>Good work Michael.</p>

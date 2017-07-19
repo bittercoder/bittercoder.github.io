@@ -1,0 +1,85 @@
+---
+layout: post
+status: publish
+published: true
+title: Base4.net compile-time query handling support
+author:
+  display_name: bittercoder
+  login: admin
+  email: alex@devdefined.com
+  url: http://blog.bittercoder.com/
+author_login: admin
+author_email: alex@devdefined.com
+author_url: http://blog.bittercoder.com/
+wordpress_id: 436545
+wordpress_url: http://blog.bittercoder.com/?p=436545
+date: '2006-10-25 19:36:06 +0000'
+date_gmt: '2006-10-25 19:36:06 +0000'
+categories:
+- ".Net"
+tags:
+- base4
+comments: []
+---
+<p>
+  Well lots to blog about, but no time to do it... at least not today - at any rate I just thought I would say if you haven't considered using <a href="http:&#47;&#47;www.base4.net&#47;Base4.NET.aspx">Base4<&#47;a> up until now, why not give it a go with the <a href="http:&#47;&#47;www.base4.net&#47;Blog.aspx?ID=165">latest drop<&#47;a> :) I'm loving these new changes with the support for Compile-time query handling... I think at this point you can start prototyping stuff with base4 very quickly, between the UI for designing or discovering an existing schema, and now the ability to avoid learning the ObjectPath query syntax it's pretty compelling...<br &#47;><br />
+  <br &#47;><br />
+At any rate, as mentioned in the various posts from <a href="http:&#47;&#47;www.base4.net&#47;blog.aspx?ID=158">Alex James<&#47;a>, you can now write these kinds of queries:<br &#47;><br />
+  <br &#47;><br />
+<&#47;p></p>
+<pre>
+IItemList<FileBase> matchingFiles = StorageContext.Find<FileBase>(FileBase.Fields.FileSize > 1024000 &amp;&amp; FileBase.Fields.MimeType == "audio&#47;wav");<br />
+<&#47;pre><br &#47;><br />
+Faboo, and of course you can drill through the relationships:<br &#47;><br />
+<br &#47;></p>
+<pre>
+Track track =  StorageContext.FindOne<Track>(Track.Fields.Name == reference.TrackName<br />
+    &amp;&amp; Track.Fields.Release.Name == reference.ReleaseName<br />
+    &amp;&amp; Track.Fields.Release.Artist.Name == reference.ArtistName);<br />
+<&#47;pre><br &#47;><br />
+This is for a simple hierarchy, where we have Artists-> Releases -> Tracks (sadly organising Music in reality isn't quite this easy...)<br &#47;><br />
+<br &#47;><br />
+But as you can see these queries are getting quite verbose, personally this is where the elegance of this approach comes in... reuse is possible, for example - we can build a static class to hold common queries:<br &#47;><br />
+<br &#47;></p>
+<pre>
+public static class FileBaseQueries<br />
+{<br />
+    public static ExpressionField LargerThenOneMegabyte<br />
+    {<br />
+        get<br />
+        {<br />
+            return FileBase.Fields.FileSize > 1024000;<br />
+        }<br />
+    }</p>
+<p>    public static ExpressionField MimeTypeIsAudioWav<br />
+    {<br />
+        get<br />
+        {<br />
+            return FileBase.Fields.MimeType == "audio&#47;wav";<br />
+        }<br />
+    }<br />
+}<br />
+<&#47;pre><br &#47;><br />
+And now the first query could be rewritten:<br &#47;><br />
+<br &#47;></p>
+<pre>
+StorageContext.Find<FileBase>(FileBaseQueries.LargerThenOneMegabyte &amp;&amp; FileBaseQueries.MimeTypeIsAudioWav);<br />
+<&#47;pre><br &#47;><br />
+The main thing I like about this approach is your queries start looking like sentences... "Larger Then One Megabyte and Mime Type Is Audio Wav"...<br &#47;><br />
+<br &#47;><br />
+Another idea might be to use a method on the static class instead...<br &#47;><br />
+<br &#47;></p>
+<pre>
+public static ExpressionField MimeTypeIs(string type, string subType)<br />
+{<br />
+    return FileBase.Fields.MimeType == string.Format("{0}&#47;{1}", type, subType);<br />
+}<br />
+<&#47;pre><br &#47;><br />
+And then writing something like:<br &#47;><br />
+<br &#47;></p>
+<pre>
+StorageContext.Find<FileBase>(FileBaseQueries.LargerThenOneMegabyte &amp;&amp; FileBaseQueries.MimeTypeIs("audio","wav"));<br />
+<&#47;pre><br &#47;><br />
+At this point it still reads quite nicely, but it's a little more flexible...<br &#47;><br />
+<br &#47;><br />
+Edit: I just noticed this entry wasn't actually marked as syndicated... fixed it now.</p>

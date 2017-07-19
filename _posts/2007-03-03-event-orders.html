@@ -1,0 +1,565 @@
+---
+layout: post
+status: publish
+published: true
+title: Event orders...
+author:
+  display_name: bittercoder
+  login: admin
+  email: alex@devdefined.com
+  url: http://blog.bittercoder.com/
+author_login: admin
+author_email: alex@devdefined.com
+author_url: http://blog.bittercoder.com/
+wordpress_id: 83489707
+wordpress_url: http://blog.bittercoder.com/?p=83489707
+date: '2007-03-03 00:54:32 +0000'
+date_gmt: '2007-03-03 00:54:32 +0000'
+categories:
+- ".Net"
+tags: []
+comments: []
+---
+<h2>
+  Dumping events<br />
+<&#47;h2>I'm often surprised (or is it dismayed) when questions pop up<br />
+in news groups surrounding things like event orders for winforms or<br />
+webforms applications... this isn't rocket science... we're given<br />
+all the tools to make this easy to figure out!<br &#47;><br />
+<br &#47;><br />
+Lets do a winforms 2.0 app as an example... first off, the earliest<br />
+point at which can easily get involved is the constructor...&nbsp;<br />
+lets have a look:<br &#47;><br />
+<br &#47;></p>
+<pre>
+public partial class Form1 : Form<br />
+{<br />
+    public Form1()<br />
+    {<br />
+        AttachToAllEvents();<br />
+        InitializeComponent();<br />
+    }<br />
+<&#47;pre><br &#47;><br />
+So I'm going to attach to all the events before the forms<br />
+components are initialized... now lets have a look at the<br />
+"<b>AttachToAllEvents<&#47;b>" method.<br &#47;><br />
+<br &#47;></p>
+<pre>
+private void AttachToAllEvents()<br />
+{<br />
+    Type type = GetType();                       </p>
+<p>    foreach (EventInfo info in type.GetEvents())<br />
+    {<br />
+        string eventName = info.Name;</p>
+<p>        EventHandlerWrapper wrapper = new EventHandlerWrapper(new EventHandler(<br />
+            delegate<br />
+            {<br />
+                Console.WriteLine("{0}: EventName: {1}, IsVisible: {2}, IsHandleCreated: {3}, HasChildren: {4}, IsDisposed: {5}",<br />
+                                       DateTime.Now, eventName, this.Visible, this.IsHandleCreated, this.HasChildren,<br />
+                                       this.IsDisposed);<br />
+            }));</p>
+<p>        wrapper.Attach(this, info);<br />
+    }<br />
+}<br />
+<&#47;pre><br &#47;><br />
+Only magic there is we're using a class called<br />
+"<b>EventHandlerWrapper<&#47;b>" - what's that... well, it's used to<br />
+create a strongly typed delegate for attaching to an event.<br &#47;><br />
+<br &#47;><br />
+The reason we need this at all is because<br />
+<b>EventInfo.AddEventHandler(...)<&#47;b> is fussy about the kind of<br />
+delegate you supply, so if you pass in an "<b>EventHandler<&#47;b>" for<br />
+a "<b>CancelEventHandler<&#47;b>" event, it'll throw an exception<br />
+complaining about it's inability to cast between them... there<br />
+might be an easier way to do this, but I haven't come across it so<br />
+far.<br &#47;><br />
+<br &#47;></p>
+<pre>
+public class EventHandlerWrapper<br />
+{<br />
+    private EventHandler _handler;<br />
+    private static readonly MethodInfo _methodInfo;</p>
+<p>    static EventHandlerWrapper()<br />
+    {<br />
+        _methodInfo = typeof(EventHandlerWrapper).GetMethod("InvokeHandler", BindingFlags.NonPublic | BindingFlags.Instance);<br />
+    }</p>
+<p>    public EventHandlerWrapper(EventHandler handler)<br />
+    {<br />
+        if (handler == null) throw new ArgumentNullException("handler");<br />
+        _handler = handler;<br />
+    }</p>
+<p>    public void Attach(object target, EventInfo info)<br />
+    {<br />
+        Delegate wrappedHandler = Delegate.CreateDelegate(info.EventHandlerType, this, _methodInfo);<br />
+        info.AddEventHandler(target, wrappedHandler);<br />
+    }</p>
+<p>    private void InvokeHandler(object sender, EventArgs args)<br />
+    {<br />
+        _handler(sender, args);<br />
+    }<br />
+}<br />
+<&#47;pre><br &#47;><br />
+With a little brain power I'm sure I could've done this without the<br />
+separate wrapper class, but this is probably a little easier to<br />
+read at any rate.<br &#47;><br />
+<br &#47;></p>
+<h2>
+  Results..?<br />
+<&#47;h2>So.. onto the results - once we run the code and see exactly<br />
+what order events are happening in, we can then make a pretty table<br />
+that may not render in most browsers because I cut 'n pasted it<br />
+from Excel 2007 ;o)<br &#47;><br />
+<br &#47;></p>
+<table style="border-collapse: collapse; width: 423pt;" border="0"<br />
+cellpadding="0" cellspacing="0" width="563"><br />
+<col style="width: 122pt;" width="162" &#47;>
+<col style="width: 61pt;" width="81" &#47;>
+<col style="width: 96pt;" width="128" &#47;>
+<col style="width: 75pt;" width="100" &#47;>
+<col style="width: 69pt;" width="92" &#47;>
+<tbody>
+<tr style="height: 15pt;" height="20">
+<td class="xl63" style="border-style: none none solid; border-color: -moz-use-text-color -moz-use-text-color white; border-width: medium medium 1pt; background: black none repeat scroll 0% 50%; height: 15pt; width: 122pt; font-size: 11pt; color: white; font-weight: 700; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;"<br />
+      height="20" width="162">    EventName<br />
+      <&#47;td></p>
+<td class="xl63" style="border-style: none none solid; border-color: -moz-use-text-color -moz-use-text-color white; border-width: medium medium 1pt; background: black none repeat scroll 0% 50%; width: 61pt; font-size: 11pt; color: white; font-weight: 700; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;"<br />
+      width="81">    <span style="">&nbsp;<&#47;span>IsVisible<br />
+      <&#47;td></p>
+<td class="xl63" style="border-style: none none solid; border-color: -moz-use-text-color -moz-use-text-color white; border-width: medium medium 1pt; background: black none repeat scroll 0% 50%; width: 96pt; font-size: 11pt; color: white; font-weight: 700; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;"<br />
+      width="128">    <span style="">&nbsp;<&#47;span>IsHandleCreated<br />
+      <&#47;td></p>
+<td class="xl63" style="border-style: none none solid; border-color: -moz-use-text-color -moz-use-text-color white; border-width: medium medium 1pt; background: black none repeat scroll 0% 50%; width: 75pt; font-size: 11pt; color: white; font-weight: 700; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;"<br />
+      width="100">    <span style="">&nbsp;<&#47;span>HasChildren<br />
+      <&#47;td></p>
+<td class="xl63" style="border-style: none none solid; border-color: -moz-use-text-color -moz-use-text-color white; border-width: medium medium 1pt; background: black none repeat scroll 0% 50%; width: 69pt; font-size: 11pt; color: white; font-weight: 700; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;"<br />
+      width="92">    <span style="">&nbsp;<&#47;span>IsDisposed<br />
+      <&#47;td><br />
+    <&#47;tr></p>
+<tr style="height: 15pt;" height="20">
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; height: 15pt; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;"<br />
+      height="20">    Resize<br />
+      <&#47;td></p>
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>False<br />
+      <&#47;td></p>
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>False<br />
+      <&#47;td></p>
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>False<br />
+      <&#47;td></p>
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>False<br />
+      <&#47;td><br />
+    <&#47;tr></p>
+<tr style="height: 15pt;" height="20">
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; height: 15pt; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;"<br />
+      height="20">    SizeChanged<br />
+      <&#47;td></p>
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>False<br />
+      <&#47;td></p>
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>False<br />
+      <&#47;td></p>
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>False<br />
+      <&#47;td></p>
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>False<br />
+      <&#47;td><br />
+    <&#47;tr></p>
+<tr style="height: 15pt;" height="20">
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; height: 15pt; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;"<br />
+      height="20">    ClientSizeChanged<br />
+      <&#47;td></p>
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>False<br />
+      <&#47;td></p>
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>False<br />
+      <&#47;td></p>
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>False<br />
+      <&#47;td></p>
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>False<br />
+      <&#47;td><br />
+    <&#47;tr></p>
+<tr style="height: 15pt;" height="20">
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; height: 15pt; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;"<br />
+      height="20">    ClientSizeChanged<br />
+      <&#47;td></p>
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>False<br />
+      <&#47;td></p>
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>False<br />
+      <&#47;td></p>
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>False<br />
+      <&#47;td></p>
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>False<br />
+      <&#47;td><br />
+    <&#47;tr></p>
+<tr style="height: 15pt;" height="20">
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; height: 15pt; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;"<br />
+      height="20">    ControlAdded<br />
+      <&#47;td></p>
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>False<br />
+      <&#47;td></p>
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>False<br />
+      <&#47;td></p>
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>True<br />
+      <&#47;td></p>
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>False<br />
+      <&#47;td><br />
+    <&#47;tr></p>
+<tr style="height: 15pt;" height="20">
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; height: 15pt; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;"<br />
+      height="20">    ControlAdded<br />
+      <&#47;td></p>
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>False<br />
+      <&#47;td></p>
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>False<br />
+      <&#47;td></p>
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>True<br />
+      <&#47;td></p>
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>False<br />
+      <&#47;td><br />
+    <&#47;tr></p>
+<tr style="height: 15pt;" height="20">
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; height: 15pt; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;"<br />
+      height="20">    StyleChanged<br />
+      <&#47;td></p>
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>False<br />
+      <&#47;td></p>
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>False<br />
+      <&#47;td></p>
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>True<br />
+      <&#47;td></p>
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>False<br />
+      <&#47;td><br />
+    <&#47;tr></p>
+<tr style="height: 15pt;" height="20">
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; height: 15pt; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;"<br />
+      height="20">    TextChanged<br />
+      <&#47;td></p>
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>False<br />
+      <&#47;td></p>
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>False<br />
+      <&#47;td></p>
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>True<br />
+      <&#47;td></p>
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>False<br />
+      <&#47;td><br />
+    <&#47;tr></p>
+<tr style="height: 15pt;" height="20">
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; height: 15pt; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;"<br />
+      height="20">    Move<br />
+      <&#47;td></p>
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>False<br />
+      <&#47;td></p>
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>True<br />
+      <&#47;td></p>
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>True<br />
+      <&#47;td></p>
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>False<br />
+      <&#47;td><br />
+    <&#47;tr></p>
+<tr style="height: 15pt;" height="20">
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; height: 15pt; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;"<br />
+      height="20">    LocationChanged<br />
+      <&#47;td></p>
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>False<br />
+      <&#47;td></p>
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>True<br />
+      <&#47;td></p>
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>True<br />
+      <&#47;td></p>
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>False<br />
+      <&#47;td><br />
+    <&#47;tr></p>
+<tr style="height: 15pt;" height="20">
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; height: 15pt; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;"<br />
+      height="20">    HandleCreated<br />
+      <&#47;td></p>
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>False<br />
+      <&#47;td></p>
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>True<br />
+      <&#47;td></p>
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>True<br />
+      <&#47;td></p>
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>False<br />
+      <&#47;td><br />
+    <&#47;tr></p>
+<tr style="height: 15pt;" height="20">
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; height: 15pt; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;"<br />
+      height="20">    Invalidated<br />
+      <&#47;td></p>
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>False<br />
+      <&#47;td></p>
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>True<br />
+      <&#47;td></p>
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>True<br />
+      <&#47;td></p>
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>False<br />
+      <&#47;td><br />
+    <&#47;tr></p>
+<tr style="height: 15pt;" height="20">
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; height: 15pt; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;"<br />
+      height="20">    StyleChanged<br />
+      <&#47;td></p>
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>False<br />
+      <&#47;td></p>
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>True<br />
+      <&#47;td></p>
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>True<br />
+      <&#47;td></p>
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>False<br />
+      <&#47;td><br />
+    <&#47;tr></p>
+<tr style="height: 15pt;" height="20">
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; height: 15pt; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;"<br />
+      height="20">    ChangeUICues<br />
+      <&#47;td></p>
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>True<br />
+      <&#47;td></p>
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>True<br />
+      <&#47;td></p>
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>True<br />
+      <&#47;td></p>
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>False<br />
+      <&#47;td><br />
+    <&#47;tr></p>
+<tr style="height: 15pt;" height="20">
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; height: 15pt; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;"<br />
+      height="20">    Invalidated<br />
+      <&#47;td></p>
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>True<br />
+      <&#47;td></p>
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>True<br />
+      <&#47;td></p>
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>True<br />
+      <&#47;td></p>
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>False<br />
+      <&#47;td><br />
+    <&#47;tr></p>
+<tr style="height: 15pt;" height="20">
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; height: 15pt; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;"<br />
+      height="20">    BindingContextChanged<br />
+      <&#47;td></p>
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>True<br />
+      <&#47;td></p>
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>True<br />
+      <&#47;td></p>
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>True<br />
+      <&#47;td></p>
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>False<br />
+      <&#47;td><br />
+    <&#47;tr></p>
+<tr style="height: 15pt;" height="20">
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; height: 15pt; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;"<br />
+      height="20">    Load<br />
+      <&#47;td></p>
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>True<br />
+      <&#47;td></p>
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>True<br />
+      <&#47;td></p>
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>True<br />
+      <&#47;td></p>
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>False<br />
+      <&#47;td><br />
+    <&#47;tr></p>
+<tr style="height: 15pt;" height="20">
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; height: 15pt; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;"<br />
+      height="20">    Layout<br />
+      <&#47;td></p>
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>True<br />
+      <&#47;td></p>
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>True<br />
+      <&#47;td></p>
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>True<br />
+      <&#47;td></p>
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>False<br />
+      <&#47;td><br />
+    <&#47;tr></p>
+<tr style="height: 15pt;" height="20">
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; height: 15pt; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;"<br />
+      height="20">    VisibleChanged<br />
+      <&#47;td></p>
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>True<br />
+      <&#47;td></p>
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>True<br />
+      <&#47;td></p>
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>True<br />
+      <&#47;td></p>
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>False<br />
+      <&#47;td><br />
+    <&#47;tr></p>
+<tr style="height: 15pt;" height="20">
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; height: 15pt; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;"<br />
+      height="20">    Activated<br />
+      <&#47;td></p>
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>True<br />
+      <&#47;td></p>
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>True<br />
+      <&#47;td></p>
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>True<br />
+      <&#47;td></p>
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>False<br />
+      <&#47;td><br />
+    <&#47;tr></p>
+<tr style="height: 15pt;" height="20">
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; height: 15pt; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;"<br />
+      height="20">    Shown<br />
+      <&#47;td></p>
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>True<br />
+      <&#47;td></p>
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>True<br />
+      <&#47;td></p>
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>True<br />
+      <&#47;td></p>
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>False<br />
+      <&#47;td><br />
+    <&#47;tr></p>
+<tr style="height: 15pt;" height="20">
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; height: 15pt; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;"<br />
+      height="20">    Paint<br />
+      <&#47;td></p>
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>True<br />
+      <&#47;td></p>
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>True<br />
+      <&#47;td></p>
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>True<br />
+      <&#47;td></p>
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>False<br />
+      <&#47;td><br />
+    <&#47;tr></p>
+<tr style="height: 15pt;" height="20">
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; height: 15pt; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;"<br />
+      height="20">    Paint<br />
+      <&#47;td></p>
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>True<br />
+      <&#47;td></p>
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>True<br />
+      <&#47;td></p>
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>True<br />
+      <&#47;td></p>
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>False<br />
+      <&#47;td><br />
+    <&#47;tr></p>
+<tr style="height: 15pt;" height="20">
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; height: 15pt; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;"<br />
+      height="20">    Paint<br />
+      <&#47;td></p>
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>True<br />
+      <&#47;td></p>
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>True<br />
+      <&#47;td></p>
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>True<br />
+      <&#47;td></p>
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>False<br />
+      <&#47;td><br />
+    <&#47;tr></p>
+<tr style="height: 15pt;" height="20">
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; height: 15pt; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;"<br />
+      height="20">    MouseCaptureChanged<br />
+      <&#47;td></p>
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>True<br />
+      <&#47;td></p>
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>True<br />
+      <&#47;td></p>
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>True<br />
+      <&#47;td></p>
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>False<br />
+      <&#47;td><br />
+    <&#47;tr></p>
+<tr style="height: 15pt;" height="20">
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; height: 15pt; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;"<br />
+      height="20">    Closing<br />
+      <&#47;td></p>
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>True<br />
+      <&#47;td></p>
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>True<br />
+      <&#47;td></p>
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>True<br />
+      <&#47;td></p>
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>False<br />
+      <&#47;td><br />
+    <&#47;tr></p>
+<tr style="height: 15pt;" height="20">
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; height: 15pt; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;"<br />
+      height="20">    FormClosing<br />
+      <&#47;td></p>
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>True<br />
+      <&#47;td></p>
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>True<br />
+      <&#47;td></p>
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>True<br />
+      <&#47;td></p>
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>False<br />
+      <&#47;td><br />
+    <&#47;tr></p>
+<tr style="height: 15pt;" height="20">
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; height: 15pt; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;"<br />
+      height="20">    Closed<br />
+      <&#47;td></p>
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>True<br />
+      <&#47;td></p>
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>True<br />
+      <&#47;td></p>
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>True<br />
+      <&#47;td></p>
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>False<br />
+      <&#47;td><br />
+    <&#47;tr></p>
+<tr style="height: 15pt;" height="20">
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; height: 15pt; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;"<br />
+      height="20">    FormClosed<br />
+      <&#47;td></p>
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>True<br />
+      <&#47;td></p>
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>True<br />
+      <&#47;td></p>
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>True<br />
+      <&#47;td></p>
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>False<br />
+      <&#47;td><br />
+    <&#47;tr></p>
+<tr style="height: 15pt;" height="20">
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; height: 15pt; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;"<br />
+      height="20">    Deactivate<br />
+      <&#47;td></p>
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>True<br />
+      <&#47;td></p>
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>True<br />
+      <&#47;td></p>
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>True<br />
+      <&#47;td></p>
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>False<br />
+      <&#47;td><br />
+    <&#47;tr></p>
+<tr style="height: 15pt;" height="20">
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; height: 15pt; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;"<br />
+      height="20">    HandleDestroyed<br />
+      <&#47;td></p>
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>True<br />
+      <&#47;td></p>
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>True<br />
+      <&#47;td></p>
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>True<br />
+      <&#47;td></p>
+<td style="background: rgb(49, 132, 155) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>False<br />
+      <&#47;td><br />
+    <&#47;tr></p>
+<tr style="height: 15pt;" height="20">
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; height: 15pt; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;"<br />
+      height="20">    Disposed<br />
+      <&#47;td></p>
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>False<br />
+      <&#47;td></p>
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>False<br />
+      <&#47;td></p>
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>False<br />
+      <&#47;td></p>
+<td style="background: rgb(75, 172, 198) none repeat scroll 0% 50%; font-size: 11pt; color: white; font-weight: 400; text-decoration: none; font-family: Calibri; -moz-background-clip: -moz-initial; -moz-background-origin: -moz-initial; -moz-background-inline-policy: -moz-initial;">  <span style="">&nbsp;<&#47;span>False<br />
+      <&#47;td><br />
+    <&#47;tr><br />
+  <&#47;tbody><br />
+<&#47;table><br &#47;><br />
+The main thing to keep in mind when doing something like this is to<br />
+avoid making assumptions - we may not be the first or last to<br />
+attach to the events (depending on the complexity of the form) -<br />
+and events can trigger other events... which could explain the<br />
+ordering of some of this data i.e. changes in visibility and handle<br />
+creation... if anything we are viewing the order of consequences,<br />
+as opposed to the true order in which the events are invoked (to<br />
+get that we'd need to override all the OnXXXX methods of the form<br />
+class... which would be a good job for <a href="http:&#47;&#47;wiki.castleproject.org&#47;index.php&#47;DynamicProxy">dynamic<br />
+proxy<&#47;a> :)<br &#47;></p>

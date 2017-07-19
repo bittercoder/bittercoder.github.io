@@ -1,0 +1,30 @@
+---
+layout: post
+status: publish
+published: true
+title: nDepend Refactoring Analysis...
+author:
+  display_name: bittercoder
+  login: admin
+  email: alex@devdefined.com
+  url: http://blog.bittercoder.com/
+author_login: admin
+author_email: alex@devdefined.com
+author_url: http://blog.bittercoder.com/
+wordpress_id: 5434764
+wordpress_url: http://blog.bittercoder.com/?p=5434764
+date: '2007-07-26 01:57:28 +0000'
+date_gmt: '2007-07-26 01:57:28 +0000'
+categories:
+- ".Net"
+tags:
+- castle
+- nDepend
+- windsor
+comments: []
+---
+<p>About to run off to a meeting... so I'll make this quick.</p>
+<p>Just read an interesting post by <a href="http:&#47;&#47;igloocoder.com&#47;default.aspx">Donald Belcham<&#47;a> on&nbsp;Refactoring Analysis with the help of nDepend... he's gone through&nbsp;the process of moving from .Net 1.1 to 2.0, then introducing&nbsp;interface based code, breaking classes apart to ensure they're&nbsp;enforcing the principle of single responsibility, moving to&nbsp;injecting dependencies, rolling his own primitive Inversion of&nbsp;Control container and finally employing the <a href="http:&#47;&#47;www.castleproject.org&#47;">Castle Project's<&#47;a> <a href="http:&#47;&#47;wiki.bittercoder.com&#47;ContainerTutorials.ashx">windsor&nbsp;container<&#47;a> instead.</p>
+<p>It pays to know a little bit about <a href="http:&#47;&#47;www.ndepend.com&#47;">nDepend<&#47;a> of course to understand the&nbsp;Abstractness vs Relational Cohesion figures... either take a look&nbsp;at the nDepend site, or maybe have a listen to the &nbsp;<a href="http:&#47;&#47;www.intellectualhedonism.com&#47;2007&#47;02&#47;15&#47;Hanselminutes51StaticCodeAnalysisWithNDepend.aspx">.Net Rocks podcast<&#47;a> earlier this year which covered the same&nbsp;topic.</p>
+<p>I'm not sure the figures actually answer questions so much as they&nbsp;ask them ... but it's interesting to see how much impact his first&nbsp;two rounds of refactoring had on the results.</p>
+<p>I wonder how the figures would've come out had he executed his&nbsp;refactoring in a different order...&nbsp; maybe DI first, then&nbsp;breaking the classes up based on responsibility, IoC and then&nbsp;finally introducing interfaces... hmmm</p>

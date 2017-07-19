@@ -1,0 +1,124 @@
+---
+layout: post
+status: publish
+published: true
+title: CORS and WebAPI
+author:
+  display_name: bittercoder
+  login: admin
+  email: alex@devdefined.com
+  url: http://blog.bittercoder.com/
+author_login: admin
+author_email: alex@devdefined.com
+author_url: http://blog.bittercoder.com/
+wordpress_id: 83490113
+wordpress_url: http://blog.bittercoder.com/?p=83490113
+date: '2012-09-09 23:18:26 +0000'
+date_gmt: '2012-09-09 11:18:26 +0000'
+categories:
+- ".Net"
+tags:
+- ASP.Net
+- C#
+- webapi
+comments: []
+---
+<h2>Introduction<&#47;h2></p>
+<p>CORS (<a href="http:&#47;&#47;en.wikipedia.org&#47;wiki&#47;Cross-origin_resource_sharing">Cross-origin resource sharing<&#47;a>) is a way in which a browser can make a request to a web server other then the one which served up the original resource.</p>
+<p><a href="http:&#47;&#47;hacks.mozilla.org&#47;2009&#47;07&#47;cross-site-xmlhttprequest-with-cors&#47;">As per the Mozilla docs:<&#47;a></p>
+<blockquote><p>
+The CORS specification mandates that requests that use methods other than POST or GET, or that use custom headers, or request bodies other than text&#47;plain, are preflighted. A preflighted request first sends the OPTIONS header to the resource on the other domain, to check and see if the actual request is safe to send. This capability is currently not supported by IE8&prime;s XDomainRequest object, but is supported by Firefox 3.5 and Safari 4 with XMLHttpRequest. The web developer does not need to worry about the mechanics of preflighting, since the implementation handles that.<br />
+<&#47;blockquote></p>
+<p>You can achieve this using a DelegatingHandler in ASP.Net Web API - the way it works is to:</p>
+<ul>
+<li>Identify requests containing the "Origin" header"<&#47;li>
+<li>If the request is NOT of HTTP method "OPTIONS" (no preflighting) then we add the following headers to the response:
+<ul>
+<li><strong>Access-Control-Allow-Origin<&#47;strong> - this will have the same value as the <strong>Origin<&#47;strong> value passed in the request.<&#47;strong><&#47;li>
+<li><strong>Access-Control-Allow-Credentials<&#47;strong> - this will have the value <strong>true<&#47;strong>, allowing requests to contain basic-auth credentials<&#47;li><br />
+  <&#47;ul><br />
+<&#47;li></p>
+<li>If the request is of HTTP method "OPTIONS", then we treat this as a "pre-flighting" request, responding with a 200-OK response, and returning the following headers in the response:
+<ul>
+<li><strong>Access-Control-Allow-Origin<&#47;strong> - this will have the same value as the <strong>Origin<&#47;strong> value passed in the request header.<&#47;strong><&#47;li>
+<li><strong>Access-Control-Allow-Credentials<&#47;strong> - this will have the value <strong>true<&#47;strong>, allowing requests to contain basic-auth credentials<&#47;li>
+<li><strong>Access-Control-Allow-Methods<&#47;strong> - this will have the same value as the <strong>Access-Control-Request-Method<&#47;strong> value passed in the request header.<&#47;li>
+<li><strong>Access-Control-Allow-Headers<&#47;strong> - this will have the same value as the <strong>Access-Control-Request-Headers<&#47;strong> value passed in the request header.<&#47;li><br />
+  <&#47;ul><br />
+<&#47;li><br />
+<&#47;ul></p>
+<p>And here's the code to achieve that:</p>
+<pre>
+public class CORSHandler : DelegatingHandler<br />
+{<br />
+ const string Origin = "Origin";<br />
+ const string AccessControlRequestMethod = "Access-Control-Request-Method";<br />
+ const string AccessControlRequestHeaders = "Access-Control-Request-Headers";<br />
+ const string AccessControlAllowOrigin = "Access-Control-Allow-Origin";<br />
+ const string AccessControlAllowMethods = "Access-Control-Allow-Methods";<br />
+ const string AccessControlAllowHeaders = "Access-Control-Allow-Headers";<br />
+ const string AccessControlAllowCredentials = "Access-Control-Allow-Credentials";</p>
+<p> protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)<br />
+ {<br />
+  bool isCorsRequest = request.Headers.Contains(Origin);<br />
+  bool isPreflightRequest = request.Method == HttpMethod.Options;<br />
+  if (isCorsRequest)<br />
+  {<br />
+   if (isPreflightRequest)<br />
+   {<br />
+    HttpResponseMessage response = new HttpResponseMessage(HttpStatusCode.OK);<br />
+    response.Headers.Add(AccessControlAllowOrigin,<br />
+      request.Headers.GetValues(Origin).First());</p>
+<p>    string accessControlRequestMethod =<br />
+      request.Headers.GetValues(AccessControlRequestMethod).FirstOrDefault();</p>
+<p>    if (accessControlRequestMethod != null)<br />
+    {<br />
+     response.Headers.Add(AccessControlAllowMethods, accessControlRequestMethod);<br />
+    }</p>
+<p>    string requestedHeaders = string.Join(", ",<br />
+       request.Headers.GetValues(AccessControlRequestHeaders));</p>
+<p>    if (!string.IsNullOrEmpty(requestedHeaders))<br />
+    {<br />
+     response.Headers.Add(AccessControlAllowHeaders, requestedHeaders);<br />
+    }     </p>
+<p>    response.Headers.Add(AccessControlAllowCredentials, "true");</p>
+<p>    TaskCompletionSource<HttpResponseMessage> tcs = new TaskCompletionSource<HttpResponseMessage>();<br />
+    tcs.SetResult(response);<br />
+    return tcs.Task;<br />
+   }<br />
+   else<br />
+   {<br />
+    return base.SendAsync(request, cancellationToken).ContinueWith<HttpResponseMessage>(t =><br />
+    {<br />
+     HttpResponseMessage resp = t.Result;<br />
+     resp.Headers.Add(AccessControlAllowOrigin, request.Headers.GetValues(Origin).First());<br />
+     resp.Headers.Add(AccessControlAllowCredentials, "true");<br />
+     return resp;<br />
+    });<br />
+   }<br />
+  }<br />
+  else<br />
+  {<br />
+   return base.SendAsync(request, cancellationToken);<br />
+  }<br />
+ }<br />
+}<br />
+<&#47;pre></p>
+<p>If using basic-auth, it's worth noting that the pre-flighted request is unauthenticated - so add the CORSHandler to your configurations set of MessageHandlers prior to any authentication handlers, so the OPTIONS requests can be handled correctly.</p>
+<h2>Access-Control-Allow-Credentials<&#47;h2></p>
+<p>In the handler above we enable <strong>Access-Control-Allow-Credentials<&#47;strong> - meaning if the Web API supports basic auth, then the browser is able to authenticate with the API using basic-auth cross-origin, in a jQuery ajax request that would look like this:</p>
+<pre>
+$.ajax({<br />
+  url: "http:&#47;&#47;localhost&#47;myapp&#47;api&#47;collectionres,<br />
+  type: "GET",<br />
+  username: "mylogin",<br />
+  password: "mypassword",<br />
+  data: "$top=10"<br />
+  xhrFields: {<br />
+ withCredentials: true<br />
+  },<br />
+  crossDomain: true,<br />
+  success: success<br />
+});<br />
+<&#47;pre></p>
+<p>I definitely don't recommend this approach for production code - but, it can make for great way for people to play with an API programmatically in javascript, without having to resort to using Node (and using a tool like Dropbox allows them to privately "host" their html&#47;javascript as well, making it possible to share and collaborate on simple mashups).</p>

@@ -1,0 +1,119 @@
+---
+layout: post
+status: publish
+published: true
+title: The final solution (for generic IronPython delegates)...
+author:
+  display_name: bittercoder
+  login: admin
+  email: alex@devdefined.com
+  url: http://blog.bittercoder.com/
+author_login: admin
+author_email: alex@devdefined.com
+author_url: http://blog.bittercoder.com/
+wordpress_id: 83488786
+wordpress_url: http://blog.bittercoder.com/?p=83488786
+date: '2006-10-01 08:03:41 +0000'
+date_gmt: '2006-10-01 08:03:41 +0000'
+categories:
+- ".Net"
+tags:
+- IronPython
+comments:
+- id: 16
+  author: Alex Henderson
+  author_email: bittercoder@gmail.com
+  author_url: http://blog.bittercoder.com/
+  date: '2006-10-02 20:28:41 +0000'
+  date_gmt: '2006-10-02 20:28:41 +0000'
+  content: Sounds like a plan - I pass through Ellerslie on the odd occasion, we could
+    probably catch up for coffee there.
+---
+<h1>
+  Back once more...<br />
+<&#47;h1>I decided to spend ten minutes implementing a version of the last post which didn't require us to generate a function definition for a python method with a generic number of parameters... it's actually not too hard.<br &#47;><br />
+<br &#47;><br />
+First off, the key to solving this problem is to generate a Type for our custom delegate - for performance reasons you would want to cache the results, but we won't do that here... Also I think it would be more apropriate for the first 0->9 parameters that we just return a generic Func delegate (generic Func &amp; Proc delegates are going to be part of .Net 3.0, as mentioned <a href="http:&#47;&#47;blogs.msdn.com&#47;ericlippert&#47;archive&#47;2006&#47;06&#47;21&#47;641831.aspx">here<&#47;a> - At the moment I use something similar from the <a href="http:&#47;&#47;wiki.ayende.com&#47;wiki&#47;index.php?title=Rhino.Commons">RhinoCommons<&#47;a> library, have a look <a href="http:&#47;&#47;svn.berlios.de&#47;svnroot&#47;repos&#47;rhino-mocks&#47;trunk&#47;rhino-commons&#47;Rhino.Commons&#47;DelegateDefinations.cs">here<&#47;a>)<br &#47;><br />
+<br &#47;><br />
+So, first off we build a helper method for generating our delegate - just heavy use of emit here, based off an example on MSDN:<br &#47;><br />
+<br &#47;></p>
+<pre>
+public Type CreateCustomDelegate(Type returnType, params Type[] parameterTypes)<br />
+{<br />
+    AssemblyName assembly = new AssemblyName();<br />
+    assembly.Name = "CreateCustomDelegateAssembly";</p>
+<p>    AssemblyBuilder assemblyBuilder =<br />
+        AppDomain.CurrentDomain.DefineDynamicAssembly(assembly, AssemblyBuilderAccess.RunAndSave);</p>
+<p>    ModuleBuilder moduleBuilder = assemblyBuilder.DefineDynamicModule("TempModule");</p>
+<p>    TypeBuilder typeBuilder =<br />
+        moduleBuilder.DefineType("TempDelegateType",</p>
+<p>            TypeAttributes.Public | TypeAttributes.Sealed | TypeAttributes.Class |</p>
+<p>            TypeAttributes.AnsiClass | TypeAttributes.AutoClass, typeof (MulticastDelegate));</p>
+<p>    ConstructorBuilder constructorBuilder =<br />
+        typeBuilder.DefineConstructor(<br />
+            MethodAttributes.RTSpecialName | MethodAttributes.HideBySig | MethodAttributes.Public,<br />
+            CallingConventions.Standard, new Type[] {typeof (object), typeof (int)});<br />
+    constructorBuilder.SetImplementationFlags(MethodImplAttributes.Runtime | MethodImplAttributes.Managed);</p>
+<p>    MethodBuilder methodBuilder =<br />
+        typeBuilder.DefineMethod("Invoke",</p>
+<p>            MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.NewSlot |</p>
+<p>            MethodAttributes.Virtual, returnType, parameterTypes);<br />
+    methodBuilder.SetImplementationFlags(MethodImplAttributes.Managed | MethodImplAttributes.Runtime);</p>
+<p>    return typeBuilder.CreateType();<br />
+}<br />
+<&#47;pre><br &#47;><br />
+Basically it goes through the motions of building a delegate type, derived from <b>MulticastDelegate<&#47;b> with our selected output type and parameter types...<br &#47;><br />
+<br &#47;><br />
+Now to put that type to use:<br &#47;><br />
+<br &#47;></p>
+<pre>
+[Test]<br />
+public void WithCustomDelegate()<br />
+{<br />
+    Dictionary<string, object> context = new Dictionary<string, object>();<br />
+    context.Add("user", "alex");<br />
+    context.Add("age", 26);</p>
+<p>    Proc testCore = delegate<br />
+        {<br />
+            List<string> parameters = new List<string>(context.Keys);<br />
+            List<object> values = new List<object>(context.Values);</p>
+<p>            PythonEngine engine = new PythonEngine();</p>
+<p>            Type[] parameterTypes = new Type[context.Count];<br />
+            for (int i = 0; i < parameterTypes.Length; i++) parameterTypes[i] = typeof (object);</p>
+<p>            Type delegateType = CreateCustomDelegate(typeof (object), parameterTypes);</p>
+<p>            Type pythonEngine = typeof (PythonEngine);<br />
+            MethodInfo genericMethod =<br />
+                pythonEngine.GetMethod("CreateMethod", new Type[] {typeof (string), typeof (IList<string>)});<br />
+            MethodInfo method = genericMethod.MakeGenericMethod(delegateType);</p>
+<p>            object result =<br />
+                method.Invoke(engine,</p>
+<p>          new object[] {"return user + ' is ' + str(age) + ' years old'", parameters});</p>
+<p>            Delegate myDelegate = (Delegate) result;<br />
+            Assert.AreEqual("alex is 26 years old", myDelegate.DynamicInvoke(values.ToArray()));<br />
+        };</p>
+<p>    &#47;&#47; try it with our two keys in the dictionary</p>
+<p>    testCore();</p>
+<p>    &#47;&#47; try it with another key in the dictionary</p>
+<p>    context.Add("monkey_colour", "brown");<br />
+    testCore();<br />
+}<br />
+<&#47;pre><br &#47;><br />
+Our test creates our custom delegate type for the number of parameters we have, and then we use that when invoking the<br />
+<b>PythonEngine.CreateMethod<&#47;b><<i>TDelegate<&#47;i>>(<i>string<&#47;i> statements, <i>IList<&#47;i><<i>string<&#47;i>> parameters) method.<br &#47;><br />
+<br &#47;><br />
+Here we have to do a little reflection, simply because we cant directly use a local variable of type "Type" as a generic type<br />
+parameter, so we grab the generic method, set the parameter and then invoke it.<br &#47;><br />
+<br &#47;><br />
+However in the end, as you can see we get a real Delegate, which we can use <b>DynamicInvoke<&#47;b> upon.<br &#47;><br />
+<br &#47;><br />
+This is actually pretty handy, and it's certainly a lot more script-friendly, compared to the alternative of forcing users to<br />
+look up values from context by index ie.<br &#47;><br />
+<br &#47;><br />
+&nbsp;&nbsp;&nbsp; context['user'] + ' is ' + str(context['age']) +<br />
+' years old'<br &#47;><br />
+<br &#47;><br />
+vs.<br &#47;><br />
+<br &#47;><br />
+&nbsp;&nbsp;&nbsp; user + ' is ' + str(age) + ' years old'<br &#47;><br />
+<br &#47;><br />
+I know what I prefer ;o)</p>

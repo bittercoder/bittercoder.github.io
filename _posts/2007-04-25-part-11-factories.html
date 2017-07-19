@@ -1,0 +1,208 @@
+---
+layout: post
+status: publish
+published: true
+title: Part 11 - Factories
+author:
+  display_name: bittercoder
+  login: admin
+  email: alex@devdefined.com
+  url: http://blog.bittercoder.com/
+author_login: admin
+author_email: alex@devdefined.com
+author_url: http://blog.bittercoder.com/
+wordpress_id: 7925133
+wordpress_url: http://blog.bittercoder.com/?p=7925133
+date: '2007-04-25 07:11:04 +0000'
+date_gmt: '2007-04-25 07:11:04 +0000'
+categories:
+- ".Net"
+tags:
+- castle windsor
+- container tutorials
+- IoC
+comments: []
+---
+<p><img src="http:&#47;&#47;blog.bittercoder.com&#47;images&#47;ioc_tutorial_titles&#47;11_factories.png" &#47;><br &#47;><br />
+So most all of us are familiar with factories, and at first glance it seems an IoC container removes the need for having to write our own... but this isn't quite the case - for the container to be able create a component it needs:<br &#47;></p>
+<ul>
+<li>A publicly accessible constructor.<br />
+  <&#47;li></p>
+<li>All dependencies to be registered in the container.<br />
+  <&#47;li></p>
+<li>Mechanisms to allow for configuration and dependencies to be<br />
+  injected via constructors, or properties.<br />
+  <&#47;li><br />
+<&#47;ul>Which is fine for classes you own, but what about those that you don't - well you have a few options, but one of the easy options is to create a factory and get the container to use the factory for creating instances - to do this we'll be using a facility.<br &#47;><br />
+<br &#47;><br />
+<span stylesrc="font-weight: bold; text-decoration: underline">Facilities<&#47;span> are "add-ins" for the container, they can be registered in the container, and augment what the container is capable of doing - there are a lot of facilities for the container, and many of them are documented (to varying degrees) on the <a href="http:&#47;&#47;wiki.castleproject.org&#47;index.php&#47;Facilities">castle project wiki<&#47;a> ... we will be using a couple of different facilities in this part, first off will be the <a href="http:&#47;&#47;wiki.castleproject.org&#47;index.php&#47;Facility:FactorySupport">factory support facility<&#47;a>.<br &#47;><br />
+<br &#47;><br />
+So let's start off with a class that's supplied to us by a 3rd party... I'm just going to make one as an example, to keep things simple, called the Sms Service, for sending simple messages to cellular phones...<br &#47;><br />
+<br &#47;></p>
+<pre>
+public class SmsService : ISmsService<br />
+{<br />
+    private SmsConfig _config;</p>
+<p>    public void SetConfig(SmsConfig config)<br />
+    {<br />
+        _config = config;<br />
+    }</p>
+<p>    public void SendMessage(string number, string message)<br />
+    {<br />
+        Console.WriteLine("SMS message: {0} sent to: {1} with account: {2}", message, number, _config.UserName);<br />
+    }</p>
+<p>    public class SmsConfig<br />
+    {<br />
+        private string _userName;<br />
+        private string _password;<br />
+        private int _retryAttempts;</p>
+<p>        internal string UserName<br />
+        {<br />
+            get { return _userName; }<br />
+        }</p>
+<p>        internal string Password<br />
+        {<br />
+            get { return _password; }<br />
+        }</p>
+<p>        public int RetryAttempts<br />
+        {<br />
+            get { return _retryAttempts; }<br />
+            set { _retryAttempts = value; }<br />
+        }</p>
+<p>        public void SetCredentials(string userName, string password)<br />
+        {<br />
+            _userName = userName;<br />
+            _password = password;<br />
+        }<br />
+    }<br />
+}<br />
+<&#47;pre><br &#47;><br />
+It also has a corresponding interface:<br &#47;><br />
+<br &#47;></p>
+<pre>
+public interface ISmsService<br />
+{<br />
+    void SendMessage(string number, string message);<br />
+}<br />
+<&#47;pre><br &#47;><br />
+Now the point is that this class can not be constructred and configured by the container "as-is" because it requires something like this to happen:<br &#47;><br />
+<br &#47;></p>
+<pre>
+SmsService service = new SmsService();</p>
+<p>SmsService.SmsConfig config = new SmsService.SmsConfig();<br />
+config.SetCredentials("joe", "secret");<br />
+config.RetryAttempts = 3;</p>
+<p>service.SetConfig(config);<br />
+<&#47;pre><br &#47;><br />
+Ack! Which doesn't fit in nicely with our concepts of constructor and setter injection for configuration...&nbsp; so the answer is first off, to write a factory... can you guess what it'll look like?<br &#47;><br />
+<br &#47;></p>
+<pre>
+public class SmsServiceFactory<br />
+{<br />
+    public ISmsService CreateService()<br />
+    {<br />
+        SmsService service = new SmsService();</p>
+<p>        SmsService.SmsConfig config = new SmsService.SmsConfig();<br />
+        config.SetCredentials("joe", "secret");<br />
+        config.RetryAttempts = 3;</p>
+<p>        service.SetConfig(config);</p>
+<p>        return service;<br />
+    }<br />
+}<br />
+<&#47;pre><br &#47;><br />
+Well almost - but we don't like hard coding credentials, so we might refactor it a little... to say something like this:<br &#47;><br />
+<br &#47;></p>
+<pre>
+public class SmsServiceFactory<br />
+{<br />
+    private string _userName;<br />
+    private string _password;<br />
+    private int _retryAttempts = 3;</p>
+<p>    public SmsServiceFactory(string userName, string password)<br />
+    {<br />
+        _userName = userName;<br />
+        _password = password;<br />
+    }</p>
+<p>    public int RetryAttempts<br />
+    {<br />
+        get { return _retryAttempts; }<br />
+        set { _retryAttempts = value; }<br />
+    }</p>
+<p>    public ISmsService CreateService()<br />
+    {<br />
+        SmsService service = new SmsService();</p>
+<p>        SmsService.SmsConfig config = new SmsService.SmsConfig();<br />
+        config.SetCredentials(_userName, _password);<br />
+        config.RetryAttempts = _retryAttempts;</p>
+<p>        service.SetConfig(config);</p>
+<p>        return service;<br />
+    }<br />
+}<br />
+<&#47;pre><br &#47;><br />
+Now how do we use this factory in lieu of registering the <b>SmsService<&#47;b> itself in the container... well first off, we need to add in the factory support facility... which is place  within a new part of the castle configuration we haven't seen until now (so far we've only be using the <b><components &#47;><&#47;b> section) - here's how that looks:<br &#47;><br />
+<br &#47;></p>
+<pre>
+<configuration></p>
+<p>  <configSections></p>
+<section name="castle"<br />
+        type="Castle.Windsor.Configuration.AppDomain.CastleSectionHandler, Castle.Windsor" &#47;><br />
+  <&#47;configSections></p>
+<p>  <castle><br />
+    <facilities></p>
+<p>      <facility<br />
+        id="factorysupport"<br />
+        type="Castle.Facilities.FactorySupport.FactorySupportFacility, Castle.MicroKernel" &#47;></p>
+<p>    <&#47;facilities><br />
+<&#47;pre><br &#47;><br />
+Nothing much to it, but now the factory support facility has augmented our container, so we can do this:<br &#47;><br />
+<br &#47;></p>
+<pre>
+<configuration></p>
+<p>  <configSections></p>
+<section name="castle"<br />
+        type="Castle.Windsor.Configuration.AppDomain.CastleSectionHandler, Castle.Windsor" &#47;><br />
+  <&#47;configSections></p>
+<p>  <castle><br />
+    <facilities></p>
+<p>      <facility<br />
+        id="factorysupport"<br />
+        type="Castle.Facilities.FactorySupport.FactorySupportFacility, Castle.MicroKernel" &#47;></p>
+<p>    <&#47;facilities><br />
+    <components></p>
+<p>      <component id="smsService.Factory"<br />
+                 type="IoC.Tutorials.Part11.SmsServiceFactory, IoC.Tutorials.Part11"></p>
+<parameters>
+          <userName>joe<&#47;userName></p>
+<password>secret<&#47;password><br />
+        <&#47;parameters><br />
+      <&#47;component></p>
+<p>      <component id="smsService.default"<br />
+                 type="IoC.Tutorials.Part11.ISmsService, IoC.Tutorials.Part11"<br />
+                 factoryId="smsService.Factory"<br />
+                 factoryCreate="CreateService" &#47;></p>
+<p>    <&#47;components><br />
+  <&#47;castle></p>
+<p><&#47;configuration><br />
+<&#47;pre><br &#47;><br />
+Notice that we've registered our factory as a component, and called it <b>smsService.Factory<&#47;b> - and then we've registered the <b>smsService.default<&#47;b> (interface only) and added a couple of additional attributes, <b>factoryId<&#47;b> (which references our factory component) and <b>factoryCreate<&#47;b> - the name of the method in the factory which is responsible for creating instances of our sms service.<br &#47;><br />
+<br &#47;><br />
+Because we now have the factory support facility installed, whenever a component is registered that facility will inspect it and see if the <b>factoryId<&#47;b> attribute appears in the components configuration and consequently defer it's activation to the referenced factory - pretty cool huh?<br &#47;><br />
+<br &#47;><br />
+So, the million dollar question, does it work?&nbsp; Well lets see... here's our code:<br &#47;><br />
+<br &#47;></p>
+<pre>
+static void Main(string[] args)<br />
+{<br />
+    WindsorContainer container = new WindsorContainer(new XmlInterpreter());</p>
+<p>    ISmsService smsService = container.Resolve<ISmsService>();<br />
+    smsService.SendMessage("+465556555", "testing testing...1.2.3");</p>
+<p>    Console.Read();<br />
+}<br />
+<&#47;pre><br &#47;><br />
+And the output:<br &#47;><br />
+<br &#47;><br />
+<b>SMS message: testing testing...1.2.3 sent to: +465556555 with account: joe<&#47;b><br &#47;><br />
+<br &#47;><br />
+At this point I was going to take a quick look into another factory-related facility, the <b>TypedFactory<&#47;b>, but it's currently broken in the main trunk ;o) so we'll wait until that's been resolved before finishing off this post.<br &#47;><br />
+<br &#47;><br />
+Next time we'll have a quite look at revisiting a class design pattern, the <b>decorator<&#47;b>, when using the Windsor container.<br &#47;></p>

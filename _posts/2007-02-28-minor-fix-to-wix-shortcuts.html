@@ -1,0 +1,26 @@
+---
+layout: post
+status: publish
+published: true
+title: Minor fix to wix shortcuts..
+author:
+  display_name: bittercoder
+  login: admin
+  email: alex@devdefined.com
+  url: http://blog.bittercoder.com/
+author_login: admin
+author_email: alex@devdefined.com
+author_url: http://blog.bittercoder.com/
+wordpress_id: 83488770
+wordpress_url: http://blog.bittercoder.com/?p=83488770
+date: '2007-02-28 06:48:27 +0000'
+date_gmt: '2007-02-28 06:48:27 +0000'
+categories:
+- ".Net"
+tags:
+- WiX
+comments: []
+---
+<p>In the last <a href="http:&#47;&#47;blog.bittercoder.com&#47;Trackback.aspx?guid=367c1e6a-39c8-4103-8bde-63061b48b1d7">post about WiX shortcuts<&#47;a> I detailed how to make an unisntall&nbsp;link... it was actually slightly wrong ;o) ... well at least if&nbsp;your product Id wasn't surrounded with braces... so here's the&nbsp;offending line fixed for product Guid's that aren't surrounded with&nbsp;braces (which is generally what you should be using in a WiX&nbsp;file)</p>
+<pre><CustomAction Id="SetUninstallArgs" Property="UNINSTALLARGS" Value="&#47;x {$(var.PRODUCTGUID)}" &#47;><&#47;pre><br />
+As you were...</p>

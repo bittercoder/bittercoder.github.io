@@ -1,0 +1,314 @@
+---
+layout: post
+status: publish
+published: true
+title: Part 12 - Decorators
+author:
+  display_name: bittercoder
+  login: admin
+  email: alex@devdefined.com
+  url: http://blog.bittercoder.com/
+author_login: admin
+author_email: alex@devdefined.com
+author_url: http://blog.bittercoder.com/
+wordpress_id: 4863
+wordpress_url: http://blog.bittercoder.com/?p=4863
+date: '2007-04-28 00:27:50 +0000'
+date_gmt: '2007-04-28 00:27:50 +0000'
+categories:
+- ".Net"
+tags:
+- castle windsor
+- container tutorials
+- IoC
+comments: []
+---
+<p><img src="http:&#47;&#47;blog.bittercoder.com&#47;images&#47;ioc_tutorial_titles&#47;12_decorators.png" &#47;><br &#47;><br />
+So... Decorators (for those who don't know, or don't remember) are a classic design pattern - have a look at the <a href="http:&#47;&#47;en.wikipedia.org&#47;wiki&#47;Decorator_pattern">wikipedia entry<&#47;a> if your curious on doing any background reading.<br &#47;><br />
+<br &#47;><br />
+Up until now we've been creating abstractions and swapping implementations, but here we are going to chain implementations... so for this example we have an Order class which contains a bunch of order items, here's how that looks:<br &#47;><br />
+<br &#47;><br />
+<span style="text-decoration: underline">Order.cs<&#47;span><br &#47;><br />
+<br &#47;></p>
+<pre>
+public class Order<br />
+{<br />
+    private string _countryCode;<br />
+    private readonly List<OrderItem> _items = new List<OrderItem>();</p>
+<p>    public List<OrderItem> Items<br />
+    {<br />
+        get { return _items; }<br />
+    }</p>
+<p>    public string CountryCode<br />
+    {<br />
+        get { return _countryCode; }<br />
+        set { _countryCode = value; }<br />
+    }<br />
+}<br />
+<&#47;pre><br &#47;><br />
+<span style="text-decoration: underline">OrderItem.cs<&#47;span><br &#47;><br />
+<br &#47;></p>
+<pre>
+public class OrderItem<br />
+{<br />
+    private string _name;<br />
+    private bool _isFragile;<br />
+    private int _quantity;<br />
+    private decimal _costPerItem;</p>
+<p>    public OrderItem(string name, int quantity, decimal costPerItem, bool isFragile)<br />
+    {<br />
+        _name = name;<br />
+        _quantity = quantity;<br />
+        _costPerItem = costPerItem;<br />
+        _isFragile = isFragile;<br />
+    }</p>
+<p>    public bool IsFragile<br />
+    {<br />
+        get { return _isFragile; }<br />
+        set { _isFragile = value; }<br />
+    }</p>
+<p>    public int Quantity<br />
+    {<br />
+        get { return _quantity; }<br />
+        set { _quantity = value; }<br />
+    }</p>
+<p>    public decimal CostPerItem<br />
+    {<br />
+        get { return _costPerItem; }<br />
+        set { _costPerItem = value; }<br />
+    }</p>
+<p>    public string Name<br />
+    {<br />
+        get { return _name; }<br />
+        set { _name = value; }<br />
+    }<br />
+}<br />
+<&#47;pre><br &#47;><br />
+And now we have an interface that a class can implement to calculate the cost of an order:<br &#47;><br />
+<br &#47;></p>
+<pre>
+public interface ICostCalculator<br />
+{<br />
+    decimal CalculateTotal(Order order);<br />
+}<br />
+<&#47;pre><br &#47;><br />
+And last of all we have an implementation of the cost calculator, which calculates the base cost of an order based on quantities and per-item costs:<br &#47;><br />
+<br &#47;></p>
+<pre>
+public class DefaultCostCalculator : ICostCalculator<br />
+{<br />
+    public decimal CalculateTotal(Order order)<br />
+    {<br />
+        decimal total = 0;</p>
+<p>        foreach (OrderItem item in order.Items)<br />
+        {<br />
+            total += (item.Quantity*item.CostPerItem);<br />
+        }</p>
+<p>        return total;<br />
+    }<br />
+}<br />
+<&#47;pre><br &#47;><br />
+Pretty simple, so what about the program itself... well here it is, we just have 2 different orders we are calculating the total cost for:<br &#47;><br />
+<br &#47;></p>
+<pre>
+internal class Program<br />
+{<br />
+    private static void Main(string[] args)<br />
+    {<br />
+        WindsorContainer container = new WindsorContainer(new XmlInterpreter());</p>
+<p>        Order order1 = new Order();<br />
+        order1.CountryCode = "NZ";<br />
+        order1.Items.Add(new OrderItem("water", 10, 1.0m, false));<br />
+        order1.Items.Add(new OrderItem("glass", 5, 20.0m, true));</p>
+<p>        Order order2 = new Order();<br />
+        order2.CountryCode = "US";<br />
+        order2.Items.Add(new OrderItem("sand", 50, 0.2m, false));</p>
+<p>        ICostCalculator costCalculator = container.Resolve<ICostCalculator>();<br />
+        Console.WriteLine("Cost to deliver Order 1: {0}", costCalculator.CalculateTotal(order1));<br />
+        Console.WriteLine("Cost to deliver Order 2: {0}", costCalculator.CalculateTotal(order2));</p>
+<p>        Console.Read();<br />
+    }<br />
+}<br />
+<&#47;pre><br &#47;><br />
+Our configuration (predictably) just had the default implementation of the cost calculator registered:<br &#47;><br />
+<br &#47;></p>
+<pre>
+<component id="costCalculator.default"<br />
+           service="IoC.Tutorials.Part12.ICostCalculator, IoC.Tutorials.Part12"<br />
+           type="IoC.Tutorials.Part12.DefaultCostCalculator, IoC.Tutorials.Part12" &#47;><br />
+<&#47;pre><br &#47;><br />
+Now lets see the output of running it:<br &#47;><br />
+<br &#47;><br />
+<b>Cost to deliver Order 1: 110.0<br &#47;><br />
+Cost to deliver Order 2: 10.0<br &#47;><&#47;b><br &#47;><br />
+So that seems OK... But I live in New Zealand, and in <a href="http:&#47;&#47;en.wikipedia.org&#47;wiki&#47;New_zealand">New Zealand<&#47;a> we have GST (<a href="http:&#47;&#47;www.ird.govt.nz&#47;gst&#47;">Goods and Services Tax<&#47;a>) which means that I need to add another 12.5% to the total value of an order for NZ customers... so I could modify the default shipping calculator... but that's going to get ugly fast as more requirements come in (and more configuration needs to be exposed) - so instead I'll create a decorator for the cost calculator, just for doing GST:<br &#47;><br />
+<br &#47;></p>
+<pre>
+public class GstCostCalcualtorDecoarator : ICostCalculator<br />
+{<br />
+    private readonly ICostCalculator _innerCalculator;<br />
+    private decimal _gstRate = 1.125m;</p>
+<p>    public GstCostCalcualtorDecoarator(ICostCalculator innerCalculator)<br />
+    {<br />
+        _innerCalculator = innerCalculator;<br />
+    }</p>
+<p>    public decimal GstRate<br />
+    {<br />
+        get { return _gstRate; }<br />
+        set { _gstRate = value; }<br />
+    }</p>
+<p>    private bool IsNewZealand(Order order)<br />
+    {<br />
+        return (order.CountryCode == "NZ");<br />
+    }</p>
+<p>    public decimal CalculateTotal(Order order)<br />
+    {<br />
+        decimal innerTotal = _innerCalculator.CalculateTotal(order);</p>
+<p>        if (IsNewZealand(order))<br />
+        {<br />
+            innerTotal = (innerTotal*_gstRate);<br />
+        }</p>
+<p>        return innerTotal;<br />
+    }<br />
+}<br />
+<&#47;pre><br &#47;><br />
+Notice it's dependency on <b>ICostCalculator<&#47;b>, and that it actually invokes the inner calculator to get a total and then "decorates" the total (by adding the 12.5% when the country for the order is New Zealand).<br &#47;><br />
+<br &#47;><br />
+Now we can actually wire this up in our container without changing any of our application code... let's look at that:<br &#47;><br />
+<br &#47;></p>
+<pre>
+<configuration></p>
+<p>  <configSections></p>
+<section name="castle"<br />
+        type="Castle.Windsor.Configuration.AppDomain.CastleSectionHandler, Castle.Windsor" &#47;><br />
+  <&#47;configSections></p>
+<p>  <castle><br />
+    <components></p>
+<p>      <component id="costCalculator.gstDecorator"<br />
+                 service="IoC.Tutorials.Part12.ICostCalculator, IoC.Tutorials.Part12"<br />
+                 type="IoC.Tutorials.Part12.GstCostCalcualtorDecoarator, IoC.Tutorials.Part12"></p>
+<parameters>
+          <innerCalculator>${costCalculator.default}<&#47;innerCalculator><br />
+        <&#47;parameters><br />
+      <&#47;component></p>
+<p>      <component id="costCalculator.default"<br />
+                 service="IoC.Tutorials.Part12.ICostCalculator, IoC.Tutorials.Part12"<br />
+                 type="IoC.Tutorials.Part12.DefaultCostCalculator, IoC.Tutorials.Part12" &#47;></p>
+<p>    <&#47;components><br />
+  <&#47;castle></p>
+<p><&#47;configuration><br />
+<&#47;pre><br &#47;><br />
+Notice that the GSTdecorator is registered first (so it will be the default implementation of the <b>ICostCalculator<&#47;b> service) and it's inner calculator is wired to our default cost calculator... but proof is in the pudding, lets see what the results of running the program are now:<br &#47;><br />
+<br &#47;><br />
+<b>Cost to deliver Order 1: 123.7500<br &#47;><br />
+Cost to deliver Order 2: 10.0<&#47;b><br &#47;><br />
+<br &#47;><br />
+Great, so our New Zealand order is now ($110 * 1.125 = $123.75) - but our United states order is still at the original $10 dollars... but we forgot to calculate shipping... so let's add another decorator.<br &#47;><br />
+<br &#47;></p>
+<pre>
+public class ShippingCostCalculatorDecorator : ICostCalculator<br />
+{<br />
+    private readonly ICostCalculator _innerCalculator;<br />
+    private decimal _shippingCost = 5.0m;<br />
+    private decimal _fragileShippingPremium = 1.5m;</p>
+<p>    public ShippingCostCalculatorDecorator(ICostCalculator innerCalculator)<br />
+    {<br />
+        _innerCalculator = innerCalculator;<br />
+    }</p>
+<p>    public decimal ShippingCost<br />
+    {<br />
+        get { return _shippingCost; }<br />
+        set { _shippingCost = value; }<br />
+    }</p>
+<p>    public decimal FragileShippingPremium<br />
+    {<br />
+        get { return _fragileShippingPremium; }<br />
+        set { _fragileShippingPremium = value; }<br />
+    }</p>
+<p>    public decimal CalculateTotal(Order order)<br />
+    {<br />
+        decimal innerTotal = _innerCalculator.CalculateTotal(order);<br />
+        return innerTotal + GetShippingTotal(order);<br />
+    }</p>
+<p>    private decimal GetShippingTotal(Order order)<br />
+    {<br />
+        decimal shippingTotal = 0;</p>
+<p>        foreach (OrderItem item in order.Items)<br />
+        {<br />
+            decimal itemShippingCost = ShippingCost*item.Quantity;<br />
+            if (item.IsFragile) itemShippingCost *= FragileShippingPremium;<br />
+            shippingTotal += itemShippingCost;<br />
+        }</p>
+<p>        return shippingTotal;<br />
+    }<br />
+}<br />
+<&#47;pre><br &#47;><br />
+And of course, we need to wire that up as well:<br &#47;><br />
+<br &#47;></p>
+<pre>
+<configuration></p>
+<p>  <configSections></p>
+<section name="castle"<br />
+        type="Castle.Windsor.Configuration.AppDomain.CastleSectionHandler, Castle.Windsor" &#47;><br />
+  <&#47;configSections></p>
+<p>  <castle><br />
+    <components></p>
+<p>      <component id="costCalculator.shippingDecorator"<br />
+           service="IoC.Tutorials.Part12.ICostCalculator, IoC.Tutorials.Part12"<br />
+           type="IoC.Tutorials.Part12.ShippingCostCalculatorDecorator, IoC.Tutorials.Part12"></p>
+<parameters>
+          <innerCalculator>${costCalculator.gstDecorator}<&#47;innerCalculator><br />
+        <&#47;parameters><br />
+      <&#47;component></p>
+<p>      <component id="costCalculator.gstDecorator"<br />
+                 service="IoC.Tutorials.Part12.ICostCalculator, IoC.Tutorials.Part12"<br />
+                 type="IoC.Tutorials.Part12.GstCostCalcualtorDecoarator, IoC.Tutorials.Part12"></p>
+<parameters>
+          <innerCalculator>${costCalculator.default}<&#47;innerCalculator><br />
+        <&#47;parameters><br />
+      <&#47;component></p>
+<p>      <component id="costCalculator.default"<br />
+                 service="IoC.Tutorials.Part12.ICostCalculator, IoC.Tutorials.Part12"<br />
+                 type="IoC.Tutorials.Part12.DefaultCostCalculator, IoC.Tutorials.Part12" &#47;></p>
+<p>    <&#47;components><br />
+  <&#47;castle></p>
+<p><&#47;configuration><br />
+<&#47;pre><br &#47;><br />
+Notice the chain, now we have <b>Shipping -> GST -> Default Calculator<&#47;b> .. so running the app again we can see the new totals:<br &#47;><br />
+<br &#47;><br />
+<b>Cost to deliver Order 1: 211.2500<br &#47;><br />
+Cost to deliver Order 2: 260.0<&#47;b><br &#47;><br />
+<br &#47;><br />
+Now there's a small problem here... we're calculating GST <span style="text-decoration: underline">before<&#47;span> shipping, this actually should be the other way round... think about what you would have to do to change this in a program normally - ugh!&nbsp; But of course decorators and IoC containers are a great fit, we'll just change the order of decorators, and while we're at it, lets make GST 20% and no longer charge a premium for shipping fragile goods... easy!<br &#47;><br />
+<br &#47;></p>
+<pre>
+<components></p>
+<p>  <component id="costCalculator.gstDecorator"<br />
+             service="IoC.Tutorials.Part12.ICostCalculator, IoC.Tutorials.Part12"<br />
+             type="IoC.Tutorials.Part12.GstCostCalcualtorDecoarator, IoC.Tutorials.Part12"></p>
+<parameters>
+      <innerCalculator>${costCalculator.shippingDecorator}<&#47;innerCalculator><br />
+      <GstRate>1.20<&#47;GstRate> <!-- GST is now 20% --><br />
+    <&#47;parameters><br />
+  <&#47;component></p>
+<p>  <component id="costCalculator.shippingDecorator"<br />
+       service="IoC.Tutorials.Part12.ICostCalculator, IoC.Tutorials.Part12"<br />
+       type="IoC.Tutorials.Part12.ShippingCostCalculatorDecorator, IoC.Tutorials.Part12"></p>
+<parameters>
+      <innerCalculator>${costCalculator.default}<&#47;innerCalculator><br />
+      <FragileShippingPremium>0.0<&#47;FragileShippingPremium> <!-- No fragile goods premium any more--><br />
+    <&#47;parameters><br />
+  <&#47;component></p>
+<p>  <component id="costCalculator.default"<br />
+             service="IoC.Tutorials.Part12.ICostCalculator, IoC.Tutorials.Part12"<br />
+             type="IoC.Tutorials.Part12.DefaultCostCalculator, IoC.Tutorials.Part12" &#47;></p>
+<p><&#47;components><br />
+<&#47;pre><br &#47;><br />
+And for anyone sad enough to be checking the results with a calculator (or with the human equivalent ;o) we'll run the program one last time:<br &#47;><br />
+<br &#47;><br />
+<b>Cost to deliver Order 1: 192.0000<br &#47;><br />
+Cost to deliver Order 2: 260.0<&#47;b><br &#47;><br />
+<br &#47;><br />
+Now one thing to keep in mind is that so far we've been decorating <b>return<&#47;b> values... but you can also decorate methods with logic that occurs before invoking the inner service - a common example of this might be to validate something before it's committed to a repository (and perhaps throwing an exception if it's not OK) - and now suddenly you can turn validation on or off at the configuration level.<br &#47;><br />
+<br &#47;><br />
+Next time we'll have a look at another way of writing this functionality without using decorators, stay tuned.<br &#47;></p>

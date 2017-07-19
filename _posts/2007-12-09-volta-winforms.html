@@ -1,0 +1,218 @@
+---
+layout: post
+status: publish
+published: true
+title: Volta WinForms..
+author:
+  display_name: bittercoder
+  login: admin
+  email: alex@devdefined.com
+  url: http://blog.bittercoder.com/
+author_login: admin
+author_email: alex@devdefined.com
+author_url: http://blog.bittercoder.com/
+wordpress_id: 83489714
+wordpress_url: http://blog.bittercoder.com/?p=83489714
+date: '2007-12-09 10:08:19 +0000'
+date_gmt: '2007-12-09 10:08:19 +0000'
+categories:
+- ".Net"
+tags: []
+comments: []
+---
+<p>So I've been playing with Volta in my spare time this evening -<br />
+just had a go at tier-splitting a winforms application to see how<br />
+that works... so I did something pretty trivial, the form has a<br />
+button, you type a name into a textbox, click the welcome button,<br />
+it invokes a method on the welcome service and outputs the results<br />
+to the textbox... I plan to tier split between the client and the<br />
+underlying service, so that the service could be executed on a<br />
+"Server".<br &#47;><br />
+<br &#47;><br />
+<img src="http:&#47;&#47;blog.bittercoder.com&#47;images&#47;2_simple_winform.png"<br />
+alt="2_simple_winform.png" border="0" height="300" widthsrc="300" &#47;><br &#47;><br />
+<br &#47;></p>
+<pre>
+public partial class Form1 : Form<br />
+{<br />
+    public Form1()<br />
+    {<br />
+        InitializeComponent();<br />
+    }</p>
+<p>    private void welcomeButton_Click(object sender, EventArgs e)<br />
+    {<br />
+        SomeService service = new SomeService();<br />
+        welcomeOutput.AppendText(service.WelcomeMessage(nameTextBox.Text));<br />
+    }<br />
+}<br />
+<&#47;pre></p>
+<p>
+  The service itself looks like this:<br &#47;><br />
+  <br &#47;><br />
+<&#47;p></p>
+<pre>
+[RunAt("Server")]<br />
+public class SomeService<br />
+{<br />
+    public string WelcomeMessage(string name)<br />
+    {<br />
+        return string.Format("Welcome: {0}", name);<br />
+    }<br />
+}<br />
+<&#47;pre><br &#47;><br />
+Unlike a web-app, you can't seem to use "RunAtOrigin" for<br />
+indicating a tier-split between client&#47;server - when you think<br />
+about this makes sense (you could have more then server for a<br />
+win-forms app, because the "origin" and the client are the same<br />
+thing, unlike the client (javascript) and origin (web server)<br />
+relationship that exists for a web app.<br &#47;><br />
+<br &#47;><br />
+Now running the application spins up the Volta test server, if you<br />
+click on volta icon (btw, cudos to whoever did the volta<br />
+branding&#47;logos - I love em) in the system tray, you can tick the<br />
+"log requests" to see what traffic between client&#47;server is<br />
+occurring... clicking the welcome button shows two requests being<br />
+made for each button click.<br &#47;><br />
+<br &#47;><br />
+<img src="http:&#47;&#47;blog.bittercoder.com&#47;images&#47;1_log_requests.png"<br />
+alt="1_log_requests.png" border="0" height="323" widthsrc="590" &#47;><br &#47;><br />
+<br &#47;><br />
+Now moving our eyes towards the tier splitter's output, we can see<br />
+on the client side that our test service class is converted into a<br />
+proxy (obviously)<br &#47;><br />
+<br &#47;></p>
+<pre>
+[RunAt("Server")]<br />
+public class SomeService<br />
+{<br />
+    &#47;&#47; Fields<br />
+    private Guid __id;<br />
+    private static ClientMap __map;<br />
+    private static string __uri;</p>
+<p>    &#47;&#47; Methods<br />
+    public SomeService()<br />
+    {<br />
+        object[] parameters = new object[0];<br />
+        this.__id = Proxy.Call<Guid>(__Serializer.GetInstance(), __GetUri(), "SomeService", 1, null, null, parameters);<br />
+        __GetMap().Add(this.__id, this);<br />
+    }</p>
+<p>    private SomeService(__TypeSerializer __typeSerializer)<br />
+    {<br />
+    }</p>
+<p>    private static ClientMap __GetMap()<br />
+    {<br />
+        if (__map == null)<br />
+        {<br />
+            __map = new ClientMap();<br />
+        }<br />
+        return __map;<br />
+    }</p>
+<p>    private static string __GetUri()<br />
+    {<br />
+        if (__uri == null)<br />
+        {<br />
+            string service = ConfigurationManager.AppSettings.Get("Server");<br />
+            if (service == null)<br />
+            {<br />
+                throw new ArgumentException("Could not find application configuration entry for 'Server'.");<br />
+            }<br />
+            __uri = ServiceLocation.GetService(service, "__TierSplit.aspx");<br />
+        }<br />
+        return __uri;<br />
+    }</p>
+<p>    public string WelcomeMessage(string name)<br />
+    {<br />
+        object[] parameters = new object[] { name };<br />
+        return Proxy.Call<string>(__Serializer.GetInstance(), __GetUri(), "SomeService", 0, this, null, parameters);<br />
+    }</p>
+<p>    &#47;&#47; Nested Types<br />
+    public sealed class __TypeSerializer : AbstractTypeSerializer<SomeService><br />
+    {<br />
+        &#47;&#47; Methods<br />
+        public override SomeService Deserialize(ISerializer serializer, IObjectReader reader)<br />
+        {<br />
+            reader.ReadSeparator();<br />
+            reader.ReadMemberName("id");<br />
+            Guid id = new Guid(reader.ReadPrimitive());<br />
+            ClientMap map = SomeService.__GetMap();<br />
+            SomeService byID = (SomeService)map.GetByID(id);<br />
+            if (byID == null)<br />
+            {<br />
+                byID = new SomeService(this);<br />
+                byID.__id = id;<br />
+                map.Add(id, byID);<br />
+            }<br />
+            return byID;<br />
+        }</p>
+<p>        public override void Serialize(ISerializer serializer, IObjectWriter writer, SomeService value)<br />
+        {<br />
+            writer.WriteSeparator();<br />
+            writer.WriteMemberName("id");<br />
+            writer.WritePrimitive(value.__id.ToString());<br />
+        }<br />
+    }<br />
+}<br />
+<&#47;pre><br &#47;><br />
+And on the server-side, our service has also been altered slightly,<br />
+note the inner __Service class:<br &#47;><br />
+<br &#47;></p>
+<pre>
+[RunAt("Server")]<br />
+public class SomeService<br />
+{<br />
+    &#47;&#47; Methods<br />
+    public string WelcomeMessage(string name)<br />
+    {<br />
+        return string.Format("Welcome: {0}", name);<br />
+    }</p>
+<p>    &#47;&#47; Nested Types<br />
+    public sealed class __Service : Service<SomeService><br />
+    {<br />
+        &#47;&#47; Methods<br />
+        public override string get_Name()<br />
+        {<br />
+            return "SomeService";<br />
+        }</p>
+<p>        protected override void ProcessMethod(Service<SomeService>.Call call)<br />
+        {<br />
+            switch (call.GetMethod())<br />
+            {<br />
+                case 0:<br />
+                    call.Return<string>(call.GetInstance().WelcomeMessage(call.GetParameter<string>(0)));<br />
+                    break;</p>
+<p>                case 1:<br />
+                    call.Return<Guid>(call.AddInstance(new SomeService()));<br />
+                    break;</p>
+<p>                default:<br />
+                    throw new InvalidMethodException();<br />
+            }<br />
+        }<br />
+    }<br />
+}<br />
+<&#47;pre><br &#47;><br />
+Now what about those two requests - looking at the code we can<br />
+deduce that the two calls are occurring first for<br />
+construction&#47;registration of the client proxy, and second for<br />
+handling the message - changing the client app to look like<br />
+this:<br &#47;><br />
+<br &#47;></p>
+<pre>
+public partial class Form1 : Form<br />
+{<br />
+    SomeService service = new SomeService();</p>
+<p>    public Form1()<br />
+    {<br />
+        InitializeComponent();<br />
+    }</p>
+<p>    private void welcomeButton_Click(object sender, EventArgs e)<br />
+    {<br />
+        welcomeOutput.AppendText(service.WelcomeMessage(nameTextBox.Text));<br />
+    }<br />
+}<br />
+<&#47;pre><br &#47;><br />
+And clicking the welcome button fixes the behavior, so that for<br />
+successive button clicks only one request is being generated.<br &#47;><br />
+<br &#47;><br />
+Afraid that's all I have time for tonight... but I'll post more<br />
+about my Volta explorations this week when I get spare<br />
+moments.<br &#47;></p>

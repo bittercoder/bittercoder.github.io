@@ -1,0 +1,79 @@
+---
+layout: post
+status: publish
+published: true
+title: mucking about with hashes...
+author:
+  display_name: bittercoder
+  login: admin
+  email: alex@devdefined.com
+  url: http://blog.bittercoder.com/
+author_login: admin
+author_email: alex@devdefined.com
+author_url: http://blog.bittercoder.com/
+wordpress_id: 83488757
+wordpress_url: http://blog.bittercoder.com/?p=83488757
+date: '2007-06-11 09:32:15 +0000'
+date_gmt: '2007-06-11 09:32:15 +0000'
+categories:
+- ".Net"
+tags:
+- C#
+- LINQ
+comments:
+- id: 39
+  author: Alex Henderson
+  author_email: bittercoder@gmail.com
+  author_url: http://blog.bittercoder.com/
+  date: '2007-06-11 21:39:53 +0000'
+  date_gmt: '2007-06-11 21:39:53 +0000'
+  content: Very clever, I never thought to use the parameter name of an anonymous
+    delegate - Love it!
+---
+<p>So, I got a comment on the last post about <a href="http:&#47;&#47;blog.bittercoder.com&#47;PermaLink,guid,d1831805-dbf7-4b74-a6fd-2e9ed437c3d9.aspx">hashes<&#47;a> <a href="http:&#47;&#47;tempuri.org&#47;tempuri.html">from&nbsp;lambdas<&#47;a> (from <a href="http:&#47;&#47;blog.ashmind.com&#47;">Andrey&nbsp;Shchekin<&#47;a>)... It pointed out the fact that you don't need to&nbsp;use expressions at all... which hilights an observation that I&nbsp;hadn't made myself - such that the lambda parameter&nbsp;names&nbsp;are available in the generated delegate... which of&nbsp;course makes perfect sense!</p>
+<p>So given:</p>
+<pre>Func<string, T> func = Name => "Value"; <&#47;pre><br />
+You can get the lambda parameter "Name" from the function&nbsp;delegate by calling:</p>
+<pre>func.Method.GetParameters()[0].Name &#47;&#47; would&nbsp;return "Name" <&#47;pre><br />
+Here's the revised Hash method from Andrey:</p>
+<pre>public Dictionary<string, T> Hash<T>(params Func<string, T>[] args)<br />
+where T : class {<br />
+    var items = new Dictionary<string,T>();<br />
+    foreach (var func in args) {<br />
+        var item = func(null);<br />
+        items.Add(func.Method.GetParameters()[0].Name, item);<br />
+    } return items;<br />
+} <&#47;pre></p>
+<p>Very elegant and simple :)</p>
+<p>He even did some stats, which I suspect are probably a lot more&nbsp;accurate then my inital observations:</p>
+<p>For 10000 consecutive calls:</p>
+<table style="width: 298px; height: 87px;" border="1" cellspacing="1">
+<tbody>
+<tr>
+<td>WithAdd<&#47;td></p>
+<td>10.0144ms<&#47;td><br />
+<&#47;tr></p>
+<tr>
+<td>WithLambdas<&#47;td></p>
+<td>9713.968ms<&#47;td><br />
+<&#47;tr></p>
+<tr>
+<td>WithLambdasConstantsOnly<&#47;td></p>
+<td>240.3456ms<&#47;td><br />
+<&#47;tr></p>
+<tr>
+<td>WithDelegates<&#47;td></p>
+<td>30.0432ms<&#47;td><br />
+<&#47;tr><br />
+<&#47;tbody><br />
+<&#47;table><br />
+Now what about multiple parameters... so far I can't think&nbsp;of any uses I would have for it... perhaps a 2 level configuration&nbsp;dictionary?</p>
+<pre>
+[Test]<br />
+public void HashTwoLevelDict()<br />
+{<br />
+    Dictionary<string, Dictionary<string,object>> config = this.Hash<object>((Connection, DriverClass) => typeof(SqlClientDriver), (Dialect, DialectClass) => typeof(MsSql2000Dialect), (Connection, Provider) => typeof(DriverConnectionProvider), (Connection, ConnectionString) =>"Data Source=.;Initial Catalog=test;Integrated Security=SSPI");<br />
+    Assert.AreEqual(typeof(SqlClientDriver), config["Connection"]["DriverClass"]);<br />
+}<br />
+<&#47;pre></p>
+<p>Who knows... I look forward to seeing how Lambdas get used and&nbsp;abused for non-functional programming tasks :)</p>

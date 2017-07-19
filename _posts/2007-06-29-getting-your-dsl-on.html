@@ -1,0 +1,171 @@
+---
+layout: post
+status: publish
+published: true
+title: Getting your DSL on...
+author:
+  display_name: bittercoder
+  login: admin
+  email: alex@devdefined.com
+  url: http://blog.bittercoder.com/
+author_login: admin
+author_email: alex@devdefined.com
+author_url: http://blog.bittercoder.com/
+wordpress_id: 83488755
+wordpress_url: http://blog.bittercoder.com/?p=83488755
+date: '2007-06-29 10:12:23 +0000'
+date_gmt: '2007-06-29 10:12:23 +0000'
+categories:
+- ".Net"
+tags:
+- C#
+- DSL
+comments:
+- id: 37
+  author: Alex Henderson
+  author_email: bittercoder@gmail.com
+  author_url: http://blog.bittercoder.com/
+  date: '2007-06-30 05:39:53 +0000'
+  date_gmt: '2007-06-30 05:39:53 +0000'
+  content: |-
+    It does a bit, I hadn't actually made the association :)
+
+    The real question is... would I be happy to ever see this kind of code cropping up in a production system, If I hadn't written it myself, or even If I had... is it intuitive enough for other developers to follow, or would a more traditional fluent interface be appropriate?
+---
+<p>Following on from my posts on creating hashes (dictionaries) using lambdas (<a href="http:&#47;&#47;blog.bittercoder.com&#47;PermaLink,guid,d1831805-dbf7-4b74-a6fd-2e9ed437c3d9.aspx">here<&#47;a>, and<a href="http:&#47;&#47;blog.bittercoder.com&#47;PermaLink,guid,206e64d1-29ae-4362-874b-83f5b103727f.aspx">here<&#47;a>) and the little annotations &ldquo;framework&rdquo; I produced (<a href="http:&#47;&#47;blog.bittercoder.com&#47;PermaLink,guid,2e0e231a-e837-4585-aaab-79999bdcb484.aspx">here<&#47;a>&nbsp;and&nbsp;<a href="http:&#47;&#47;blog.bittercoder.com&#47;PermaLink,guid,02585765-adcc-470d-8d8e-4d3b193d37db.aspx">here<&#47;a>) which leverage the idea for annotating classes via extension methods&hellip; I&rsquo;ve decided to turn my hand to creating a DSL using lambdas, on my continuing theme of C# 3.0 lambda abuse.</p>
+<p>So first off&hellip; go have a look at Ayende&rsquo;s post&nbsp;<a href="http:&#47;&#47;ayende.com&#47;Blog&#47;archive&#47;2007&#47;06&#47;26&#47;DSL-Support-for-Brail.aspx">DSL Support for brail<&#47;a>&nbsp;&hellip; that&rsquo;ll give you an idea of kinda what I&rsquo;m trying to achieve&hellip;. so, here&rsquo;s an example of a simple DSL for building say a html table.</p>
+<pre>
+var dsl = new StandardDsl();</p>
+<p>dsl.Add(<br />
+table => dsl.As(<br />
+  tr => dsl.As(<br />
+    td => dsl.Text(&ldquo;header1&Prime;),<br />
+    td => dsl.Text(&ldquo;header2&Prime;))));</p>
+<p>Console.WriteLine(DslToXml.ToXml(dsl));<br />
+<&#47;pre></p>
+<p>Which gives an output of:</p>
+<pre>
+<table>
+<tr>
+<td>header1<&#47;td>
+<td>header2<&#47;td><&#47;tr><&#47;table><br />
+<&#47;pre></p>
+<p>Depending on taste you could lay it out differently, avoiding the mess of closing parentheses at the end of the Add call, say like:</p>
+<pre>
+var dsl = new StandardDsl();</p>
+<p>dsl.Add<br />
+(<br />
+  table => dsl.As<br />
+  (<br />
+    tr => dsl.As<br />
+    (<br />
+      td => dsl.Text(&ldquo;header1&Prime;),<br />
+      td => dsl.Text(&ldquo;header2&Prime;)<br />
+    )<br />
+  )<br />
+);<br />
+<&#47;pre></p>
+<p>Which is pretty easy on the eyes&hellip; now what about something a little more domain specific like the view component example Ayende gave for monorail&hellip; well here&rsquo;s my take on that, so say we have some people:</p>
+<pre>
+var people = new List<Person>()<br />
+{<br />
+  new Person() { FirstName = &ldquo;Alex&rdquo;, LastName = &ldquo;Henderson&rdquo;},<br />
+  new Person() { FirstName = &ldquo;Joe&rdquo;, LastName = &ldquo;Bloggs&rdquo;}<br />
+};<br />
+<&#47;pre></p>
+<p>And we have a DSL specific to components...</p>
+<pre>
+var compDsl = new ComponentDsl();</p>
+<p>compDsl.Add<br />
+(<br />
+  GridComponent => compDsl.As<br />
+  (<br />
+    compDsl.Component(source => people),<br />
+    header => compDsl.Section<br />
+    (<br />
+      tr => compDsl.As<br />
+      (<br />
+        th => compDsl.As<br />
+        (<br />
+          compDsl.Text(&ldquo;Names&rdquo;)<br />
+        )<br />
+      )<br />
+    ),<br />
+    item => compDsl.Section<br />
+    (<br />
+      tr => compDsl.As<br />
+      (<br />
+        td => compDsl.As<br />
+        (<br />
+          compDsl.Item<Person>(p => p.FirstName + &rdquo; &ldquo; + p.LastName)<br />
+        )<br />
+      )<br />
+    )<br />
+  )<br />
+);<br />
+<&#47;pre></p>
+<p>And now we could do this in-line with a bigger DSL for say a whole view, but we can also just reference them so I could do something like this to create the overall view:</p>
+<pre>
+var dsl = new StandardDsl();</p>
+<p>dsl.Add<br />
+(<br />
+  html => dsl.As<br />
+  (<br />
+    body => compDsl<br />
+  )<br />
+);<br />
+<&#47;pre></p>
+<p>Now once I&rsquo;ve tidied the code up a bit I&rsquo;ll probably put it up for people to&nbsp;have a play with &ndash; I don&rsquo;t necessarily consider a &ldquo;good idea&rdquo; &ndash; but it&rsquo;s cute.&nbsp; However for now let&rsquo;s have a quick look at how I&rsquo;m doing it...</p>
+<p>So to start with we have a delegate called &ldquo;<strong>Batch<&#47;strong>&rdquo; with the signature below &ndash; batch probably isn&rsquo;t the right name for this, I&rsquo;m not really sure it matters all that much.</p>
+<pre>
+public delegate Batch[] Batch(Batch batch);<br />
+<&#47;pre></p>
+<p><strong>Batch<&#47;strong>&nbsp;takes a&nbsp;<strong>Batch<&#47;strong>&nbsp;and returns an array of&nbsp;<strong>Batch<&#47;strong>&nbsp;;o) and to match that we then have say the &ldquo;As&rdquo; method on the DSL:</p>
+<pre>
+public Batch[] As(params Batch[] batches)<br />
+{<br />
+  Batch asBatch = new Batch(delegate(Batch ignore)<br />
+  {<br />
+    ExecuteBatches(batches);<br />
+    return null;<br />
+  });</p>
+<p>  IgnoreBatch(asBatch);</p>
+<p>  return new Batch[] { asBatch };<br />
+}<br />
+<&#47;pre></p>
+<p>Notice it takes one or more Batch instances, and returns a delegate which executes the batches, ignores the batch we just generated and returning the one Batch as an array&hellip; conforming to the expected return type of the Batch delegate.&nbsp; Clear as mud? ;o)</p>
+<p>Ignoring the batches actually just uses the annotation framework, so IgnoreBatch looks like this:</p>
+<pre>
+public void IgnoreBatch(Batch batch)<br />
+{<br />
+  batch.Annotate(Ignore => true);<br />
+}<br />
+<&#47;pre></p>
+<p>And then we check if a batch is ignored before processing it down the line by calling this method.</p>
+<pre>
+public bool IsBatchIgnored(Batch batch)<br />
+{<br />
+  return batch.HasAnnotation(&ldquo;Ignore&rdquo;);<br />
+}<br />
+<&#47;pre></p>
+<p>Last of all to actually &ldquo;render&rdquo; the DSL into some useful format we execute it (no Expression<>&rsquo;s required, so it&rsquo;s very fast) - which just call the top with null, which in turn calls the arguments, and those arguments arguments etc.  While doing that we write nodes (much like an Xml writer) against an &ldquo;evaluation&rdquo; scope, which associates a NodeWriter with the current thread. basically the DSL ends up as a bunch of calls like:</p>
+<pre>
+NodeWriter writer = new NodeWriter();<br />
+writer.WriteStartNode(new NamedNode(&ldquo;table&rdquo;))<br />
+  .WriteStartNode(new NamedNode(&ldquo;tr&rdquo;))<br />
+    .WriteStartNode(new NamedNode(&ldquo;td&rdquo;))<br />
+      .WriteNode(new TextNode(&ldquo;column1&Prime;))<br />
+    .WriteEndNode()<br />
+  .WriteEndNode()<br />
+.WriteEndNode();<br />
+<&#47;pre></p>
+<p>Where the nodes conform to this interface:</p>
+<pre>code><br />
+public interface INode<br />
+{<br />
+  INode Parent { get; set; }<br />
+  List<INode> Nodes { get; }<br />
+}<br />
+<&#47;pre></p>
+<p>At which point it&rsquo;s trivial to walk the tree of INode&rsquo;s and do whatever you like with the information stored within it, and we can encapsulate new concepts by creating new types of node, which have payloads of additional information.</p>
+<p>At any rate, next time I&rsquo;ll post a little more about how I&rsquo;m doing it, and attach the code for people to have a play with.</p>

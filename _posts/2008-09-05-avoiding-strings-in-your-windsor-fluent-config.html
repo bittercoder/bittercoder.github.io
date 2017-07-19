@@ -1,0 +1,44 @@
+---
+layout: post
+status: publish
+published: true
+title: Avoiding strings in your Windsor fluent config
+author:
+  display_name: bittercoder
+  login: admin
+  email: alex@devdefined.com
+  url: http://blog.bittercoder.com/
+author_login: admin
+author_email: alex@devdefined.com
+author_url: http://blog.bittercoder.com/
+wordpress_id: 83488717
+wordpress_url: http://blog.bittercoder.com/?p=83488717
+date: '2008-09-05 21:13:02 +0000'
+date_gmt: '2008-09-05 21:13:02 +0000'
+categories:
+- ".Net"
+tags:
+- castle windsor
+- IoC
+comments: []
+---
+<p>As a brief follow up to my &nbsp;<a href="http:&#47;&#47;blog.bittercoder.com&#47;PermaLink,guid,6c1a25f7-5c8c-4a5e-bda9-04ffa944ebd0.aspx">last post here<&#47;a> I thought I'd quickly post about something I've<br />
+been doing lately with my own &nbsp;<a href="http:&#47;&#47;www.castleproject.org&#47;container&#47;documentation&#47;trunk&#47;index.html">windsor<&#47;a> configurations, which is pretty minor - but saves me a&nbsp;little grief when it comes to refactoring etc.</p>
+<p>Basically I have this extension method:</p>
+<pre>public static ComponentRegistration<> RegisterTransient<S>(this IWindsorContainer container, ComponentRegistration<S> registration)<br />
+{<br />
+ container.Register(registration.LifeStyle.Transient);<br />
+ return registration;<br />
+} <&#47;pre><br />
+Which then lets me do this:</p>
+<pre>var serviceA = container.RegisterTransient(Component.For() .ImplementedBy());var serviceB = container.RegisterTransient(Component.For() .ImplementedBy());</p>
+<p>container.Register(Component.For().Named("service.staff")<br />
+ .ImplementedBy().ServiceOverrides(ServiceOverride<br />
+ .ForKey("Repositories").Eq(serviceB.Name, serviceA.Name))); </p>
+<p>var staffService = (StaffService)container.Resolve(); </p>
+<p>Assert.IsType(staffService.Repositories[0]);<br />
+Assert.IsType(staffService.Repositories[1]); <&#47;pre><br />
+notice the lack of strings when registering service overrides...&nbsp;it's a minor thing, but I find it quite handy... plus it generally&nbsp;makes it easier to identify the lifestyle of the components being&nbsp;registered because it's a little more in your face, i.e. your&nbsp;making an explicit decision... though anywhere that lifestyle poses&nbsp;a risk you should obviously be writing some unit tests to verify&nbsp;your getting the expected behavior when resolving that service<br />
+anyway.</p>
+<p>Also, while looking at ComponentRegistration<S> -the other&nbsp;nice thing about the fluent component registration is it works&nbsp;quite well for add-ons that introduce their own services which&nbsp;aren't loaded into a seperate app domain or child kernel ...</p>
+<p>Just give the add-in an installation "helper" which only exposes a&nbsp;method taking a ComponentRegistration<S> for registering the&nbsp;component... you can then defer when those services are actually&nbsp;registered in the kernel, and can use the names of the components&nbsp;or other info to unregister them if the add-in is turned off&nbsp;(obviously this is a rainy day scenario and there are problems with&nbsp;this approach, but so far I've found it to work quite well).</p>

@@ -1,0 +1,536 @@
+---
+layout: post
+status: publish
+published: true
+title: Instead of our planned presentation, we bring you rambling IronPython spelunking...
+author:
+  display_name: bittercoder
+  login: admin
+  email: alex@devdefined.com
+  url: http://blog.bittercoder.com/
+author_login: admin
+author_email: alex@devdefined.com
+author_url: http://blog.bittercoder.com/
+wordpress_id: 243
+wordpress_url: http://blog.bittercoder.com/?p=243
+date: '2006-10-03 21:46:42 +0000'
+date_gmt: '2006-10-03 21:46:42 +0000'
+categories:
+- ".Net"
+tags:
+- IronPython
+comments:
+- id: 11
+  author: Alex Henderson
+  author_email: bittercoder@gmail.com
+  author_url: http://blog.bittercoder.com/
+  date: '2006-10-04 00:19:03 +0000'
+  date_gmt: '2006-10-04 00:19:03 +0000'
+  content: I'd completely forgotten about help() - I tried using it back in early
+    betas (probably beta-4 or beta-6, as we did releases of our product with these)
+    and it used to just raise a NotImplementedException, so I assumed it just wasn't
+    going to ever work for .Net types :) thanks for the heads up Seo.
+---
+<p>
+  This entry was going to cover thinking about your .Net classes from the perspective of Python consumption... but actually it's not, we'll cover that another time.<br />
+<&#47;p></p>
+<p>
+  What this post is really going to be about is how to spelunk a little into our managed classes via the IronPython interactive console - and to see how some common practices in .Net have interesting results in python.<br />
+<&#47;p></p>
+<p>
+  This entry is going to be a little slow paced, I'm making the assumption you're a .Net developer, and haven't cut Python code before, if you know your way around Python probably best to pass this one over.<br />
+<&#47;p></p>
+<p>
+  Also worth noting at this point that I'm really just a Python hacker, and certainly no guru...<br />
+<&#47;p></p>
+<p>
+  So first off, we have a class with a bunch of overloads for various methods, here is the interface... I've left the code for the class itself out, but the class is called MyFileStore.<br &#47;><br />
+<&#47;p></p>
+<pre>
+public interface IMyFileStore<br />
+{<br />
+    Guid AddFile(string fileName);<br />
+    Guid AddFile(string fileName, string mimeType);<br />
+    Guid AddFile(byte[] contents, string mimeType);<br />
+    Guid[] AddFiles(params string[] fileNames);<br />
+    Guid AddFile(byte[] contents);<br />
+    byte[] ReadFile(Guid id, out string mimeType);<br />
+    void ReadFile(Guid id, string fileName);<br />
+    void ExtractFiles(ref IList<byte[]> myList);<br />
+}</p>
+<p><&#47;pre></p>
+<p>
+  Pretty simple, now lets look at using this class with Iron python, I'll be running with the <b>ipy<&#47;b> (the interactive interpreter) so we can investigate our types as we go along (this is an executable which comes with the Iron Python binaries). The <b>ipy<&#47;b> console has a prompt consisting of three greater then signs ">>>" so you'll know what I'm typing into the console by looking for those.<br />
+<&#47;p></p>
+<p>
+  First off, we need to load our type... this is pretty trivial...<br />
+<&#47;p></p>
+<p>
+  <strong>>>> import clr<br &#47;><br />
+  >>><br />
+  clr.AddReferenceToFileAndPath("D:DemoSampleIronPythonLib.dll")<br &#47;></p>
+<p>  >>> from IronPythonLib import *<&#47;strong><br />
+<&#47;p></p>
+<p>
+  All done, lets make sure our class is in there, using the inbuilt function dir() - a list of built-in functions can be found here:  <a href="http:&#47;&#47;www.python.net&#47;quick-ref1_52.html#BuiltIn">http:&#47;&#47;www.python.net&#47;quick-ref1_52.html#BuiltIn<&#47;a><br />
+<&#47;p></p>
+<p>
+  <strong>>>> dir()<br &#47;><br />
+  ['IMyFileStore', 'MyFileStore', '_', '__builtins__', '__doc__',<br />
+  '__name__', 'clr', 'results', 'site', 'store', 'sys']<&#47;strong><br />
+<&#47;p></p>
+<p>
+  MyFileStore, sweet.<br />
+<&#47;p></p>
+<p>
+  First off, lets create an instance of my type (not yours ;o)<br />
+<&#47;p></p>
+<p>
+  <strong>>>> store = new MyFileStore()<br &#47;><br />
+  Traceback (most recent call last):<br &#47;><br />
+  SyntaxError: unexpected token MyFileStore (<stdin>, line  1)<br &#47;><br />
+  >>><&#47;strong><br />
+<&#47;p></p>
+<p>
+  Arse, python doesn't have a new operator... forgot that, lets try it again.<br />
+<&#47;p></p>
+<p>
+  <strong>>>> store = MyFileStore<&#47;strong><br />
+<&#47;p></p>
+<p>
+  Right, looks good, interpreter didn't return any errors... but wait, lets make sure we got what we want, which is an instance of MyFileStore....<br />
+<&#47;p></p>
+<p>
+  <strong>>>> store<br &#47;><br />
+  <type ?MyFileStore'><br &#47;><br />
+  >>><&#47;strong><br />
+<&#47;p></p>
+<p>
+  Woops, that's not what we wanted, we want an instance, not the type... lets try again:<br />
+<&#47;p></p>
+<p>
+  <strong>>>> store = MyFileStore()<br &#47;><br />
+  >>> store<br &#47;><br />
+  <MyFileStore object at 0x0000000000000035><br &#47;><br />
+  >>><&#47;strong><br />
+<&#47;p></p>
+<p>
+  That's better, lets find out what our store is capable off, using the dir command.<br />
+<&#47;p></p>
+<p>
+  <strong>>>> dir(store)<br &#47;><br />
+  ['AddFile', 'AddFiles', 'Equals', 'ExtractFiles', 'Finalize',<br />
+  'GetHashCode', 'GetType', 'MakeDynamicType', 'MemberwiseClone',<br />
+  'ReadFile', 'Reduce', 'ReferenceEquals', 'ToString', '__class__',<br />
+  '__doc__', '__init__', '__module__', '__new__','__reduce__',<br />
+  '__reduce_ex__', '__repr__']<br &#47;><br />
+  >>><&#47;strong><br />
+<&#47;p></p>
+<p>
+We see our AddFile, AddFiles,ReadFile &amp; ExtractFiles methods - everything looks to be in order... but what are the parameters for those methods?<br />
+<&#47;p></p>
+<p>
+  <strong>>>> dir(store.AddFile)<br &#47;><br />
+  ['Call', 'CallInstance', 'Equals', 'Finalize', 'GetHashCode',<br />
+  'GetTargetType', '<br &#47;><br />
+  GetType', 'Make', 'MakeDelegate', 'MakeDynamicType',<br />
+  'MemberwiseClone', 'Overloads', 'PrependInstance', 'Reduce',<br />
+  'ReferenceEquals', 'ToString', '__call__', '__class__',<br />
+  '__doc__', '__eq__', '__getitem__', '__hash__', '__init__',<br />
+  '__module__', '__name__', '__new__', '__reduce__',<br />
+  '__reduce_ex__', '__repr__', '__self__', '__str__']<br &#47;><br />
+  >>><&#47;strong><br />
+<&#47;p></p>
+<p>
+  Hmm... what's the "Overloads" thing, lets find out...<br />
+<&#47;p></p>
+<p>
+  <strong>>>> dir(store.AddFile.Overloads)<br &#47;><br />
+  ['Equals', 'Finalize', 'Function', 'GetHashCode', 'GetOverload',<br />
+  'GetTargetFunction', 'GetType', 'MakeDynamicType',<br />
+  'MemberwiseClone', 'Reduce', 'ReferenceEquals', 'Targets',<br />
+  'ToString', '__class__', '__doc__', '__getitem__', '__init__',<br />
+  '__module__', '__new__', '__reduce__', '__reduce_ex__',<br />
+  '__repr__', '__str__']<br &#47;><br />
+  >>><&#47;strong><br />
+<&#47;p></p>
+<p>
+  That doesn't seem very useful, though what if we check it's string representation?<br />
+<&#47;p></p>
+<p>
+  <strong>>>> store.AddFile.Overloads<br &#47;><br />
+  <IronPython.Runtime.Calls.BuiltinFunctionOverloadMapper object<br />
+  at 0x0000000000000036 [{'Guid AddFile(self, str fileName)':<br />
+  <built-in function AddFile>, 'Guid AddFile(self, str<br />
+  fileName, str mimeType)': <built-in function AddFile>,<br />
+  'Guid AddFile(self, Array[Byte] contents, str mimeType)':<br />
+  <built-in function AddFile>, 'Guid AddFile(self,<br />
+  Array[Byte] contents)': <built-in function<br />
+  AddFile>}]><br &#47;><br />
+  >>><&#47;strong><br />
+<&#47;p></p>
+<p>
+  Look at that, there are our 4 overloads - but it's a bit jumbled, what am I looking at it....<br />
+<&#47;p></p>
+<p>
+  Well at first glance it looks a bit like a python dictionary... notice the colon separating the signature for the method and <built-in function AddFile> ... what if we try to grab one for use later, maybe for some functional programming, why don't we get the one which takes the fileName and mimeType parameters eh?<br />
+<&#47;p></p>
+<p>
+  <br &#47;><br />
+  <strong>>>> myFunc =<br />
+  store.AddFile.Overloads[str,str]<br &#47;><br />
+  Traceback (most recent call last):<br &#47;><br />
+  File , line 0, in <stdin>##100<br &#47;><br />
+  TypeError: __getitem__() takes exactly 1 argument (1 given)<br &#47;><br />
+  >>><&#47;strong><br />
+<&#47;p></p>
+<p>
+  Bugger, that didn't work... still, not a bad guess - one parameter eh? Lets have another stab, maybe it just wants us to group the types together somehow?<br />
+<&#47;p></p>
+<p>
+  <strong>>>> myFunc =<br />
+  store.AddFile.Overloads[(str,str)]<br &#47;><br />
+  >>> myFunc<br &#47;><br />
+  <built-in method AddFile of MyFileStore object at<br />
+  0x0000000000000035><br &#47;><br />
+  >>><&#47;strong><br />
+<&#47;p></p>
+<p>
+  Looks better, of course if we wanted to we could use our function right now... let's give it a whirl:<br />
+<&#47;p></p>
+<p>
+  <strong>>>> myFunc("d:testinput.3gp",<br />
+  "video&#47;3gpp")<br &#47;><br />
+  <System.Guid object at 0x0000000000000037<br />
+  [7b6d6dc5-bbe6-4831-bff7-21984031684f]><br &#47;><br />
+  >>><&#47;strong><br />
+<&#47;p></p>
+<p>
+  Looks to have worked, the method has successfully returned us a Guid identifying the new file... shame we didn't save it into a variable for future reference, cest la vie.<br />
+<&#47;p></p>
+<p>
+  Luckily I can just copy and paste it - lets see if I can get the file back using this overload...<br />
+<&#47;p></p>
+<pre>
+byte[] ReadFile(Guid id, out string mimeType);<br />
+<&#47;pre></p>
+<p>
+  Simple as.. lets try...<br />
+<&#47;p></p>
+<p>
+  <strong>>>> id =<br />
+  Guid("7b6d6dc5-bbe6-4831-bff7-21984031684f")<br &#47;><br />
+  Traceback (most recent call last):<br &#47;><br />
+  File , line 0, in <stdin>##116<br &#47;><br />
+  NameError: name 'Guid' not defined<br &#47;><br />
+  >>><&#47;strong><br />
+<&#47;p></p>
+<p>
+  Woops, we need to import the System namespace...<br />
+<&#47;p></p>
+<p>
+  <strong>>>> import System<&#47;strong><br />
+<&#47;p></p>
+<p>
+  Now lets try again...<br />
+<&#47;p></p>
+<p>
+  <strong>>>> id =<br />
+  Guid("7b6d6dc5-bbe6-4831-bff7-21984031684f")<br &#47;><br />
+  Traceback (most recent call last):<br &#47;><br />
+  File , line 0, in <stdin>##116<br &#47;><br />
+  NameError: name 'Guid' not defined<br &#47;><br />
+  >>><&#47;strong><br />
+<&#47;p></p>
+<p>
+  Huh... oh wait, let's check our local symbol table:<br />
+<&#47;p></p>
+<p>
+  <strong>>>> dir()<br &#47;><br />
+  ['MyFileStore', 'System', '_', '__builtins__', '__doc__',<br />
+  '__name__', 'clr', 'myArray', 'myFunc', 'results', 'site',<br />
+  'store', 'sys']<&#47;strong><br />
+<&#47;p></p>
+<p>
+  System eh? Lets dig into it...<br />
+<&#47;p></p>
+<p>
+  <strong>>>> dir(System)<br &#47;><br />
+  ['AccessViolationException', 'Action', 'ActivationContext',<br />
+  'Activator', 'AppDom<br &#47;><br />
+  ain', 'AppDomainInitializer', 'AppDomainManager',<br />
+  'AppDomainManagerInitializatio<br &#47;><br />
+  nOptions', 'AppDomainSetup', 'AppDomainUnloadedException',<br />
+  'ApplicationException... and all the rest.<br &#47;><br />
+  >><&#47;strong><br />
+<&#47;p></p>
+<p>
+  Well, what can we do about that... we could import them all using "from System import *" - but we only need Guid, so why don't we just grab that eh?<br />
+<&#47;p></p>
+<p>
+  <strong>>>> from System import Guid<br &#47;><br />
+  >>> dir()<br &#47;><br />
+  ['Guid', 'MyFileStore', 'System', '_', '__builtins__', '__doc__',<br />
+  '__name__', 'clr', 'myArray', 'myFunc', 'results', 'site',<br />
+  'store', 'sys']<br &#47;><br />
+  >>><&#47;strong><br />
+<&#47;p></p>
+<p>
+  Sweet, now lets try it again... finally!<br />
+<&#47;p></p>
+<p>
+  <strong>>>> id =<br />
+  Guid("7b6d6dc5-bbe6-4831-bff7-21984031684f")<br &#47;><br />
+  >>> mimeType = ""<br &#47;><br />
+  >>> contents = store.ReadFile(id, mimeType)<br &#47;><br />
+  Traceback (most recent call last):<br &#47;><br />
+  File , line 0, in <stdin>##136<br &#47;><br />
+  File , line 0, in ReadFile##66<br &#47;><br />
+  File D:devProjectsIronPythonDemoIronPythonLibMyClass.cs,<br />
+  line 70, in Read<br &#47;><br />
+  File<br &#47;><br />
+  File mscorlib, line unknown, in WriteAllBytes<br &#47;><br />
+  File mscorlib, line unknown, in .ctor<br &#47;><br />
+  File mscorlib, line unknown, in Init<br &#47;><br />
+  ValueError: Empty path name is not legal.<br &#47;><br />
+  >>><&#47;strong><br />
+<&#47;p></p>
+<p>
+  Oh no! what went wrong??... what's this about an empty path name, I was expecting to get some bytes back.... Hmmm, don't panic, lets just do some digging...<br />
+<&#47;p></p>
+<p>
+  <strong>>>> store.ReadFile.Overloads<br &#47;><br />
+  <IronPython.Runtime.Calls.BuiltinFunctionOverloadMapper object<br />
+  at 0x0000000000000039 [{'(Array[Byte], str) ReadFile(self, Guid<br />
+  id)': <built-in function ReadFile>, 'ReadFile(self, Guid<br />
+  id, str fileName)': <built-in function<br />
+  ReadFile>}]><br &#47;><br />
+  >>><&#47;strong><br />
+<&#47;p></p>
+<p>
+  Well there's the problem, I've called the wrong version, but... that's odd, there's a ReadFile there I haven't defined in my class... and one that's missing... hmmm, time to file a bug report.<br />
+<&#47;p></p>
+<p>
+  Or not, this is just where the Python and .Net world don't see eye to eye - Python doesn't know about <em><strong>out<&#47;strong><&#47;em> parameters as such, so it simulates the effect by altering the method's signature - lets have a go at playing by IronPython's rules:<br />
+<&#47;p></p>
+<p>
+  <strong>>>> contentsAndMimeType =<br />
+  store.ReadFile(id)<br &#47;><br />
+  >>> len(contentsAndMimeType)<br &#47;><br />
+  2<br &#47;><br />
+  >>> type(contentsAndMimeType[0])<br &#47;><br />
+  <type 'Array[Byte]'><br &#47;><br />
+  >>> type(contentsAndMimeType[1])<br &#47;><br />
+  <type 'str'><br &#47;><br />
+  >>> contentsAndMimeType[1]<br &#47;><br />
+  'video&#47;3gpp'<br &#47;><br />
+  >>><&#47;strong><br />
+<&#47;p></p>
+<p>
+  So our "<em><strong>out string mimeType"<&#47;strong><&#47;em> parameter was returned by the method instead, as the second item in an array... hmm... interesting.<br />
+<&#47;p></p>
+<p>
+  Well if python does this to out parameters, what does it do to ref parameters - lets try the extract files method to see what happens... this method is implemented to create a new list if we don't supply a valid instance, but lets pass in a valid one first - I wont be caught out this time, so I'll import the types I need first (List<T>):<br />
+<&#47;p></p>
+<p>
+  <strong>>>> from System.Collections.Generic import<br />
+  *<br &#47;><br />
+  >>> bytes = List<byte[]>()<br &#47;><br />
+  Traceback (most recent call last):<br &#47;><br />
+  SyntaxError: unexpected token ] (<stdin>, line 1)<br &#47;><br />
+  >>><&#47;strong><br />
+<&#47;p></p>
+<p>
+  Oh dear, looks like Python doesn't use the <T> syntax... lets start digging again...<br />
+<&#47;p></p>
+<p>
+  <strong>>>> dir(List)<br &#47;><br />
+  ['Add', 'AddRange', 'AsReadOnly', 'BinarySearch', 'Capacity',<br />
+  'Clear', 'Contains<br &#47;><br />
+  ', 'ConvertAll', 'CopyTo', 'Count', 'Enumerator', 'Equals',<br />
+  'Exists', 'Finalize'<br &#47;><br />
+  , 'Find', 'FindAll', 'FindIndex', 'FindLast', 'FindLastIndex',<br />
+  'ForEach', 'GetEn<br &#47;><br />
+  umerator', 'GetHashCode', 'GetRange', 'GetType', 'IndexOf',<br />
+  'Insert', 'InsertRange', 'LastIndexOf', 'MakeDynamicType',<br />
+  'MemberwiseClone', 'Reduce', 'ReferenceEquals', 'Remove',<br />
+  'RemoveAll', 'RemoveAt', 'RemoveRange', 'Reverse', 'Sort',<br />
+  'ToArray', 'ToString', 'TrimExcess', 'TrueForAll', '__class__',<br />
+  '__doc__', '__getitem__', '__init__', '__module__', '__new__',<br />
+  '__reduce__', '__reduce_ex__', '__repr__', '__setitem__']<br &#47;><br />
+  >>> List<br &#47;><br />
+  <type 'List[T]'><br &#47;><br />
+  >>><&#47;strong><br />
+<&#47;p></p>
+<p>
+  Hmm... nothing obvious there, but we could hazard a guess...<br />
+<&#47;p></p>
+<p>
+  <strong>>>> List[str]<br &#47;><br />
+  <type 'List[str]'><br &#47;><br />
+  >>><&#47;strong><br />
+<&#47;p></p>
+<p>
+  Hmmm... so lets give our List of byte array another go...<br />
+<&#47;p></p>
+<p>
+  <strong>>>> bytes = List[byte[]]()<br &#47;><br />
+  Traceback (most recent call last):<br &#47;><br />
+  SyntaxError: unexpected token ] (<stdin>, line 1)<&#47;strong><br />
+<&#47;p></p>
+<p>
+  Hmm... it doesn't like byte, lets have a look...<br />
+<&#47;p></p>
+<p>
+  <strong>>>> byte<br &#47;><br />
+  Traceback (most recent call last):<br &#47;><br />
+  File , line 0, in <stdin>##56<br &#47;><br />
+  NameError: name 'byte' not defined<br &#47;><br />
+  >>> Byte<br &#47;><br />
+  <type 'Byte'><br &#47;><br />
+  >>><&#47;strong><br />
+<&#47;p></p>
+<p>
+  Ahhh... I forgot that "byte" (lowercase) isn't actually what the Clr calls it... hmm... we could try it again, but it wont work - simply because Byte[] doesn't make sense (if we're using square brackets to index into a generic type... ) so having another dig in the IronPython docs we see that we need to index to the type "Array" with the type of our array, given this knowledge we can get what we want...<br />
+<&#47;p></p>
+<p>
+  <strong>>>> bytes = List[Array[Byte]]()<br &#47;><br />
+  >>> bytes<br &#47;><br />
+  <List[Array[Byte]] object at 0x000000000000002C><br &#47;><br />
+  >>><&#47;strong><br />
+<&#47;p></p>
+<p>
+  Sweet, now to call that ExtractFiles method...<br />
+<&#47;p></p>
+<p>
+  <strong>>>> store.ExtractFiles(bytes)<br &#47;><br />
+  <List[Array[Byte]] object at 0x000000000000002C><br &#47;><br />
+  >>> bytes<br &#47;><br />
+  <List[Array[Byte]] object at 0x000000000000002C><br &#47;><br />
+  >>> len(bytes)<br &#47;><br />
+  8<&#47;strong><br />
+<&#47;p></p>
+<p>
+  Well it returned a list... but it did accept our reference parameter, and it has updated the collection we passed to it... but what if we had passed it a null instead?<br />
+<&#47;p></p>
+<p>
+  <strong>>>> bytes = None<br &#47;><br />
+  >>> store.ExtractFiles(bytes)<br &#47;><br />
+  <List[Array[Byte]] object at 0x0000000000000030><br &#47;><br />
+  >>> len(bytes)<br &#47;><br />
+  Traceback (most recent call last):<br &#47;><br />
+  File , line 0, in <stdin>##83<br &#47;><br />
+  File , line 0, in Length##75<br &#47;><br />
+  TypeError: len() of unsized object of type <type<br />
+  'NoneType'><br &#47;><br />
+  >>><&#47;strong><br />
+<&#47;p></p>
+<p>
+  Hmmm... it returned a list, but it didn't set the value in our variable <strong><em>"bytes"<&#47;em><&#47;strong> - this isn't really <strong><em>ref<&#47;em><&#47;strong> like behavior... yet, if you think about it we can get almost the same thing by doing this:<br />
+<&#47;p></p>
+<p>
+  <strong>>>> bytes = store.ExtractFiles(bytes)<br &#47;><br />
+  >>> len(bytes)<br &#47;><br />
+  8<br &#47;><br />
+  >>><&#47;strong><br />
+<&#47;p></p>
+<p>
+  Right, our journey has almost come to an end... looking at the interface we have a method declared like so:<br />
+<&#47;p></p>
+<pre>
+Guid[] AddFiles(params string[] fileNames);<br />
+<&#47;pre></p>
+<p>
+  params is handy in .Net code - anything to save tedious typing of array declarations, lets see if we can do the same thing in python?<br />
+<&#47;p></p>
+<p>
+  <strong>>>> store.AddFiles("d:testinput1.3gp",<br />
+  "d:testinput2.3gp")<br &#47;><br />
+  System.Guid[](<System.Guid object at 0x0000000000000031<br />
+  [d3e8f099-3005-461c-a63a-fdc69b2091ee]>, <System.Guid<br />
+  object at 0x0000000000000032<br />
+  [d9d1fb25-fc7a-47a2-89ac-c11264bfa47f]>)<br &#47;><br />
+  >>><&#47;strong><br />
+<&#47;p></p>
+<p>
+  Sweet, that's a pleasant surprise after that whole <strong><em>out<&#47;em><&#47;strong> and <strong><em>ref<&#47;em><&#47;strong> debacle, I was beginning to loosing hope!<br />
+<&#47;p></p>
+<p>
+  But wait, why not revive our faith in Python a little more by looking at a few tricks...<br />
+<&#47;p></p>
+<p>
+  <strong>>>> paramsDict = { "fileName" :<br />
+  "d:testinput.3gp", "mimeType" : "video&#47;3gpp"}<br &#47;><br />
+  >>> store.AddFile(**paramsDict)<br &#47;><br />
+  <System.Guid object at 0x0000000000000033<br />
+  [e07680d9-f544-4847-9a1e-d04a0ef137f7]><br &#47;><br />
+  >>><&#47;strong><br />
+<&#47;p></p>
+<p>
+  What did we just do? Well... given a dictionary, where the keys are the parameter names, we used them as the parameters for one of our .Net methods using the double asterisk syntax&nbsp;- think of what you'd have to do to code this in .Net... reflection city<br />
+  ;o)<br />
+<&#47;p></p>
+<p>
+  It doesn't just have to be dictionaries... we can use arrays too...<br />
+<&#47;p></p>
+<p>
+  <strong>>>> paramsArray = [ "d:testinput.3gp",<br />
+  "video&#47;3gpp" ]<br &#47;><br />
+  >>> store.AddFile(*paramsArray)<br &#47;><br />
+  <System.Guid object at 0x0000000000000034<br />
+  [85006c43-e6f5-4e90-b837-0868788cf453]><br &#47;><br />
+  >>><&#47;strong><br />
+<&#47;p></p>
+<p>
+  Neat, of course, being a dynamic language and all, the selection of the appropriate overload is based on the types in the array or dictionary... it would be a nightmare to do both of these in .Net with reflection yourself.<br />
+<&#47;p></p>
+<p>
+  Faith still not restored eh, what about creating a python class that wraps an existing (possibly sealed) .Net class, that forwards calls on unless we want to override the behavior...<br />
+<&#47;p></p>
+<p>
+  <strong>>>> class MyFileStoreWrapper:<br &#47;><br />
+  ... def __init__(self, realStore):<br &#47;><br />
+  ... self.realStore = realStore<br &#47;><br />
+  ... def ExtractFiles(self, myList):<br &#47;><br />
+  ... raise Exception, "this method isn't allowed"<br &#47;><br />
+  ... def __getattr__(self, name):<br &#47;><br />
+  ... if name == "ExtractFiles": return ExtractFiles<br &#47;><br />
+  ... return eval("self.realStore."+name)<br &#47;><br />
+  ...<br &#47;><br />
+  >>> store = MyFileStoreWrapper(MyFileStore())<br &#47;><br />
+  >>> store.AddFile("d:testinput.3gp")<br &#47;><br />
+  <System.Guid object at 0x000000000000002C<br />
+  [a2bf8747-cc71-4b79-8c02-0b61a87ff67f]<br &#47;><br />
+  ><br &#47;><br />
+  >>> store.ExtractFiles(None)<br &#47;><br />
+  Traceback (most recent call last):<br &#47;><br />
+  File , line 0, in <stdin>##52<br &#47;><br />
+  File , line 0, in ExtractFiles<br &#47;><br />
+  Exception: this method isn't allowed<br &#47;><br />
+  >>><&#47;strong><br />
+<&#47;p></p>
+<p>
+  ExtractFiles can't be invoked on our wrapper, however our wrapper automagically responds for other methods like AddFile - sadly I've used an <strong>eval&nbsp;<&#47;strong>(which, rhymes with Evil -&nbsp;coincidence?) here because MyFileStore doesn't expose a __getattr__ method (because it's&nbsp;a .Net classes, not a native Python one).<br />
+<&#47;p></p>
+<p>
+  The nice thing now, is that given a native python class, we can do some things we aren't allowed to do to the underlying .Net class - like adding new methods at run time.<br />
+<&#47;p></p>
+<p>
+  <strong>>>> def ExtractMoreFiles(self, myList):<br &#47;><br />
+  ... raise Exception, 'not implemented yet'<br &#47;><br />
+  ...<br &#47;><br />
+  >>> MyFileStoreWrapper.ExtractMoreFiles =<br />
+  ExtractMoreFiles<br &#47;><br />
+  >>> store.ExtractMoreFiles(None)<br &#47;><br />
+  Traceback (most recent call last):<br &#47;><br />
+  File , line 0, in <stdin>##60<br &#47;><br />
+  File , line 0, in ExtractMoreFiles<br &#47;><br />
+  Exception: not implemented yet<br &#47;><br />
+  >>><&#47;strong><br />
+<&#47;p></p>
+<p>
+  I think it's pretty cool, and though python's meta-programming model isn't quite up to ruby standards, it's still pretty easy to dig down and create some pleasantly surprising results :) and if you have your thinking caps on you can probably see how this stuff would really help to bring a DSL to life for your applications special needs.<br />
+<&#47;p></p>
+<p>
+  And that's where I'm going to conclude this rambling post... ;o)&nbsp;Hopefully it'll spark some thoughts about what's possible with IronPython and allow you avoid some simple mistakes when using .Net classes in iron python.<br />
+<&#47;p></p>

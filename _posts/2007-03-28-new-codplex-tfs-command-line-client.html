@@ -1,0 +1,72 @@
+---
+layout: post
+status: publish
+published: true
+title: New codplex TFS command line client
+author:
+  display_name: bittercoder
+  login: admin
+  email: alex@devdefined.com
+  url: http://blog.bittercoder.com/
+author_login: admin
+author_email: alex@devdefined.com
+author_url: http://blog.bittercoder.com/
+wordpress_id: 83488768
+wordpress_url: http://blog.bittercoder.com/?p=83488768
+date: '2007-03-28 08:10:33 +0000'
+date_gmt: '2007-03-28 08:10:33 +0000'
+categories:
+- ".Net"
+- Tools
+tags:
+- codeplex
+- TFS
+comments: []
+---
+<h2>Cast your mind back...<&#47;h2><br />
+If you recall (maybe you don't) there was some discussion a while<br />
+back about <a href="http:&#47;&#47;www.codeplex.com&#47;">Codplex,<&#47;a> TFS and&nbsp;the fact that it's a bit of a wash for creating an collaborative&nbsp;environment for an open source project... why?&nbsp; Well because&nbsp;of the chasm between developers for the project and those users who&nbsp;wish to collaborate by providing small patches, or working on the&nbsp;bleeding edge (i.e. checking out changes since the last time they&nbsp;build your project from source)</p>
+<p>Just to recap the big problems were:</p>
+<ul>
+<li>No support for patches<&#47;li>
+<li>No anonymous check-outs<&#47;li>
+<li>No easy way to diff&#47;merge between your version and the latest&nbsp;version on source control (because you could only get the source&nbsp;as a tarball).<&#47;li><br />
+<&#47;ul><br />
+In particular I remember <a href="http:&#47;&#47;www.ayende.com&#47;">Ayendes<&#47;a> posts on the subject, which&nbsp;sparked a bit of debate on the whole issue (and even got some&nbsp;feedback from the codeplex developers themselves...)</p>
+<ul>
+<li><a href="http:&#47;&#47;www.ayende.com&#47;Blog&#47;archive&#47;6904.aspx">Codeplex&nbsp;WTF<&#47;a><&#47;li>
+<li><a href="http:&#47;&#47;ayende.com&#47;Blog&#47;archive&#47;2007&#47;02&#47;03&#47;Team-Foundation-Scalability--And-why-CodePlex-exists.aspx">Team Foundation Scalability ??? And why CodePlex exists?<&#47;a><&#47;li>
+<li><a href="http:&#47;&#47;ayende.com&#47;Blog&#47;archive&#47;2007&#47;02&#47;04&#47;Adding-SVN-functionality-to-CodePlex.aspx">Adding SVN functionality to CodePlex<&#47;a><&#47;li><br />
+<&#47;ul></p>
+<h2>Codeplex's new command line client<&#47;h2><br />
+Well it looks like one small step has been taken this week,&nbsp;check out this <a href="http:&#47;&#47;blogs.msdn.com&#47;codeplex&#47;archive&#47;2007&#47;03&#47;26&#47;announcing-the-codeplex-source-control-client.aspx"><br />
+entry<&#47;a> on the <a href="http:&#47;&#47;blogs.msdn.com&#47;codeplex&#47;">codeplex&nbsp;blog<&#47;a> ... There is now a .Net 2.0 command-line client being&nbsp;developed, which will include support for:</p>
+<ul>
+<li>Anonymous checkouts (hurray! dragging down a tar ball every&nbsp;time there were changes... what an arse that is&#47;was)<&#47;li>
+<li>Merging<&#47;li>
+<li>Patching<&#47;li><br />
+<&#47;ul><br />
+I got all excited (well as excited as you can be about a&nbsp;command line client for TFS) and grabbed the beta... really all I&nbsp;cared about was anonymous checkouts... I like my open source medium&nbsp;rare (mmm... nothing like a fresh check-out of <a href="http:&#47;&#47;www.castleproject.org&#47;">castle<&#47;a>... release candidates<br />
+never have any of the fun stuff!)</p>
+<p>But my hopes were dashed - it appears there's no way to skip the&nbsp;authorisation check as far as I can see, and when supplying my own&nbsp;credentials I didn't have access:</p>
+<blockquote><p>c:devtoolscodeplex_client></p>
+<p>cpc co reflectoraddins:&#47; c:devresourcesreflector</p>
+<p>_addins</p>
+<p>Username [sndanonymous_cp]: bittercoder</p>
+<p>Password for bittercoder: ********</p>
+<p>error: TF50309: You do not have sufficient permissions to perform<br />
+this operation</p>
+<p>. ---> Attempted to perform an unauthorized operation.<&#47;blockquote><br />
+I guess there's a little more waiting to go&nbsp;yet...</p>
+<p>Still, not to get too disheartended I decided to try it on a&nbsp;project I coordinate for (ye olde <a href="http:&#47;&#47;www.codeplex.com&#47;splicer&#47;">Splicer<&#47;a>...) and I can&nbsp;certainly confirm it works... considering that the command line&nbsp;tools are less than 200K, this is already a great improvement over&nbsp;the current situtation... (about 250mb to download Team Explorer's&nbsp;iso).</p>
+<blockquote><p>c:devtoolscodeplex_client></p>
+<p>cpc co splicer:&#47; c:devhomesplicer_copy</p>
+<p>A&nbsp;&nbsp;&nbsp; c:devhomesplicer_copy</p>
+<p>A&nbsp;&nbsp;&nbsp; c:devhomesplicer_copysrc</p>
+<p>A&nbsp;&nbsp;&nbsp; c:devhomesplicer_copysrcASL - Apache<br />
+Software Foundation License.txt</p>
+<p>.... and so on ;o)<&#47;blockquote></p>
+<p>So as you can see ... it does work... but I have to say it's pretty&nbsp;damn slow (could just be because I'm in New Zealand of&nbsp;course).</p>
+<p>At any rate... I'll be keeping my eye on it... there may be hope&nbsp;for codeplex yet ;o)</p>
+<p>... and on one last note... the gui check-in looks a little like&nbsp;TortoiseSVN don't you think... &nbsp;hopefully the work towards some&nbsp;feature parity there.</p>
+<p><img src="http:&#47;&#47;www.codeplex.com&#47;CodePlex&#47;Project&#47;FileDownload.aspx?DownloadId=9201" alt="" &#47;></p>

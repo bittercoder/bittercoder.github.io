@@ -1,0 +1,245 @@
+---
+layout: post
+status: publish
+published: true
+title: Leveraging Member Initializers
+author:
+  display_name: bittercoder
+  login: admin
+  email: alex@devdefined.com
+  url: http://blog.bittercoder.com/
+author_login: admin
+author_email: alex@devdefined.com
+author_url: http://blog.bittercoder.com/
+wordpress_id: 90113
+wordpress_url: http://blog.bittercoder.com/?p=90113
+date: '2008-02-20 01:01:38 +0000'
+date_gmt: '2008-02-20 01:01:38 +0000'
+categories:
+- ".Net"
+tags:
+- C#
+- LINQ
+comments: []
+---
+<p>So a few weeks back there was a &nbsp;<a href="http:&#47;&#47;blog.genom-e.com&#47;PermaLink,guid,8d2645c0-66a8-4064-b266-15a4d0464723.aspx">post<&#47;a> on the <a href="http:&#47;&#47;blog.genom-e.com&#47;PermaLink,guid,8d2645c0-66a8-4064-b266-15a4d0464723.aspx">Genome TeamBlog<&#47;a> which included a link to one of my &nbsp;<a href="http:&#47;&#47;blog.bittercoder.com&#47;PermaLink,guid,d1831805-dbf7-4b74-a6fd-2e9ed437c3d9.aspx">lambda abuse<&#47;a> posts from last year.</p>
+<p>At any rate - the problem they faced was that with code like&nbsp;this:</p>
+<pre>
+DataContext Context = new DataContext();</p>
+<p>string connStr = "";</p>
+<p>DataDomainSchema schema = DataDomainSchema.LoadFrom("SomeMappingFile");</p>
+<p>schema.CreateDbSchema(connStr);</p>
+<p>DataDomain dd = new DataDomain(schema, connStr);</p>
+<p>using (Context.Push(ShortRunningTransactionContext.Create()))<br />
+{<br />
+    Customer tt = dd.New<Customer>();<br />
+    tt.Name = "TechTalk";</p>
+<p>    RootProject tt_hk = dd.New<RootProject>();<br />
+    tt_hk.Name = "Housekeeping";</p>
+<p>    ChildProject tt_hk_hol = dd.New<ChildProject>();<br />
+    tt_hk_hol.Name = "Holiday";<br />
+    tt_hk.ChildProjects.Add(tt_hk_hol);</p>
+<p>    ChildProject tt_hk_ill = dd.New<ChildProject>();<br />
+    tt_hk_ill.Name = "Illness";</p>
+<p>    tt_hk.ChildProjects.Add(tt_hk_ill);</p>
+<p>    tt.RootProjects.Add(tt_hk);</p>
+<p>    RootProject tt_g = dd.New<RootProject>();<br />
+    tt_g.Name = "Genome";</p>
+<p>    ChildProject tt_g_dev = dd.New<ChildProject>();<br />
+    tt_g_dev.Name = "Development";<br />
+    tt_g.ChildProjects.Add(tt_g_dev);</p>
+<p>    ChildProject tt_g_mnt = dd.New<ChildProject>();<br />
+    tt_g_mnt.Name = "Maintenance";<br />
+    tt_g.ChildProjects.Add(tt_g_mnt);<br />
+    tt.RootProjects.Add(tt_g);</p>
+<p>    Context.CommitCurrent();<br />
+}<br />
+<&#47;pre><br />
+You ended up with a very flat member initialization structure&nbsp;plagued with:</p>
+<ul>
+<li>Having to explicitly name child instances being added to&nbsp;collections - there's a lot of unnecessary noise.<&#47;li>
+<li>Where you can't easily see the structure i.e. it's not&nbsp;visually hierarchical, so at a glance you're not sure just what&nbsp;the structure is compared to say looking at an xml document with&nbsp;nested elements where it's quite obvious.<&#47;li><br />
+<&#47;ul><br />
+At any rate, the guys at the Genome project attempted to&nbsp;overcome this using the nested lambdas (what I coined a "DSL" at&nbsp;the time, though It's a terrible and inaccurate term for what's&nbsp;effectively just a bit of a "trick" relying on side effects of&nbsp;evaluation) - it didn't go so well though because of course at&nbsp;first glance the syntax look strongly typed, the reality is it's&nbsp;anything but, and refactoring tools just aren't going to do things&nbsp;like renaming of keys in the hash style syntax i.e. key =>&nbsp;value, because the key is just a Lambda parameter.</p>
+<p>But all is not lost - of course with C# 3.0 we already have a great&nbsp;syntax for doing this kind of hierarchical initialization, say for&nbsp;this set of types:</p>
+<pre>
+public class BlogPost<br />
+{<br />
+    private readonly List<string> _tags = new List<string>();<br />
+    private readonly BlogUser _createdBy = new BlogUser();       </p>
+<p>    public string Title { get; set; }</p>
+<p>    public string Body { get; set; }</p>
+<p>    public List<string> Tags<br />
+    {<br />
+        get { return _tags; }<br />
+    }</p>
+<p>    public BlogUser CreatedBy<br />
+    {<br />
+        get { return _createdBy; }<br />
+    }</p>
+<p>    public BlogUser LastEditedBy { get; set; }<br />
+}</p>
+<p>public class BlogUser<br />
+{<br />
+    public int Age { get; set; }<br />
+    public string Name { get; set; }<br />
+}<br />
+<&#47;pre><br />
+We could do something like this to initialize an instance of&nbsp;BlogPost:</p>
+<pre>
+BlogPost post = new BlogPost()<br />
+{<br />
+    Title = "Post on Lambdas",<br />
+    Body = "This is a post...",<br />
+    Tags =<br />
+    {<br />
+        ".Net",<br />
+        "Lambda",<br />
+        "C#3.0"<br />
+    },<br />
+    CreatedBy =<br />
+    {<br />
+        Name = "Jane Doe",<br />
+        Age = 35<br />
+    },<br />
+    LastEditedBy = new BlogUser()<br />
+    {<br />
+        Name = "Joe Bloggs",<br />
+        Age = 25<br />
+    }<br />
+};<br />
+<&#47;pre><br />
+But the catch for the Genome guys is that it looks like they need&nbsp;to construct their entities using their <strong>DataDomain<&#47;strong> class&nbsp;...&nbsp; I don't know about how there product works but I can only&nbsp;assume it's either to get a transparent proxy for change tracking&nbsp;purposes or to enlist it into the current session etc. (though if&nbsp;it's just to enlist the entity I can't see why they need to bother&nbsp;with getting the DataDomain to create a new instance, surely they&nbsp;could manually enlist it).</p>
+<p>At any rate that's irrelevant :)</p>
+<p>So I got to thinking that of course member initialization is one of&nbsp;the Lambda-friendly things we can do because it's expressed in a&nbsp;single statement - so we can happily take the above code snippet&nbsp;and express it like so:</p>
+<pre>
+BlogPost post = evaluator.Create(() => new BlogPost()<br />
+{<br />
+    Title = "Post on Lambdas",<br />
+    Body = "This is a post...",<br />
+    Tags =<br />
+    {<br />
+        ".Net",<br />
+        "Lambda",<br />
+        "C#3.0"<br />
+    },<br />
+    CreatedBy =<br />
+    {<br />
+        Name = "Jane Doe",<br />
+        Age = 35<br />
+    },<br />
+    LastEditedBy = new BlogUser()<br />
+    {<br />
+        Name = "Joe Bloggs",<br />
+        Age = 25<br />
+    }<br />
+});<br />
+<&#47;pre><br />
+Where evaluator is an instance of a class I wrote called&nbsp;<strong>ServiceInjectionEvaluator<&#47;strong> ... the Create method (as you can&nbsp;probably guess) has the following signature:</p>
+<pre>public T Create<T>(Expression<Func<T>> expression)<&#47;pre><br />
+The service injection evaluator just relies on being configured&nbsp;with an &nbsp;<a href="http:&#47;&#47;msdn2.microsoft.com&#47;en-us&#47;library&#47;system.iserviceprovider.aspx">IServiceProvider<&#47;a> capable of resolving instances of types... at&nbsp;this point we just unwind the expression, substituting our own&nbsp;instance activation mechanism wherever we stumble upon a &nbsp;<a href="http:&#47;&#47;msdn2.microsoft.com&#47;en-us&#47;library&#47;system.linq.expressions.newexpression.aspx">NewExpression<&#47;a> and walking through the expressions executing&nbsp;each bit as required - though it makes the assumption that you're&nbsp;going to have either a New or MemberInit expression at the top&nbsp;level of the Lambda, otherwise we just compile the whole thing and&nbsp;throw it back without any changes (because I don't want to bother&nbsp;writing code to visit the other types of expression node).</p>
+<pre>
+public class ServiceInjectionEvaluator<br />
+{<br />
+    private readonly IServiceProvider _serviceProvider;</p>
+<p>    public ServiceInjectionEvaluator(IServiceProvider serviceProvider)<br />
+    {<br />
+        _serviceProvider = serviceProvider;<br />
+    }</p>
+<p>    public T Create<T>(Expression<Func<T>> expression)<br />
+    {<br />
+        switch (expression.Body.NodeType)<br />
+        {<br />
+            case ExpressionType.New:<br />
+            case ExpressionType.MemberInit:<br />
+                return (T)EvaluateExpression(expression.Body);<br />
+            default:<br />
+                return expression.Compile().Invoke();<br />
+        }<br />
+    }</p>
+<p>    private object GetInstanceWithInit(MemberInitExpression expression)<br />
+    {<br />
+        object instance = GetInstance(expression.NewExpression);<br />
+        foreach (MemberBinding binding in expression.Bindings)<br />
+        {<br />
+            ApplyBinding(instance, binding);<br />
+        }<br />
+        return instance;<br />
+    }</p>
+<p>    private void ApplyBinding(object instance, MemberBinding binding)<br />
+    {<br />
+        switch (binding.BindingType)<br />
+        {<br />
+            case MemberBindingType.Assignment:<br />
+                ApplyAssignmentBinding(instance, (MemberAssignment)binding);<br />
+                break;<br />
+            case MemberBindingType.ListBinding:<br />
+                ApplyListBinding(instance, (MemberListBinding)binding);<br />
+                break;<br />
+            case MemberBindingType.MemberBinding:<br />
+                ApplyMemberBinding(instance, (MemberMemberBinding)binding);<br />
+                break;<br />
+            default:<br />
+                throw new NotImplementedException();<br />
+        }<br />
+    }</p>
+<p>    private void ApplyMemberBinding(object instance, MemberMemberBinding binding)<br />
+    {<br />
+        PropertyInfo property = (PropertyInfo)binding.Member;<br />
+        object memberValue = property.GetValue(instance, null);<br />
+        foreach (MemberBinding childBinding in binding.Bindings)<br />
+        {<br />
+            ApplyBinding(memberValue, childBinding);<br />
+        }<br />
+    }</p>
+<p>    private void ApplyListBinding(object instance, MemberListBinding binding)<br />
+    {<br />
+        object list = ((PropertyInfo)binding.Member).GetValue(instance, null);</p>
+<p>        foreach (ElementInit elementInit in binding.Initializers)<br />
+        {<br />
+            Delegate compiled = Expression.Lambda(Expression.NewArrayInit(typeof(object), elementInit.Arguments.ToArray())).Compile();<br />
+            object[] arguments = (object[])compiled.DynamicInvoke();<br />
+            elementInit.AddMethod.Invoke(list, arguments);<br />
+        }<br />
+    }</p>
+<p>    private void ApplyAssignmentBinding(object instance, MemberAssignment assignment)<br />
+    {<br />
+        object value = EvaluateExpression(assignment.Expression);<br />
+        PropertyInfo info = (PropertyInfo)assignment.Member;<br />
+        info.SetValue(instance, value, null);<br />
+    }</p>
+<p>    private object EvaluateExpression(Expression expression)<br />
+    {<br />
+        switch (expression.NodeType)<br />
+        {<br />
+            case ExpressionType.New:<br />
+                return GetInstance((NewExpression) expression);<br />
+            case ExpressionType.MemberInit:<br />
+                return GetInstanceWithInit((MemberInitExpression) expression);<br />
+            default:<br />
+                return Expression.Lambda(expression).Compile().DynamicInvoke();<br />
+        }<br />
+    }</p>
+<p>    private object GetInstance(NewExpression expression)<br />
+    {<br />
+        return _serviceProvider.GetService(expression.Type);<br />
+    }<br />
+}<br />
+<&#47;pre><br />
+The only thing left is to then either provide an existing instance&nbsp;of <strong>IServiceProvider<&#47;strong> (i.e. the Windsor container) or creating&nbsp;an adaptor</p>
+<pre>
+public class DataDomainServiceProvider : IServiceProvider<br />
+{<br />
+    private readonly DataDomain _domain;<br />
+    private static readonly MethodInfo member = typeof(DataDomain).GetMethod("New");</p>
+<p>    public DataDomainServiceProvider(DataDomain domain)<br />
+    {<br />
+        _domain = domain;<br />
+    }</p>
+<p>    public object GetService(Type serviceType)<br />
+    {<br />
+        return member.MakeGenericMethod(serviceType).Invoke(_domain, null);<br />
+    }<br />
+}<br />
+<&#47;pre><br />
+There's a few things the enterprising mind can do with&nbsp;substitutions and member initialization I can think of, especially&nbsp;around IoC - anyone else have some ideas or thoughts on&nbsp;using&#47;abusing them?</p>

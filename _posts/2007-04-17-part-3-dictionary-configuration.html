@@ -1,0 +1,114 @@
+---
+layout: post
+status: publish
+published: true
+title: Part 3 - Dictionary configuration
+author:
+  display_name: bittercoder
+  login: admin
+  email: alex@devdefined.com
+  url: http://blog.bittercoder.com/
+author_login: admin
+author_email: alex@devdefined.com
+author_url: http://blog.bittercoder.com/
+wordpress_id: 1697
+wordpress_url: http://blog.bittercoder.com/?p=1697
+date: '2007-04-17 09:14:30 +0000'
+date_gmt: '2007-04-17 09:14:30 +0000'
+categories:
+- ".Net"
+tags:
+- castle windsor
+- container tutorials
+- IoC
+comments:
+- id: 25
+  author: Alex Henderson
+  author_email: bittercoder@gmail.com
+  author_url: http://blog.bittercoder.com/
+  date: '2007-05-15 02:36:27 +0000'
+  date_gmt: '2007-05-15 02:36:27 +0000'
+  content: |-
+    Hi James,
+
+    Yeah, these tutorials are built against the "bleeding edge" ... some of them should work with RC2, but some generics etc. scenarios may trip up the older release.  I believe the stronghold guys are looking to put out another "official" release shortly (next couple of weeks) which will be the version I will eventually target for all the tutorials.
+
+    I will be looking to move them onto the using.castleproject.org Wiki once the whole set is complete, in the mean time I'm just keeping them on my Wiki to gauge some feedback from people, and also to capture a few additional blog subscribers at the same time :)
+---
+<p><img src="http:&#47;&#47;blog.bittercoder.com&#47;images&#47;ioc_tutorial_titles&#47;3_more_config_dictionaries.png" &#47;></p>
+<p>
+  So in this part we look at creating a component which has a dictionary which gets configured... in this case we're creating a little service to handle word substitutions...<br &#47;><br />
+  <br &#47;><br />
+  So lets have a look at the service:<br &#47;><br />
+  <br &#47;><br />
+<&#47;p></p>
+<pre>
+public class AliasService<br />
+{<br />
+    private Dictionary<string, string> _aliases;</p>
+<p>    public Dictionary<string, string> Aliases<br />
+    {<br />
+        get { return _aliases; }<br />
+        set { _aliases = value; }<br />
+    }</p>
+<p>    public string Evaluate(string term)<br />
+    {<br />
+        if (_aliases == null) return term;</p>
+<p>        while (_aliases.ContainsKey(term))<br />
+        {<br />
+            term = _aliases[term];<br />
+        }</p>
+<p>        return term;<br />
+    }<br />
+}<br />
+<&#47;pre><br &#47;><br />
+And the application code that uses the service:<br &#47;><br />
+<br &#47;></p>
+<pre>
+static void Main(string[] args)<br />
+{<br />
+    WindsorContainer container = new WindsorContainer(new XmlInterpreter());</p>
+<p>    AliasService aliasService = container.Resolve<AliasService>();</p>
+<p>    string sentence = "a dog ate my homework";</p>
+<p>    foreach (string word in sentence.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries))<br />
+    {<br />
+        Console.Write("{0} ", aliasService.Evaluate(word));<br />
+    }</p>
+<p>    Console.Read();<br />
+}<br />
+<&#47;pre><br &#47;><br />
+Our component is again registered without any parameters, lets run it and see what pearls of wisdom it can share:<br &#47;><br />
+<br &#47;><br />
+<b>a dog at my homework<&#47;b><br &#47;><br />
+<br &#47;><br />
+Hmm... I'm not sure that's a great excuse for late delivery... let's do some configuration and try again:<br &#47;><br />
+<br &#47;></p>
+<pre>
+<configuration></p>
+<p>  <configSections></p>
+<section name="castle"<br />
+        type="Castle.Windsor.Configuration.AppDomain.CastleSectionHandler, Castle.Windsor" &#47;><br />
+  <&#47;configSections></p>
+<p>  <castle><br />
+    <components><br />
+      <component id="aliases.service" type="IoC.Tutorials.Part3.AliasService, IoC.Tutorials.Part3"></p>
+<parameters>
+          <Aliases><br />
+            <dictionary><br />
+              <entry key="dog">duck<&#47;entry><br />
+              <entry key="ate">broke<&#47;entry><br />
+              <entry key="homework">code<&#47;entry><br />
+            <&#47;dictionary><br />
+          <&#47;Aliases><br />
+        <&#47;parameters><br />
+      <&#47;component><br />
+    <&#47;components><br />
+  <&#47;castle></p>
+<p><&#47;configuration><br />
+<&#47;pre><br &#47;><br />
+So, you can see we map keys to values via an entry key... and here's the result:<br &#47;><br />
+<br &#47;><br />
+<b>a duck broke my code<br &#47;><br />
+<br &#47;><&#47;b>You may need to tweak the mappings, depending on what you actually broke...<br &#47;><br />
+<br &#47;><br />
+Now at this point you might be wondering just how the strings are getting converted into strongly typed values for the last 3 parts - and to be honest, you won't need to know most of time, just do what "seems" right and it'll probably work... but when it doesn't, check out the castle projects wiki topic on <a href="http:&#47;&#47;wiki.castleproject.org&#47;index.php&#47;IoC:Component_parameters%2C_configuration_and_type_converters">component parameters, configuration and type converters<&#47;a>.</p>

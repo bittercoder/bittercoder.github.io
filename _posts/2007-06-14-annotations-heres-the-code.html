@@ -1,0 +1,69 @@
+---
+layout: post
+status: publish
+published: true
+title: Annotations - here's the code
+author:
+  display_name: bittercoder
+  login: admin
+  email: alex@devdefined.com
+  url: http://blog.bittercoder.com/
+author_login: admin
+author_email: alex@devdefined.com
+author_url: http://blog.bittercoder.com/
+wordpress_id: 2585765
+wordpress_url: http://blog.bittercoder.com/?p=2585765
+date: '2007-06-14 04:06:12 +0000'
+date_gmt: '2007-06-14 04:06:12 +0000'
+categories:
+- ".Net"
+tags:
+- C#
+- LINQ
+comments:
+- id: 34
+  author: Rob
+  author_email: ''
+  author_url: ''
+  date: '2007-06-14 10:53:55 +0000'
+  date_gmt: '2007-06-14 10:53:55 +0000'
+  content: Thanks for the code!  I'm looking forward to digging into this soon.
+---
+<p><a href="http:&#47;&#47;blog.bittercoder.com&#47;content&#47;binary&#47;AnnotationsCode.zip">Here's the code<&#47;a> for my last post on <a href="http:&#47;&#47;blog.bittercoder.com&#47;PermaLink,guid,2e0e231a-e837-4585-aaab-79999bdcb484.aspx">Annotations<&#47;a> - I tidied up a few things up (it's still very basic but it does work) there's a single test fixture to give you a guide for usage... so things like:<br &#47;></p>
+<pre>
+    [Test]<br />
+    public void QueryStoreForClassAnnotationsWithCertainKey()<br />
+    {<br />
+        ClassA target1 = new ClassA();<br />
+        ClassA target2 = new ClassA();<br />
+        ClassA target3 = new ClassA();<br />
+        target1.Annotate(Description => "class number 1");<br />
+        target2.Annotate(Description => "class number 2");<br />
+        target3.Annotate(Parsed => true);</p>
+<p>        var results = AnnotationStore.Classes<br />
+            .Where(a => a.HasKey("Description"))<br />
+            .ToList();</p>
+<p>        Assert.AreEqual(2, results.Count);<br />
+    }<br />
+<&#47;pre></p>
+<p>And also the equivalent thing is possible for members... though I suspect annotating members isn't all that useful in most cases...</p>
+<pre>
+  [Test]<br />
+  public void QueryStoreForMemberAnnotations()<br />
+  {<br />
+      ClassA target1 = new ClassA();<br />
+      ClassA target2 = new ClassA();<br />
+      ClassA target3 = new ClassA();</p>
+<p>      target1.Annotate(() => target1.FirstName,<br />
+          CamelCase => true); &#47;&#47; annotating a property<br />
+      target1.Annotate(() => target1.Field,<br />
+          Ignored => true); &#47;&#47; annotating a field<br />
+      target2.Annotate(() => target2.Execute(),<br />
+          Parsed => true); &#47;&#47; annotating a method<br />
+      target3.Annotate(Parsed => true);</p>
+<p>      var results = AnnotationStore.Members<br />
+          .Where(p => p.HasKey("CamelCase"))<br />
+          .ToList();</p>
+<p>      Assert.AreEqual(1, results.Count);<br />
+  }<br />
+<&#47;pre></p>

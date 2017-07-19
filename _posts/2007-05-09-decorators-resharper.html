@@ -1,0 +1,118 @@
+---
+layout: post
+status: publish
+published: true
+title: Decorators & ReSharper
+author:
+  display_name: bittercoder
+  login: admin
+  email: alex@devdefined.com
+  url: http://blog.bittercoder.com/
+author_login: admin
+author_email: alex@devdefined.com
+author_url: http://blog.bittercoder.com/
+wordpress_id: 83489686
+wordpress_url: http://blog.bittercoder.com/?p=83489686
+date: '2007-05-09 03:11:45 +0000'
+date_gmt: '2007-05-09 03:11:45 +0000'
+categories:
+- ".Net"
+tags: []
+comments:
+- id: 99
+  author: Alex Henderson
+  author_email: bittercoder@gmail.com
+  author_url: http://blog.bittercoder.com/
+  date: '2007-05-24 21:18:24 +0000'
+  date_gmt: '2007-05-24 21:18:24 +0000'
+  content: |-
+    Hi Tim,
+
+    The scrollbar example seems stupid to me... there are other mechanisms in most UI frameworks for achieving the same thing...
+
+    Well let's see... in the past I've done things such as:
+
+     * Implementing caching over a simple store (so methods that write store a copy in cache, and methods that read check the cache first to see if the results have been fetched in the past.  At that point it's very easy to enabled&#47;disable caching, and there is a good separation of concerns.
+     * Implementing validation of parameters for a preexisting class, so you create a decorator which validates arguments, then proceeds to call the underlying implementation if everything is OK (or throws an exception if not).
+     * Synchronization mechanisms (decorate a store, when somebody saves something, the decorator intercepts, and generally raises an event which the UI can respond to - say to keep a tree view in sync... quite elegant when working with a WCF service).
+     * Implementing an additional interface on a preexisting class, technically that could be considered another kind of pattern though.
+
+    Decorators are a good fit with IoC - be sure to have a look at my IoC tutorials:
+
+    http:&#47;&#47;blog.bittercoder.com&#47;CategoryView,category,IoC.aspx
+---
+<p>More parts in the container tutorial series are on the way, I've<br />
+just been a little busy these last few days.<br &#47;><br />
+<br &#47;><br />
+However I had a discussion with someone about decorators this week<br />
+- they eluded to them being too hard to "create" and maintain, and<br />
+that opportunities to get them wrong abound (manually writing the<br />
+code to call all the members of the inner service) - I was a little<br />
+astounded that they didn't know how to do this using<br />
+ReSharper.<br &#47;><br />
+<br &#47;><br />
+So heres a quick 1 minute tutorial for those that don't know, first<br />
+an interface.<br &#47;><br />
+<br &#47;></p>
+<pre>
+public interface IBondService<br />
+{<br />
+    void Smoke50Cigarettes();<br />
+    void RegisterEnemy(string name);<br />
+    void GetOfBed();<br />
+    bool GunLoaded();<br />
+}<br />
+<&#47;pre><br &#47;><br />
+Now let's write the start of our decorator.<br &#47;><br />
+<br &#47;></p>
+<pre>
+public class BondService : IBondService<br />
+{<br />
+    private readonly IBondService _innerService;</p>
+<p>    public BondService(IBondService innerService)<br />
+    {<br />
+        _innerService = innerService;<br />
+    }<br />
+}<br />
+<&#47;pre><br &#47;><br />
+And then generate the rest... by going to: <b>ReSharper<br />
+->Code->Generate...->Delegating Members<br &#47;><br />
+<br &#47;><&#47;b>Or just type <b>Alt-insert<&#47;b> (if your using the default<br />
+key bindings) and select "Delegating Members".<br &#47;><br />
+<br &#47;><br />
+At that point select the only option, the inner service.<br &#47;><br />
+<br &#47;><br />
+<img src="http:&#47;&#47;blog.bittercoder.com&#47;images&#47;delegate_members_1.png" altsrc="delegate_members_1.png" border="0" height="245" widthsrc="400" &#47;><br &#47;><br />
+<br &#47;><br />
+And then select all the members to delegate for.<br &#47;><br />
+<br &#47;><br />
+<img src="http:&#47;&#47;blog.bittercoder.com&#47;images&#47;delegate_members_2.png" altsrc="delegate_members_2.png" border="0" height="276" widthsrc="400" &#47;><br &#47;><br />
+<br &#47;><br />
+And then we get the results... joy<br &#47;><br />
+<br &#47;></p>
+<pre>
+public class BondService : IBondService<br />
+{<br />
+    private readonly IBondService _innerService;</p>
+<p>    public BondService(IBondService innerService)<br />
+    {<br />
+        _innerService = innerService;<br />
+    }</p>
+<p>    public void Smoke50Cigarettes()<br />
+    {<br />
+        _innerService.Smoke50Cigarettes();<br />
+    }</p>
+<p>    public void RegisterEnemy(string name)<br />
+    {<br />
+        _innerService.RegisterEnemy(name);<br />
+    }</p>
+<p>    public void GetOfBed()<br />
+    {<br />
+        _innerService.GetOfBed();<br />
+    }</p>
+<p>    public bool GunLoaded()<br />
+    {<br />
+        return _innerService.GunLoaded();<br />
+    }<br />
+}<br />
+<&#47;pre><br &#47;></p>

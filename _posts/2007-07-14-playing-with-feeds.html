@@ -1,0 +1,45 @@
+---
+layout: post
+status: publish
+published: true
+title: playing with feeds...
+author:
+  display_name: bittercoder
+  login: admin
+  email: alex@devdefined.com
+  url: http://blog.bittercoder.com/
+author_login: admin
+author_email: alex@devdefined.com
+author_url: http://blog.bittercoder.com/
+wordpress_id: 23595
+wordpress_url: http://blog.bittercoder.com/?p=23595
+date: '2007-07-14 10:00:18 +0000'
+date_gmt: '2007-07-14 10:00:18 +0000'
+categories:
+- Tools
+tags:
+- dapper.net
+- feedburner
+- yahoo pipes
+comments:
+- id: 33
+  author: Tomas Restrepo
+  author_email: tomas@winterdom.com
+  author_url: http://www.winterdom.com/weblog/
+  date: '2007-07-16 13:59:13 +0000'
+  date_gmt: '2007-07-16 13:59:13 +0000'
+  content: Alex, it is a commercial product, but in final beta stages right now...
+    don't know what the licensing terms will be eventually, though...
+---
+<div style="text-align: left;">I decided to have a play with some of the new aggregation-esque&nbsp;platforms this evening... for a break from cutting code...So first off I had a play with <a href="http:&#47;&#47;www.dapper.net&#47;">dapper<&#47;a>, turning the castle project's&nbsp;build feed (that's html) into an <a href="http:&#47;&#47;www.dapper.net&#47;services&#47;CastleProjectBuilds">RSS<&#47;a>&nbsp;Feed... It was painless, and required zero skill ... but it was&nbsp;limited in what it was capable of achieving... basically you can&nbsp;just just click on the content you want, give it a name, then&nbsp;pick which named parts will make up say an RSS feed.</p>
+<p><img src="http:&#47;&#47;blog.bittercoder.com&#47;images&#47;aggregations&#47;dapper.png" alt="dapper.png" width="798" height="544" border="1" &#47;></p>
+<p>It's pretty elegant at what it does, though I think it's got a&nbsp;way to go before it'll parse some of the more tricky content out&nbsp;there.</p>
+<p>The next thing I did was to have a go with <a href="http:&#47;&#47;pipes.yahoo.com&#47;">yahoo pipes<&#47;a>... I decided to do&nbsp;something pretty simplistic, aggregating the feeds from the&nbsp;Fisheye change log RSS for the castle proejct with the feed I'd&nbsp;created with dapper.net for builds.... this was a delightful drag&nbsp;and drop experience, I didn't even read a tutorial ... I just&nbsp;seems to "work" exactly as you would expect.</p>
+<p>The resulting published pipe is <a href="http:&#47;&#47;pipes.yahoo.com&#47;pipes&#47;pipe.run?_id=Ok934vgx3BGjLN89YEsBXw&amp;_render=rss">here<&#47;a>.</p>
+<p><img src="http:&#47;&#47;blog.bittercoder.com&#47;images&#47;aggregations&#47;yahoo_pipes.png" alt="yahoo_pipes.png" width="833" height="641" border="0" &#47;></p>
+<p>I didn't originally have the truncate step in the pipe, but had&nbsp;to add it after attempting to burn the feed with feedburner (it&nbsp;was over 512K in size, so feedburner politely said "no") after&nbsp;that it burnt just fine... as you can see:</p>
+<p><img src="http:&#47;&#47;blog.bittercoder.com&#47;images&#47;aggregations&#47;feedburner.png" alt="feedburner.png" width="714" height="581" border="1" &#47;></p>
+<p>I couldn't get the two aggregate feeds to sort correctly, but I'm&nbsp;sure it's possible using yahoo pipe's, any new events should&nbsp;appear in the expected order though... you can subscribe to the&nbsp;<a href="http:&#47;&#47;feeds.feedburner.com&#47;CastleProjectEvents">feed<&#47;a> here&nbsp;if your curious.</p>
+<p>Of course the hosted platforms aren't much use if you need to&nbsp;handle private&#47;local feeds or interact with other types of&nbsp;systems (like your private gmail account) and that's where I&nbsp;believe something like <a href="http:&#47;&#47;plagger.org&#47;">plagger<&#47;a>&nbsp;comes into it's own... I haven't had a chance to play with it&nbsp;yet, but it's definitely on my list of things to do... there's&nbsp;still a lot of manual information management and&nbsp;categorization&#47;organization that I'd rather hand over to some&nbsp;kind of automated agent.</p>
+<p>[Disclaimer: I'm no expert on these kinds of things, I just&nbsp;figured there might be some other "head-in-the-sand" developers&nbsp;who haven't played with these kinds of sites, and might find it&nbsp;interesting like I did ;o]</p>
+<p><&#47;div></p>

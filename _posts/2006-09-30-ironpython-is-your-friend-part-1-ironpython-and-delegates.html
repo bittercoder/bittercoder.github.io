@@ -1,0 +1,155 @@
+---
+layout: post
+status: publish
+published: true
+title: IronPython is your friend - Part 1 - IronPython and delegates&hellip;.
+author:
+  display_name: bittercoder
+  login: admin
+  email: alex@devdefined.com
+  url: http://blog.bittercoder.com/
+author_login: admin
+author_email: alex@devdefined.com
+author_url: http://blog.bittercoder.com/
+wordpress_id: 83489710
+wordpress_url: http://blog.bittercoder.com/?p=83489710
+date: '2006-09-30 03:29:21 +0000'
+date_gmt: '2006-09-30 03:29:21 +0000'
+categories:
+- ".Net"
+tags: []
+comments: []
+---
+<p>
+  I felt like posting some code snippets... so I was looking around<br />
+  and thought perhaps some IronPython might be interesting.... Some<br />
+  of you may find this useful, possibly not.&nbsp; I tend to<br />
+  explore functionality using unit tests, so all my code will be<br />
+  test cases - I might make this part of a small series on looking<br />
+  at python code with a view to integrating it into an existing<br />
+  system as a scripting engine.&nbsp; Lets call the series<br />
+  "IronPython is your friend"... because it really is.<br &#47;><br />
+  <br &#47;><br />
+<&#47;p></p>
+<h1>
+  Part 1 - IronPython and delegates....<br />
+<&#47;h1>So you have downloaded the IronPython runtime dll's, and you<br />
+would like to start integrating it into some project your working<br />
+on... first off lets create a python engine, and make sure it<br />
+goes....<br &#47;><br />
+<br &#47;></p>
+<pre>
+[Test]<br />
+public void GetGoing()<br />
+{<br />
+    PythonEngine engine = new PythonEngine();<br />
+    engine.Execute("myString = 'hello'");<br />
+    Assert.AreEqual("hello reader", engine.Evaluate("myString + ' reader'"));<br />
+}<br />
+<&#47;pre><br &#47;><br />
+That was pretty easy; we executed some python code to assign the<br />
+value hello to myString, and then evaluated the expression - sweet<br />
+you might say - no effort required.<br &#47;><br />
+<br &#47;><br />
+Now, you could write your scripting engine so that it passed the<br />
+strings to the engine for evaluation every time you wanted to<br />
+evaluate them - but this strings malarkey isn't very pleasant...<br />
+what we really want is a decent god fearing .Net delegate, so we<br />
+can call this without having to think about the python engine....<br />
+Lets check out our first destination, method delegates.<br &#47;><br />
+<br &#47;></p>
+<h2>
+  Method Delegates<br />
+<&#47;h2>Given a converter delegate like this:<br &#47;><br />
+<br &#47;><br />
+<span style="color: teal;">&nbsp;&nbsp;&nbsp;<br />
+Converter<&#47;span><<span style="color: blue;">int<&#47;span>,<br />
+<span style="color: blue;">string<&#47;span>><br &#47;><br />
+<br &#47;><br />
+(Which by the way, if you haven't stumbled across the generic<br />
+<b>Converter<&#47;b><<i>TInput<&#47;i>,<i>TOutput<&#47;i>> delegate yet,<br />
+effectively you end up with a delegate method of the<br />
+definition"<i>TOutput<&#47;i> <b>Converter<&#47;b>(<i>TInput<&#47;i>)" - pretty<br />
+handy actually)<br &#47;><br />
+&nbsp;<br &#47;><br />
+We could do this:<br &#47;><br />
+<br &#47;></p>
+<pre>
+[Test]<br />
+public void StatementsToStronglyTypedDelegate()<br />
+{<br />
+    PythonEngine engine = new PythonEngine();<br />
+    List<string> parameters = new List<string>(new string[] {"age"});<br />
+    Converter<int, string> converter =<br />
+        engine.CreateMethod<Converter<int, string>>("return str(age+1)", parameters);<br />
+    Assert.AreEqual("11", converter(10));<br />
+}<br />
+<&#47;pre><br &#47;><br />
+Using a strongly typed overload for the engine's<br />
+<b>CreateMethod<&#47;b> method, we're able to evaluate statements using<br />
+our new delegate, which in turn uses our IronPython method we<br />
+created earlier... looks promising!<br &#47;><br />
+<br &#47;></p>
+<h2 style="font-weight: bold">Events<br />
+<&#47;h2>Now delegates are cool,&nbsp; but it's only half the story for<br />
+scripting in an application - depending on your model, you may be<br />
+aiming to produce results similar to a microsoft's VBA in<br />
+applications like Excel or Word - and for this we need to be able<br />
+to assign python code to events on our own classes... we can do<br />
+this using delegates of course, or we could let the python (user<br />
+code) do this itself, and save some time.... So lets have a look at<br />
+the latter:<br &#47;><br />
+<br &#47;></p>
+<pre>
+[Test]<br />
+public void HookingToEvents()<br />
+{<br />
+    PythonEngine engine = new PythonEngine();</p>
+<p>    ManualResetEvent waitHandle = new ManualResetEvent(false);<br />
+    WebClient client = new WebClient();</p>
+<p>    List<string> results = new List<string>();</p>
+<p>    engine.Globals["client"] = client;<br />
+    engine.Globals["results"] = results;</p>
+<p>    engine.Execute(<br />
+        @"def storeResult(sender, e):<br />
+    results.Add(e.Result)<br />
+    e.UserState.Set()</p>
+<p># assign out storeResult function as an event handler for the client class<br />
+client.DownloadStringCompleted += storeResult<br />
+");</p>
+<p>    client.DownloadStringAsync(<br />
+        new Uri(<br />
+            "http:&#47;&#47;api.feedburner.com&#47;awareness&#47;1.0&#47;GetFeedData?uri=http:&#47;&#47;feeds.feedburner.com&#47;BitterCoder"),<br />
+        waitHandle);</p>
+<p>    Assert.IsTrue(waitHandle.WaitOne(10000, false), "timeout occured after 10 seconds");</p>
+<p>    Assert.AreEqual(1, results.Count);</p>
+<p>    Assert.IsTrue(results[0].StartsWith("<?xml"));<br />
+}<br />
+<&#47;pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br &#47;><br />
+This test is a bit clunky, but you get the idea... we are:<br &#47;></p>
+<ul>
+<li>Creating a web client, for downloading some xml from a web<br />
+  site.<br />
+  <&#47;li></p>
+<li>Set the client as a global variable for the default module in<br />
+  the python engine.<br />
+  <&#47;li></p>
+<li>Execute some python, which creates a function, and assigns<br />
+  that function as a handle for the web client's<br />
+  DownloadStringCompleted event (take note at how concise the code<br />
+  is, this would be a lot uglier in C#)<br &#47;><br />
+  <&#47;li></p>
+<li>start the async download<br />
+  <&#47;li></p>
+<li>Make sure we got a response, and that the python code did<br />
+  what it should.<br />
+  <&#47;li><br />
+<&#47;ul>All in all, with a little finesse you can recreate a model<br />
+similar to VBA, driving your extension points from events - and<br />
+this certainly has some merit - obviously you want to create the<br />
+code in their own modules, as opposed to using the default module<br />
+for the python engine as we are.<br &#47;><br />
+<br &#47;><br />
+We haven't quite finished with delegates yet though, I'll leave<br />
+that for part 2 - which I'll post shortly.<br &#47;><br />
+<br &#47;></p>

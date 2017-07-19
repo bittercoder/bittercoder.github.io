@@ -1,0 +1,66 @@
+---
+layout: post
+status: publish
+published: true
+title: For future reference...
+author:
+  display_name: bittercoder
+  login: admin
+  email: alex@devdefined.com
+  url: http://blog.bittercoder.com/
+author_login: admin
+author_email: alex@devdefined.com
+author_url: http://blog.bittercoder.com/
+wordpress_id: 83488756
+wordpress_url: http://blog.bittercoder.com/?p=83488756
+date: '2007-06-29 04:47:25 +0000'
+date_gmt: '2007-06-29 04:47:25 +0000'
+categories:
+- ".Net"
+tags:
+- generics
+comments:
+- id: 38
+  author: Alex Henderson
+  author_email: bittercoder@gmail.com
+  author_url: http://blog.bittercoder.com/
+  date: '2007-07-06 10:22:18 +0000'
+  date_gmt: '2007-07-06 10:22:18 +0000'
+  content: |-
+    Good spotting, have a chocolate fish :) oh, and they should be sorted now.
+
+    Chez,
+
+     - Alex
+---
+<p>No so much for my future reference, but to refer people too should the topic of how generic types are represented by name ever crops up again.</p>
+<table border="1" cellspacing="1" cellpadding="1">
+<tbody>
+<tr>
+<th>Type<&#47;th></p>
+<th>FullName<&#47;th><br />
+<&#47;tr><br />
+<&#47;tbody></p>
+<tbody>
+<tr>
+<td>typeof (List<>).FullName<&#47;td></p>
+<td>System.Collections.Generic.List`1<&#47;td><br />
+<&#47;tr></p>
+<tr>
+<td>typeof(List<int>).FullName<&#47;td></p>
+<td>System.Collections.Generic.List`1[[System.Int32]]<&#47;td><br />
+<&#47;tr></p>
+<tr>
+<td>typeof(Dictionary<,>).FullName<&#47;td></p>
+<td>System.Collections.Generic.Dictionary`2<&#47;td><br />
+<&#47;tr></p>
+<tr>
+<td>typeof(Dictionary<string,int>).FullName<&#47;td></p>
+<td>System.Collections.Generic.Dictionary`2[[System.String],[System.Int32]]<&#47;td><br />
+<&#47;tr></p>
+<tr>
+<td>typeof(Dictionary<string,List<int>>).FullName<&#47;td></p>
+<td>System.Collections.Generic.Dictionary`2[[System.String],[System.Collections.Generic.List`1[[System.Int32]]]]<&#47;td><br />
+<&#47;tr><br />
+<&#47;tbody><br />
+<&#47;table></p>

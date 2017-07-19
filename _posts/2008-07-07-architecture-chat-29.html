@@ -1,0 +1,73 @@
+---
+layout: post
+status: publish
+published: true
+title: 'Architecture Chat #29'
+author:
+  display_name: bittercoder
+  login: admin
+  email: alex@devdefined.com
+  url: http://blog.bittercoder.com/
+author_login: admin
+author_email: alex@devdefined.com
+author_url: http://blog.bittercoder.com/
+wordpress_id: 83489692
+wordpress_url: http://blog.bittercoder.com/?p=83489692
+date: '2008-07-07 07:03:58 +0000'
+date_gmt: '2008-07-07 07:03:58 +0000'
+categories:
+- Architecture Chat
+tags: []
+comments: []
+---
+<p>Reasonable turnout at the last Architecture Chat - appologies about<br />
+the late write-up!<br &#47;><br />
+<br &#47;><br />
+So we talked about a few things last week - on a recurring them of<br />
+IL generation and weaving we discussed verifying generated<br />
+assemblies with <a href="http:&#47;&#47;msdn.microsoft.com&#47;en-us&#47;library&#47;62bwd2yd%28VS.80%29.aspx">PEVerify<&#47;a><br />
+- and how to ensure IL you generate is not invalid and Garreth<br />
+mentioned some issues with ILDASM crashes when using <a href="http:&#47;&#47;www.mono-project.com&#47;Cecil">Mono.Cecil<&#47;a>.<br &#47;><br />
+<br &#47;><br />
+We talked about the process for wrapping and abstracting<br />
+functionality and services, and I gave a brief mention to this blog<br />
+post which provides a slightly more formalized description to this<br />
+process - <a href="http:&#47;&#47;hcoding.blogspot.com&#47;2008&#47;06&#47;wafagy.html">Wafagy<&#47;a>.<br &#47;><br />
+<br &#47;><br />
+The discussion moved onto file&#47;XML persistence and substituting<br />
+traditional relational databases with alternative persistence<br />
+mechanisms, especially in the cloud.<br &#47;><br />
+<br &#47;><br />
+Static analysis tools were discussed, and thoughts about what (if<br />
+any) alternatives exist to tools such as <a href="http:&#47;&#47;www.ndepend.com&#47;">NDepend<&#47;a>.<br &#47;><br />
+<br &#47;><br />
+We talked about the use of "toolkit" style projects such as the<br />
+<a href="http:&#47;&#47;www.codeplex.com&#47;umbrella">Umbrella project<&#47;a> or<br />
+<a href="http:&#47;&#47;ayende.com&#47;Wiki&#47;Default.aspx?Page=Rhino+Commons&amp;AspxAutoDetectCookieSupport=1"><br />
+Rhino Commons<&#47;a> and the compromise often felt between plucking<br />
+out only the bits you want (to control the surface area of your<br />
+project) verses the wish to easily integrate updates and unit tests<br />
+from the library into your project as they undergo continual<br />
+improvement.<br &#47;><br />
+<br &#47;><br />
+I also talked about hostile templating&#47;transformation languages<br />
+(such as the template language in <a href="http:&#47;&#47;www.sparxsystems.com.au&#47;">Enterprise Architect<&#47;a> which<br />
+I've been using for a recent project) and what features make a<br />
+domain or templating language "hostile" to being part of your daily<br />
+process i.e. lack of debugging, lack of comment syntax, poorly<br />
+identified or completely missed syntax errors, left to right<br />
+expression evaluation, lack of operator presidence rules etc.<br &#47;><br />
+<br &#47;><br />
+I then gave a quick run through how I've been using the MDA and MDG<br />
+to model a PIM (platform independent model) of the domain,<br />
+including OCL constraints, and how it's automatically transformed<br />
+into a platform specific model (Castle <a href="http:&#47;&#47;www.castleproject.org&#47;ActiveRecord&#47;">ActiveRecord<&#47;a> with<br />
+<a href="http:&#47;&#47;www.castleproject.org&#47;activerecord&#47;documentation&#47;v1rc1&#47;usersguide&#47;validation.html"><br />
+validation attributes<&#47;a> in this case) which is then used to<br />
+generate code from - and the issues I've encountered so far with<br />
+the tool.<br &#47;><br />
+<br &#47;><br />
+Details of previous chats can be found <a href="http:&#47;&#47;wiki.bittercoder.com&#47;SylviaParkArchitectureChats.ashx">here<&#47;a><br />
+on the wiki.<br &#47;><br />
+<br &#47;><br />
+The next Architecture chat is this Thursday, all are welcome.<br &#47;></p>

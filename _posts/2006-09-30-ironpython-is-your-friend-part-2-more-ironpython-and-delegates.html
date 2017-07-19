@@ -1,0 +1,165 @@
+---
+layout: post
+status: publish
+published: true
+title: IronPython is your friend - Part  2 - More IronPython and delegates&hellip;.
+author:
+  display_name: bittercoder
+  login: admin
+  email: alex@devdefined.com
+  url: http://blog.bittercoder.com/
+author_login: admin
+author_email: alex@devdefined.com
+author_url: http://blog.bittercoder.com/
+wordpress_id: 653
+wordpress_url: http://blog.bittercoder.com/?p=653
+date: '2006-09-30 04:38:11 +0000'
+date_gmt: '2006-09-30 04:38:11 +0000'
+categories:
+- ".Net"
+tags:
+- IronPython
+comments: []
+---
+<h1>
+  Part&nbsp; 2 - More IronPython and delegates...<br />
+<&#47;h1><br &#47;><br />
+So we have briefly covererd strongly typed delegates and event handlers... But they make the assumption that we know what our arguments are at compile time, what if we dont?<br &#47;><br />
+<br &#47;><br />
+Say for instance you're expression engine has a bag of contextual values being passed around in a dictionary, like this:<br &#47;><br />
+<br &#47;></p>
+<pre>
+Dictionary<string, object> context = new Dictionary<string, object>();<br />
+context.Add("user", "alex");<br />
+context.Add("age", 26);<br />
+<&#47;pre><br &#47;><br />
+What if we want to use python to evaluate expressions against that context?... Say something like writing out "my name is alex and my age is 25" - the expression in python is easy enough, we can go:<br &#47;><br />
+<br &#47;></p>
+<pre>my name is' + name + ? and my age is ? + str(age)<&#47;pre></p>
+<p>But how do we marry all these together... lets start exploring... ever noticed that delegates have a <b>DynamicInvoke<&#47;b> method with a signature like this?<br &#47;><br />
+<br &#47;></p>
+<pre>object DynamicInvoke(params object[] parameters)<&#47;pre></p>
+<p>Perhaps we can try and use this to our advantage... lets see shall we?</p>
+<h2>First Attempt<&#47;h2></p>
+<pre>
+[Test]<br />
+[ExpectedException(typeof (ArgumentException), "T must be a concrete delegate, not MulticastDelegate or Delegate")]<br />
+public void LooseDelegateAndDynamicInvoke()<br />
+{<br />
+    PythonEngine engine = new PythonEngine();</p>
+<p>    List<string> parameters = new List<string>(new string[] {"name", "age"});</p>
+<p>    Delegate func =<br />
+        engine.CreateMethod<Delegate>("return ?my name is' + name + ? and my age is ? + str(age)", parameters);<br />
+    string result = (string) func.DynamicInvoke("alex", 26);</p>
+<p>    Assert.AreEqual("my name is alex and my age is 25", result);<br />
+}<br />
+<&#47;pre><br &#47;><br />
+Sadly this doesn't work so well, seems the PythonEngine is looking for a concrete delegate... we could try giving it void delegate, but it does type checking on the number of parameters and their type, so we're a little stuck.<br &#47;><br />
+<br &#47;><br />
+At this point I think the best answer is to actually build some code which generates the apropriate delegate type, based on the supplied dictionary, and then passing that onto the python engine, but there is another way... it's a little less elegant, but it's at least amusing:<br &#47;><br />
+<br &#47;></p>
+<h2>
+  Round 2<br />
+<&#47;h2>First of let's build a little helper method...<br &#47;><br />
+<br &#47;></p>
+<pre>
+private static string GenerateFunction(string functionName, string[] parameters, string statements)<br />
+{<br />
+    StringBuilder builder = new StringBuilder();</p>
+<p>    builder.AppendFormat("def {0}(", functionName);</p>
+<p>    for (int i = 0; i < parameters.Length; i++)<br />
+    {<br />
+        if (i > 0) builder.AppendFormat(", ");<br />
+        builder.AppendFormat(parameters[i]);<br />
+    }</p>
+<p>    builder.AppendFormat("):rn    ");</p>
+<p>    builder.AppendFormat(statements.Replace("rn", "n").Replace("r", "n").Replace("n", "rn    "));</p>
+<p>    return builder.ToString();<br />
+}<br />
+<&#47;pre><br &#47;><br />
+You can no doubt see where this is going - so given a statement like this:<br &#47;><br />
+<br &#47;></p>
+<pre>
+GenerateFunction("func", new string[] { "user", "age" }, "return user + ' is ' + str(age) + ' years old'")<br />
+<&#47;pre><br &#47;><br />
+We'd end up with a string like this:<br &#47;><br />
+<br &#47;><br />
+&nbsp;&nbsp;&nbsp; def func(user, age):<br &#47;><br />
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; return user + ' is ' +<br />
+str(age) + ' years old'<br &#47;><br />
+<br &#47;><br />
+And, moving on from there we build a test...</p>
+<pre>
+[Test]<br />
+public void GeneratingPythonFunction()<br />
+{<br />
+    Dictionary<string, object> context = new Dictionary<string, object>();<br />
+    context.Add("user", "alex");<br />
+    context.Add("age", 26);</p>
+<p>    List<string> parameters = new List<string>(context.Keys);<br />
+    List<object> values = new List<object>(context.Values);</p>
+<p>    PythonEngine engine = new PythonEngine();</p>
+<p>    engine.Execute(<br />
+        GenerateFunction("func", parameters.ToArray(), "return user + ' is ' + str(age) + ' years old'"));</p>
+<p>    PythonFunction func1 = engine.EvaluateAs<PythonFunction>("func");</p>
+<p>    engine.Execute(<br />
+        GenerateFunction("func", parameters.ToArray(),<br />
+                         "return user + ' is ' + str(age+1) + ' years old next year'"));</p>
+<p>    PythonFunction func2 = engine.EvaluateAs<PythonFunction>("func");</p>
+<p>    object result1 = func1.Call(values.ToArray());<br />
+    Assert.AreEqual("alex is 26 years old", result1);</p>
+<p>    object result2 = func2.Call(values.ToArray());<br />
+    Assert.AreEqual("alex is 27 years old next year", result2);<br />
+}<br />
+<&#47;pre></p>
+<p>Are there problems with this?... well there's a few, unsurprisingly!</p>
+<ul>
+<li>PythonFunction's are not delegates.<&#47;li>
+<li>String manipulation is a bit clunky<&#47;li>
+<li>Because these are named functions, you probably want to lock against some object when generating the function, to avoid cross-threading issues...<&#47;li><br />
+<&#47;ul></p>
+<h2>Back to delegates<&#47;h2></p>
+<p>Aside from the problems it works alright, but what we really want is a delegate... those PythonFunctions don't give you the flexibility to substitute IronRuby in the future now do they?</p>
+<p>So first off, lets declare a delegate suitable for our purposes.</p>
+<pre>
+[ThereBeDragons("Only use as a last resort")]<br />
+public delegate object UntypedDelegate(params object[] parameters);<br />
+<&#47;pre><br &#47;><br />
+Aint she a beauty ;o) - full credit for the <b>ThereBeDragons<&#47;b> attribute goes to <a href="http:&#47;&#47;www.ayende.com&#47;Blog&#47;">Ayende<&#47;a>, though it's probably not really warranted in this situation - now, let's rework the last test to use a delegate instead, a simple anonymous delegate will do the dirty work:<br &#47;><br />
+<br &#47;></p>
+<pre>
+[Test]<br />
+public void UntypedDelegateForPythonFunction()<br />
+{<br />
+    Dictionary<string, object> context = new Dictionary<string, object>();<br />
+    context.Add("user", "alex");<br />
+    context.Add("age", 26);</p>
+<p>    List<string> parameters = new List<string>(context.Keys);<br />
+    List<object> values = new List<object>(context.Values);</p>
+<p>    PythonEngine engine = new PythonEngine();</p>
+<p>    engine.Execute(GenerateFunction("func",parameters.ToArray(),"return user + ' is ' + str(age) + ' years old'"));</p>
+<p>    PythonFunction func1 = engine.EvaluateAs<PythonFunction>("func");</p>
+<p>    UntypedDelegate func1Delegate = delegate(object[] param)<br />
+    {<br />
+        return func1.Call(param);<br />
+    };</p>
+<p>    object result1 = func1Delegate(values.ToArray());<br />
+    Assert.AreEqual("alex is 26 years old", result1);<br />
+}<br />
+<&#47;pre><br &#47;><br />
+It's certainly better then passing around PythonFunction instances - though you need to be a little careful... there's a little quirk here, if we were to use:<br &#47;><br />
+<br &#47;></p>
+<pre>
+object result1 = func1Delegate.DynamicInvoke(values.ToArray());<br />
+<&#47;pre><br &#47;><br />
+It's going to fail because the wrong number of arguments were supplied (it expects only 1, an array), so our delegate doesn't really behave like it has multiple parameters.. so to dynamically invoke this delegate we'd need to take special care, promoting the arguments into a second array like so:<br &#47;><br />
+<br &#47;></p>
+<pre>
+object result1 = func1Delegate.DynamicInvoke(new object[] { values.ToArray()});<br />
+<&#47;pre></p>
+<p><br &#47;></p>
+<h2>
+  Next Time<br />
+<&#47;h2>When I get bored I'll write a version which doesn't require the clunky generator and post it up...<br &#47;><br />
+<br &#47;><br />
+Next time I'll talk about writing classes which are python-friendly, riveting stuff eh? As you were.</p>

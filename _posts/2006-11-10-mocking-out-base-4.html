@@ -1,0 +1,154 @@
+---
+layout: post
+status: publish
+published: true
+title: Mocking out base 4....
+author:
+  display_name: bittercoder
+  login: admin
+  email: alex@devdefined.com
+  url: http://blog.bittercoder.com/
+author_login: admin
+author_email: alex@devdefined.com
+author_url: http://blog.bittercoder.com/
+wordpress_id: 83488778
+wordpress_url: http://blog.bittercoder.com/?p=83488778
+date: '2006-11-10 11:00:12 +0000'
+date_gmt: '2006-11-10 11:00:12 +0000'
+categories:
+- ".Net"
+tags:
+- base4
+- castle
+- rhinomocks
+comments:
+- id: 20
+  author: Nikolai
+  author_email: nikolai@phiner.co.nz
+  author_url: ''
+  date: '2006-11-26 22:03:26 +0000'
+  date_gmt: '2006-11-26 22:03:26 +0000'
+  content: Cool thank, will do
+---
+<h2>Domain Driven Design Afterthoughts...<&#47;h2><br />
+I just finished reading Jimmy Nilsson&rsquo;s <a href="http:&#47;&#47;blog.bittercoder.com&#47;ct.ashx?id=deaa8b8c-07a9-46a0-baf1-67f65ce844f3&amp;url=http%3a%2f%2fwww.amazon.com%2fApplying-Domain-Driven-Design-Patterns-Examples%2fdp%2f0321268202">Applying Domain-Driven Design and Patterns<&#47;a> [ADDDP] book... I actually read it cover to cover, something I&rsquo;ve found difficult to compel myself to do with some of the other books that have been lying around my desk for a wee while now (such as Petzold&rsquo;s <a href="http:&#47;&#47;blog.bittercoder.com&#47;ct.ashx?id=deaa8b8c-07a9-46a0-baf1-67f65ce844f3&amp;url=http%3a%2f%2fwww.amazon.com%2fApplications-Code-Markup-Presentation-Foundation%2fdp%2f0735619573%2fsr%3d1-1%2fqid%3d1163707849%2fref%3dpd_bbs_sr_1%2f102-4294949-8099335%3fie%3dUTF8%26s%3dbooks">&ldquo;Applications = Code + Markup&rdquo;<&#47;a> &ndash; a great book to assault someone with in a dark alley)...</p>
+<p>First off, I think this book is a pretty good, it didn&rsquo;t cover a lot of new ground for me, but It&rsquo;s very down to earth, which I liked, and it&rsquo;s encouraged me to have a read of <a href="http:&#47;&#47;blog.bittercoder.com&#47;ct.ashx?id=deaa8b8c-07a9-46a0-baf1-67f65ce844f3&amp;url=http%3a%2f%2fwww.amazon.com%2fDomain-Driven-Design-Tackling-Complexity-Software%2fdp%2f0321125215%2fref%3dpd_bxgy_b_img_b%2f102-4294949-8099335">Evan&rsquo;s<&#47;a> and <a href="http:&#47;&#47;blog.bittercoder.com&#47;ct.ashx?id=deaa8b8c-07a9-46a0-baf1-67f65ce844f3&amp;url=http%3a%2f%2fwww.amazon.com%2fPatterns-Enterprise-Application-Architecture-Martin%2fdp%2f0321127420%2fref%3dpd_bxgy_b_img_b%2f102-4294949-8099335">Fowler&rsquo;s<&#47;a> more definitive works on the subject too... I also liked the fact that this book does attempt to tie the whole story together, from rough sketch through to identifying the domains language, using TDD to build up your domain model and even some of the gritty integration work, including evaluating OR&#47;M features, using NHibernate as an example, and even looks into inversion of control contains (spring sadly, it would&rsquo;ve been great to have seen Castle get a mention) and finally AOP. On the down side &ndash; I think the book could&rsquo;ve tackled the application of rules to your domain model a little better (I wanted to see more code) and depending on your TDD knowledge, you might find that a couple of the chapters don&rsquo;t really do much for you as there&rsquo;s little focus on the model so much as the key concepts of red, green, refactor...</p>
+<p>At any rate, one thing I did keep rolling around in the back of my mind is just how <a href="http:&#47;&#47;blog.bittercoder.com&#47;ct.ashx?id=deaa8b8c-07a9-46a0-baf1-67f65ce844f3&amp;url=http%3a%2f%2fwww.base4.net%2f">Base4.Net<&#47;a> fits into the &ldquo;domain model&rdquo; picture ... it&rsquo;s difficult to nail down, there are plenty of mechanisms for implementing most of what you need to create a domain model, for instance:</p>
+<ul>
+<li>Inheritance, though it&rsquo;s support for discriminators in user types isn&rsquo;t quite up to scratch &ndash; it only works via &ldquo;ItemBase&rdquo; at the moment &ndash; though I think Alex James mentioned that this would be implemented at some point... and though I haven&rsquo;t tried, you could roll your own in some way.<&#47;li>
+<li>Aggregates (through extended properties).<&#47;li>
+<li>Various hooks (Events) to allow for the application of custom behavior, for instance you could wire up to a BeforeSave event on a type and implement some custom validation rules... not that easy to test though .<&#47;li>
+<li>A reasonable query abstraction - Good query support.<&#47;li>
+<li>A &ldquo;logical&rdquo; transaction mechanism, suitable for supporting the concept of a &ldquo;UnitOfWork&rdquo;, though it&rsquo;s explicit, rather the implicit, and based on the examples in the documentation this could be a little annoying to work with when you&rsquo;re trying to persist the entire graph for an aggregate &ndash; however using a similar implementation for &ldquo;UnitOfWork&rdquo; as Ayende does in the <a href="http:&#47;&#47;blog.bittercoder.com&#47;ct.ashx?id=deaa8b8c-07a9-46a0-baf1-67f65ce844f3&amp;url=http%3a%2f%2fwiki.ayende.com%2fwiki%2findex.php%3ftitle%3dRhino.Commons">Rhino.Commons<&#47;a> library for NHibernate I&rsquo;m sure I could get it all working nicely, without too much trouble.<&#47;li><br />
+<&#47;ul><br />
+And it sounds like I&rsquo;m on to a winner... but I think what I struggle with is that the types in your schema are not really the focal point for your domain model, because they&rsquo;re not POCO, unlike say a domain model implemented with NHibernate as the backing O&#47;RM can be, you can&rsquo;t enrich or decorate them with additional functionality all that easily... It&rsquo;s not that you have to build your domain model this way, it&rsquo;s just that&rsquo;s the way I would like to do it, at least to satisfy me that I'm not being railroaded into a bad design choice&nbsp;&ndash; but I think it&rsquo;s the small blood price you pay for letting Base4 generate the schema assemblies for you, that loss of control is also a boon in immediate productivity when you start developing apps with Base4 apps... I&rsquo;ve come close while using ActiveRecord, but it&rsquo;s still not the same.</p>
+<p>So... given the restrictions I&rsquo;m left to implementing additional abstractions for my domain model... which means using repositories and services for encapsulating the business logic... which, in turn, brings me to mocking...</p>
+<h2>Mocking out my Base4 Implementation...<&#47;h2><br />
+Now, if you recall a while back I talked about my repository implementation... basically it let you do things like:</p>
+<pre>
+IRepository<Order> orderRepository = IoC.Resolve<IRepository<Order>>();</p>
+<p>Order orderForApples = new Order();<br />
+OrderLine greenOnes = new OrderLine();<br />
+OrderLine redOnes = new OrderLine();<br />
+orderForApples.OrderLines.Add(greenOnes);<br />
+orderForApples.OrderLines.Add(redOnes);</p>
+<p>orderRepository.Save(orderForApples);<br />
+<&#47;pre></p>
+<p>Big woop, but what I probably neglected to mention is that the repository is great for implementing a chain of generic decorators (which can be set up in your IoC container of course)... so at the bottom&#47;base of the chain we may have our &ldquo;Base4StorageRepository&rdquo; and layered on top of that we might have various decorators (each injected with a dependency for the next repository in the chain) for implementing some useful concepts...</p>
+<p>Things that spring to mind are:</p>
+<ul>
+<li>Security<&#47;li>
+<li>Validation<&#47;li>
+<li>Logging<&#47;li><br />
+<&#47;ul><br />
+Being able to configure these things is quite useful, and there&rsquo;s little stopping you deploying additional decorators as additional assemblies for an already installed product &ndash; just throw in some additional container configuration - and it is a great deal more elegant then implementing this functionality with AOP.</p>
+<p>But you do kind of paint yourself in a corner at the same time... this generic decorator pattern stops you from being able to decorate the repository with additional methods for implementing business level functionality (because any decorations that are applied to your base repositorty will mask out&nbsp; methods and properties no present in the IRepository<T> interface)... that&rsquo;s fine though, I guess we just have to write the repository off as being more of a persistence mechanism, It&rsquo;s really a logical separation of concerns anyway... you can decorate a "wrapper" at the top of the chain though (and this is how Ayende does, but lets ignore that for now ;o)</p>
+<p>So... A higher level entity for dealing with the business level concerns is required... I call mine services, that may or may not sit right with you, but it makes reasonable sense in my application &ndash; and these service are injected as dependencies of the controllers re: MVC, yeah this is a Monorail app (or at least, part of it is)...</p>
+<p>These services often aggregate the features of multiple repositories, like this catalogue service below which deals with a simple music structure:</p>
+<pre>
+public class CatalogueService : ICatalogueService<br />
+{<br />
+    public CatalogueService(IRepository<Track> trackRepository, IRepository<Release> releaseRepository,<br />
+                            IRepository<Artist> artistRepository, IRepository<Genre> genreRepository)<br />
+    {<br />
+        if (trackRepository == null) throw new ArgumentNullException("trackRepository");<br />
+        if (releaseRepository == null) throw new ArgumentNullException("releaseRepository");<br />
+        if (artistRepository == null) throw new ArgumentNullException("artistRepository");<br />
+        if (genreRepository == null) throw new ArgumentNullException("genreRepository");</p>
+<p>        _trackRepository = trackRepository;<br />
+        _releaseRepository = releaseRepository;<br />
+        _artistRepository = artistRepository;<br />
+        _genreRepository = genreRepository;<br />
+    }<br />
+<&#47;pre></p>
+<p>In this case we have a dependency on four different repositories...</p>
+<p>For this example we have a pretty simple schema... with a child-parent relationship between Track, Release and Artist... and a Many to Many relationship between Tracks and Genres...</p>
+<p><span style="color: #000000;"><strong>Track -> Release -> Artist<br />
+Track(s) <-> Genre(s)<&#47;strong><&#47;span></p>
+<p>The catalogue service implements the business rules for dealing with the catalogue, in some cases this is no more than querying the associated repository... so for getting a list of releases for a particular artist we have this (and yeah, I know it&rsquo;s pretty daft):</p>
+<pre>
+public PagedItemList<Track> ListTracksForArtist(Artist artist, int pageSize, int pageNumber)<br />
+{<br />
+    ObjectQuery query = new ObjectQuery(typeof (Track));</p>
+<p>    query.Scope.Add("Release");<br />
+    query.Scope.Add("Release.Artist");<br />
+    query.Path = (Track.Fields.Release.Artist.ID == artist.ID);<br />
+    query.Path.AddOrderBy("Name", OrderByDirection.Ascending);</p>
+<p>    return _trackRepository.Find(query, pageSize, pageNumber);<br />
+}<br />
+<&#47;pre></p>
+<p>I say daft because it doesn&rsquo;t support sorting and filtering by a query... but it&rsquo;s here to illustrate a point, and until the customer actually asks for these features I&rsquo;m not going to bother building them :P</p>
+<p>At any rate, the point is not to critique the service, but instead how can we test this catalogue service without being connected to a Base4 server... and of course it&rsquo;s <a href="http:&#47;&#47;blog.bittercoder.com&#47;ct.ashx?id=deaa8b8c-07a9-46a0-baf1-67f65ce844f3&amp;url=http%3a%2f%2fwww.ayende.com%2fprojects%2frhino-mocks.aspx">RhinoMocks<&#47;a> to the rescue!</p>
+<h2>Mocking with RhinoMocks...<&#47;h2><br />
+So here&rsquo;s the guts of the test in mid-refactoring ... post red-green for those sticklers for the rules ;o) (there&rsquo;s still plenty yet to clean up, but it would muddy the waters a bit for this example I think...)</p>
+<pre>
+[Test]<br />
+public void ListReleasesForArtist()<br />
+{<br />
+    Artist artist = new Artist();</p>
+<p>    PagedItemList<Release> releases = new PagedItemList<Release>(new ItemList<Release>(), 1, 10, 20);</p>
+<p>    Func<bool, ObjectQuery, int, int> callback<br />
+        = delegate(ObjectQuery query, int pageNumber, int pageSize)<br />
+        {<br />
+            ObjectPath path = Release.Fields.Artist.ID == artist.ID;<br />
+            path.AddOrderBy("Name");</p>
+<p>            Base4Assert.ArePathsEqual(path, query.Path);<br />
+            Base4Assert.AreScopesEqual(new string[] { "Artist" }, query.Scope);<br />
+            Assert.AreEqual(1, pageNumber, "pageNumber");<br />
+            Assert.AreEqual(10, pageSize, "pageSize");<br />
+            return true;<br />
+        };</p>
+<p>    Expect.Call(_releaseRepository.Find(null, 1, 10)).Callback(callback).Return(releases);<br />
+    _mockRepository.ReplayAll();</p>
+<p>    ICatalogueService service =<br />
+        new CatalogueService(_trackRepository, _releaseRepository, _artistRepository, _genreRepository);</p>
+<p>    PagedItemList<Release> results = service.ListReleasesForArtist(artist, 1, 10);</p>
+<p>    Assert.AreSame(releases, results);</p>
+<p>    _mockRepository.VerifyAll();<br />
+}<br />
+<&#47;pre></p>
+<p>Pretty chunky I know - but as more tests are added there will be opportunities for removing some of that duplicated effort... however the key points to take away are:</p>
+<ul>
+<li>We don&rsquo;t need to have the base4 service running.<&#47;li>
+<li>We are actually testing the catalogue service&rsquo;s interactions with the repositories, instead of relying on detecting expected side effects in the underlying storage.<&#47;li>
+<li>We&rsquo;re verifying the object path and scope for the query, as well as paging information, and insulating ourselves from difficult to detect changes (like forgetting to apply an object scope, which may have a severe impact on performance).<&#47;li><br />
+<&#47;ul><br />
+Just to complete the story, the mock repository was created in the Setup (as we use it for every test case)... here's the code for it:</p>
+<pre>
+[SetUp]<br />
+public void SetUp()<br />
+{<br />
+    _mockRepository = new MockRepository();</p>
+<p>    _trackRepository = _mockRepository.CreateMock<IRepository<Track>>();<br />
+    _releaseRepository = _mockRepository.CreateMock<IRepository<Release>>();<br />
+    _artistRepository = _mockRepository.CreateMock<IRepository<Artist>>();<br />
+    _genreRepository = _mockRepository.CreateMock<IRepository<Genre>>();<br />
+}<br />
+<&#47;pre></p>
+<p>It does not stop us from incorrectly spelling an object scope I think compile time query support for ordering and scoping of an object query will help to make this a little more robust... small potatoes.</p>
+<p>The callback in this case is a bit of a &ldquo;bad smell&rdquo; &ndash; there&rsquo;s support in rhino mocks for parameter constraints, but the object paths and scopes are a little too complex to test using the out the box ones... though you can get surprisingly close, they are pretty powerful... but I believe you can write custom constraints yourself &ndash; which is something I&rsquo;ll do for the next post (I&rsquo;ve never done it before, I'm guessing it's easy) and hopefully that will reduce the complexity of these tests quite a bit, and replace the less concise anonymous delegate, and more importantly, make it easy to develop the catalogue service in a test-driven manor.</p>
+<p>For those more observant people you may have noticed the &ldquo;<strong>Base4Assert<&#47;strong>&rdquo; as well &ndash; that&rsquo;s a little static helper class I&rsquo;m using in these tests... it&rsquo;s not perfect, but it works for simple cases including things like multi-level scopes and gives meaningful failure methods like &ldquo;<strong>expected scope &lsquo;Release.Artist&rsquo; but found nothing.<&#47;strong>&rdquo; Or "<strong>expected OrderBy Name Descending, but found OrderBy Name Ascending<&#47;strong>"... which can quickly narrow down problems for you, especially if your writing these tests first (which is the whole point of this exercise I feel).</p>
+<h2>Conclusion... For Now ;o)<&#47;h2><br />
+Last thing I&rsquo;ve done is to have tossed away a lot of the additional query overloads in my <a href="http:&#47;&#47;blog.bittercoder.com&#47;ct.ashx?id=deaa8b8c-07a9-46a0-baf1-67f65ce844f3&amp;url=http%3a%2f%2fblog.bittercoder.com%2fPermaLink%2cguid%2cd996b96f-13f3-4d0f-9c5b-e770dabd77ce.aspx">original repository design<&#47;a> in favor of just using a single ObjectQuery parameter with and without page number and page size (returning a <strong>PagedItemList<T><&#47;strong> when providing a page number and page size, and returning an <strong>IItemList<T><&#47;strong> when querying without them) &ndash; It makes everything a lot more... predictable, and is a lot cleaner when you start considering generic decorator implementations (10 overloads is 10 more code paths that need testing in a decorator... ) - looking towards to the future it should conceivable that a compile time query will allow you to construct the entire object query, not just the unordered path, and I&rsquo;m quite happy to build these up in a few lines of code before passing them to a find method for now.</p>
+<p><span style="text-decoration: underline;">Edit (Sunday 12th):<&#47;span></p>
+<p>In a similar vein, I just noticed <a href="http:&#47;&#47;blog.bittercoder.com&#47;ct.ashx?id=deaa8b8c-07a9-46a0-baf1-67f65ce844f3&amp;url=http%3a%2f%2fwww.ayende.com%2fBlog%2fMyMSDNArticle.aspx">Ayende's<&#47;a> great <a href="http:&#47;&#47;blog.bittercoder.com&#47;ct.ashx?id=deaa8b8c-07a9-46a0-baf1-67f65ce844f3&amp;url=http%3a%2f%2fwww.ayende.com%2fBlog%2fct.ashx%3fid%3d133e4e45-d806-4272-998c-5ccf1fbc6787%26url%3dhttp%253a%252f%252fmsdn2.microsoft.com%252fen-us%252flibrary%252faa973811.aspx">MSDN article<&#47;a> this evening - which covers that whole <strong>IRepository<T><&#47;strong> story, including generic decorators and most importantly the intricacies of registering and chaining these components in the windsor container... great stuff!</p>

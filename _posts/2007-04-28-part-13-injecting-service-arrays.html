@@ -1,0 +1,215 @@
+---
+layout: post
+status: publish
+published: true
+title: Part 13 - Injecting Service Arrays
+author:
+  display_name: bittercoder
+  login: admin
+  email: alex@devdefined.com
+  url: http://blog.bittercoder.com/
+author_login: admin
+author_email: alex@devdefined.com
+author_url: http://blog.bittercoder.com/
+wordpress_id: 83489611
+wordpress_url: http://blog.bittercoder.com/?p=83489611
+date: '2007-04-28 01:52:35 +0000'
+date_gmt: '2007-04-28 01:52:35 +0000'
+categories:
+- ".Net"
+tags:
+- castle windsor
+- container tutorials
+- IoC
+comments: []
+---
+<p><img src="http:&#47;&#47;blog.bittercoder.com&#47;images&#47;ioc_tutorial_titles&#47;13_injecting_service_arrays.png" alt="13_injecting_service_arrays.png" border="0" height="189" width="270" &#47;><br &#47;><br />
+So this time we're going to look at injecting service arrays ... if you haven't read <a href="http:&#47;&#47;blog.bittercoder.com&#47;PermaLink,guid,4863e460-2985-475c-9266-80b4895e80de.aspx"> part 12<&#47;a>, it might pay to have a look at that first - this part follows on from the examples presented there.<br &#47;><br />
+<br &#47;><br />
+So this should be reasonably quick, we're just going to rework the <a href="http:&#47;&#47;blog.bittercoder.com&#47;PermaLink,guid,4863e460-2985-475c-9266-80b4895e80de.aspx"> Part 12<&#47;a> solution so we don't need decorators... why would we do this, well in this case I feel that rewiring decorators (ie. changing orders, or disabling one of the decorators temporarily) isn't completely intuitive, especially when you have a long chain, it's easy to make mistakes.<br &#47;><br />
+<br &#47;><br />
+So what's the plan, well first off let's implement an abstract class for our calculators:<br &#47;><br />
+<br &#47;></p>
+<pre>
+public abstract class AbstractCalculator<br />
+{<br />
+    public abstract decimal Calculate(decimal currentTotal, Order order);<br />
+}<br />
+<&#47;pre><br &#47;><br />
+Now we can rework the existing decorators and default calculator to be implementations of the abstract caculator, so here goes:<br &#47;><br />
+<br &#47;><br />
+First off the the logic in the <b>DefaultCostCalculator<&#47;b> will be moved into a class called <b>TotalCalculator<&#47;b> :<br &#47;><br />
+<br &#47;></p>
+<pre>
+public class TotalCalculator : AbstractCalculator<br />
+{<br />
+    private decimal CalculateTotal(Order order)<br />
+    {<br />
+        decimal total = 0;</p>
+<p>        foreach (OrderItem item in order.Items)<br />
+        {<br />
+            total += (item.Quantity*item.CostPerItem);<br />
+        }</p>
+<p>        return total;<br />
+    }</p>
+<p>    public override decimal Calculate(decimal currentTotal, Order order)<br />
+    {<br />
+        return currentTotal + CalculateTotal(order);<br />
+    }<br />
+}<br />
+<&#47;pre><br &#47;><br />
+And then for the gst calculator, we do much the same thing:<br &#47;><br />
+<br &#47;></p>
+<pre>
+public class GstCalculator : AbstractCalculator<br />
+{<br />
+    private decimal _gstRate = 1.125m;</p>
+<p>    public decimal GstRate<br />
+    {<br />
+        get { return _gstRate; }<br />
+        set { _gstRate = value; }<br />
+    }</p>
+<p>    private bool IsNewZealand(Order order)<br />
+    {<br />
+        return (order.CountryCode == "NZ");<br />
+    }</p>
+<p>    public override decimal Calculate(decimal currentTotal, Order order)<br />
+    {<br />
+        if (IsNewZealand(order))<br />
+        {<br />
+            return (currentTotal*_gstRate);<br />
+        }</p>
+<p>        return currentTotal;<br />
+    }<br />
+}<br />
+<&#47;pre><br &#47;><br />
+And finally the shipping calculator:<br &#47;><br />
+<br &#47;></p>
+<pre>
+public class ShippingCalculator : AbstractCalculator<br />
+{<br />
+    private decimal _shippingCost = 5.0m;<br />
+    private decimal _fragileShippingPremium = 1.5m;</p>
+<p>    public decimal ShippingCost<br />
+    {<br />
+        get { return _shippingCost; }<br />
+        set { _shippingCost = value; }<br />
+    }</p>
+<p>    public decimal FragileShippingPremium<br />
+    {<br />
+        get { return _fragileShippingPremium; }<br />
+        set { _fragileShippingPremium = value; }<br />
+    }</p>
+<p>    private decimal GetShippingTotal(Order order)<br />
+    {<br />
+        decimal shippingTotal = 0;</p>
+<p>        foreach (OrderItem item in order.Items)<br />
+        {<br />
+            decimal itemShippingCost = ShippingCost*item.Quantity;<br />
+            if (item.IsFragile) itemShippingCost *= FragileShippingPremium;<br />
+            shippingTotal += itemShippingCost;<br />
+        }</p>
+<p>        return shippingTotal;<br />
+    }</p>
+<p>    public override decimal Calculate(decimal currentTotal, Order order)<br />
+    {<br />
+        return currentTotal + GetShippingTotal(order);<br />
+    }<br />
+}<br />
+<&#47;pre><br &#47;><br />
+Now, our original <b>DefaultCostCalculator<&#47;b> is reworked to use an array of <b>AbstractCalculators<&#47;b> to compute the total cost for an order:<br &#47;><br />
+<br &#47;></p>
+<pre>
+public class DefaultCostCalculator : ICostCalculator<br />
+{<br />
+    private AbstractCalculator[] _calculators;</p>
+<p>    public DefaultCostCalculator(AbstractCalculator[] calculators)<br />
+    {<br />
+        _calculators = calculators;<br />
+    }</p>
+<p>    public decimal CalculateTotal(Order order)<br />
+    {<br />
+        decimal currentTotal = 0;</p>
+<p>        foreach (AbstractCalculator calculator in _calculators)<br />
+        {<br />
+            currentTotal = calculator.Calculate(currentTotal, order);<br />
+        }</p>
+<p>        return currentTotal;<br />
+    }<br />
+}<br />
+<&#47;pre><br &#47;><br />
+Notice it takes an <b>array<&#47;b> of <b>AbstractCalculator<&#47;b>'s as a constructor dependency... just like we did for <a href="http:&#47;&#47;blog.bittercoder.com&#47;PermaLink,guid,3233bd70-4885-4292-8aac-c94bf9910401.aspx"> configuration parameters<&#47;a> in the early parts of this container tutorial series, we can actually pass arrays of <span stylesrc="text-decoration: underline">dependencies<&#47;span> to a component as well, so last of all let's see the container configuration:<br &#47;><br />
+<br &#47;></p>
+<pre>
+<configuration></p>
+<p>  <configSections></p>
+<section name="castle"<br />
+        type="Castle.Windsor.Configuration.AppDomain.CastleSectionHandler, Castle.Windsor" &#47;><br />
+  <&#47;configSections></p>
+<p>  <castle><br />
+    <components></p>
+<p>      <component id="calc.gst"<br />
+                 service="IoC.Tutorials.Part13.AbstractCalculator, IoC.Tutorials.Part13"<br />
+                 type="IoC.Tutorials.Part13.GstCalculator, IoC.Tutorials.Part13"></p>
+<parameters>
+          <GstRate>1.20<&#47;GstRate><br />
+          <!-- GST is now 20% --><br />
+        <&#47;parameters><br />
+      <&#47;component></p>
+<p>      <component id="calc.shipping"<br />
+           service="IoC.Tutorials.Part13.AbstractCalculator, IoC.Tutorials.Part13"<br />
+           type="IoC.Tutorials.Part13.ShippingCalculator, IoC.Tutorials.Part13"></p>
+<parameters>
+          <FragileShippingPremium>0.0<&#47;FragileShippingPremium><br />
+          <!-- No fragile goods premium any more--><br />
+        <&#47;parameters><br />
+      <&#47;component></p>
+<p>      <component id="calc.total"<br />
+        service="IoC.Tutorials.Part13.AbstractCalculator, IoC.Tutorials.Part13"<br />
+           type="IoC.Tutorials.Part13.TotalCalculator, IoC.Tutorials.Part13" &#47;></p>
+<p>      <component id="costCalculator.default"<br />
+                 service="IoC.Tutorials.Part13.ICostCalculator, IoC.Tutorials.Part13"<br />
+                 type="IoC.Tutorials.Part13.DefaultCostCalculator, IoC.Tutorials.Part13"></p>
+<parameters>
+          <calculators><br />
+            <array><br />
+              <value>${calc.total}<&#47;value><br />
+              <value>${calc.shipping}<&#47;value><br />
+              <value>${calc.gst}<&#47;value><br />
+            <&#47;array><br />
+          <&#47;calculators><br />
+        <&#47;parameters><br />
+      <&#47;component></p>
+<p>    <&#47;components><br />
+  <&#47;castle></p>
+<p><&#47;configuration><br />
+<&#47;pre><br &#47;><br />
+Notice the default caculator now takes our 3 calculators as members of an array, and if we want to change the order in which they are evaluated, it's trivial to just move them around within the <array &#47;> node, or to comment certain ones out.<br &#47;><br />
+<br &#47;><br />
+And just to demonstrate that nothing has changed, the code for the program in part 13 is identical to part 12:<br &#47;><br />
+<br &#47;></p>
+<pre>
+private static void Main(string[] args)<br />
+{<br />
+    WindsorContainer container = new WindsorContainer(new XmlInterpreter());</p>
+<p>    Order order1 = new Order();<br />
+    order1.CountryCode = "NZ";<br />
+    order1.Items.Add(new OrderItem("water", 10, 1.0m, false));<br />
+    order1.Items.Add(new OrderItem("glass", 5, 20.0m, true));</p>
+<p>    Order order2 = new Order();<br />
+    order2.CountryCode = "US";<br />
+    order2.Items.Add(new OrderItem("sand", 50, 0.2m, false));</p>
+<p>    ICostCalculator costCalculator = container.Resolve<ICostCalculator>();<br />
+    Console.WriteLine("Cost to deliver Order 1: {0}", costCalculator.CalculateTotal(order1));<br />
+    Console.WriteLine("Cost to deliver Order 2: {0}", costCalculator.CalculateTotal(order2));</p>
+<p>    Console.Read();<br />
+}<br />
+<&#47;pre><br &#47;><br />
+And the results are the same too:<br &#47;><br />
+<br &#47;><br />
+<b>Cost to deliver Order 1: 192.0000<br &#47;><br />
+Cost to deliver Order 2: 260.0<&#47;b><br &#47;><br />
+<br &#47;><br />
+Beautiful :)<br &#47;><br />
+<br &#47;><br />
+The next part will have a quick look at the "Startable" facility, enjoy.</p>

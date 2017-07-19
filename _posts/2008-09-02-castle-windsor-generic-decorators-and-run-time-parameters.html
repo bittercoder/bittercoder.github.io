@@ -1,0 +1,251 @@
+---
+layout: post
+status: publish
+published: true
+title: 'Castle Windsor: Generic Decorators and run-time parameters'
+author:
+  display_name: bittercoder
+  login: admin
+  email: alex@devdefined.com
+  url: http://blog.bittercoder.com/
+author_login: admin
+author_email: alex@devdefined.com
+author_url: http://blog.bittercoder.com/
+wordpress_id: 63653
+wordpress_url: http://blog.bittercoder.com/?p=63653
+date: '2008-09-02 05:11:06 +0000'
+date_gmt: '2008-09-02 05:11:06 +0000'
+categories:
+- ".Net"
+tags:
+- castle windsor
+- IoC
+comments: []
+---
+<p>So I received a question recently via email from someone following the container tutorials, which read like so:</p>
+<blockquote><p><strong>Read through you tutorials and great work!<br />
+<&#47;strong></p>
+<p><strong> Have a question for you though, that I can't seem to find an answer in google. On decorators. How do you provide state dependencies that are unknown at configuration time?<br />
+<&#47;strong></p>
+<p><strong>So I ask for an IRepository and I have configuration setup to wrap it in a IValidator and maybe an ISecurity. However, ISecurity has a dependency on a runtime determined role (say from multiple sources, possibly including a state value on IWidget) and the user id (for argument sake isn't available on the context).<br />
+<&#47;strong></p>
+<p><strong>I want to call T Get() on IRepository. How do you get it all setup?<br />
+<&#47;strong></p>
+<p><strong>Many Thanks! <&#47;strong><&#47;blockquote><br />
+As I see it there were two distinct questions asked:</p>
+<ul>
+<li>How to wire up generic decorator chains (though I suspect they already know how to do that).<&#47;li>
+<li>How to pass in parameters&#47;dependencies at run time.<&#47;li><br />
+<&#47;ul><br />
+So Let's look at doing these two things, I'm going to steer clear of xml configuration because that's so 2 years ago ;o)</p>
+<p>First off let's create the repository interface:</p>
+<div>
+<pre>
+public interface IRepository<T><br />
+  where T : class, new()<br />
+{<br />
+    T Get(int id);<br />
+}<br />
+<&#47;pre></p>
+<p><&#47;div><br />
+Then the root implementation (we can't keep chaining forever, at some point we have to hit an implementation which can actually return the results we want).</p>
+<div>
+<pre>
+public class StubRepository<T> : IRepository<T><br />
+  where T : class, new()<br />
+{<br />
+    public T Get(int id)<br />
+    {<br />
+        return new T();<br />
+    }<br />
+}<br />
+<&#47;pre><br />
+<&#47;div><br />
+And finally a decorator for "security"...</p>
+<div>
+<pre>
+public class SecurityDecorator<T> : IRepository<T><br />
+  where T : class, new()<br />
+{<br />
+    private readonly IRepository<T> _inner;</p>
+<p>    public SecurityDecorator(IRepository<T> inner)<br />
+    {<br />
+        _inner = inner;<br />
+    }</p>
+<p>    public T Get(int id)<br />
+    {<br />
+        return _inner.Get(id);<br />
+    }<br />
+}<br />
+<&#47;pre></p>
+<p><&#47;div><br />
+better have a widget too... for good measure:</p>
+<div>
+<pre>
+public class Widget<br />
+{</p>
+<p>}</p>
+<p><&#47;pre></p>
+<p><&#47;div><br />
+At this point we can write a test - I'm an <a href="http:&#47;&#47;blog.bittercoder.com&#47;ct.ashx?id=63653be2-d0d4-4a0b-b3e5-a1572aad5c8b&amp;url=http%3a%2f%2fwww.codeplex.com%2fxunit">xUnit<&#47;a> fanboy these days (typing less == good) so let's take a look:</p>
+<div>
+<pre>
+<p>public class ContainerTests<br />
+{<br />
+    private readonly IWindsorContainer container;</p>
+<p>    public ContainerTests()<br />
+    {<br />
+        container = new WindsorContainer();<br />
+        container.Register(Component.For(typeof (IRepository<>)).ImplementedBy(typeof (SecurityDecorator<>)));<br />
+        container.Register(Component.For(typeof (IRepository<>)).ImplementedBy(typeof (StubRepository<>)));<br />
+    }</p>
+<p>    [Fact]<br />
+    public void GetRepository_ForWidget_ReturnsSecurityDecoratorOfTypeWidget()<br />
+    {<br />
+        var widgetRepository = container.Resolve<IRepository<Widget>>();<br />
+        Assert.True(widgetRepository is SecurityDecorator<Widget>);<br />
+    }<br />
+}<br />
+<&#47;pre></p>
+<p><&#47;div></p>
+<p>Notice we register the components in top to bottom order i.e. decorators first, followed by the underlying implementation, for something as simple as this you don't really need to use the fluent interface for registering components - but I find it's good to be consistent.</p>
+<p>Now, the second question is about injecting "context" - this is really just another way of saying "some of my dependencies can't be known until just before I attempt to resolve the service" ... no problem... so let's make some modifications:</p>
+<p>First off I'm going to make a user...</p>
+<div>
+<pre>
+public interface IUser<br />
+{</p>
+<p>}<br />
+<&#47;pre></p>
+<p><&#47;div><br />
+Next thing I'm going to do is add a User property to my security context (ugh, this seems like a better job for some kind of "ICurrentUserHolder" service, but that's beside the point).</p>
+<div>
+<pre>
+public class SecurityDecorator<T> : IRepository<T><br />
+    where T : class, new()<br />
+{<br />
+    private readonly IRepository<T> _inner;</p>
+<p>    public SecurityDecorator(IRepository<T> inner)<br />
+    {<br />
+        _inner = inner;<br />
+    }</p>
+<p>    public T Get(int id)<br />
+    {<br />
+        return _inner.Get(id);<br />
+    }</p>
+<p>    public IUser User { get; set; } &#47;&#47; <-- the current user<br />
+}<br />
+<&#47;pre></p>
+<p><&#47;div><br />
+Now let's add another test to ensure everything is being injected properly...</p>
+<div>
+<pre>
+public class ContainerTests<br />
+{<br />
+    private readonly IWindsorContainer container;<br />
+    private readonly IUser user = MockRepository.GenerateStub<IUser>();</p>
+<p>    public ContainerTests()<br />
+    {<br />
+        container = new WindsorContainer();<br />
+        container.Register(Component.For(typeof (IRepository<>)).ImplementedBy(typeof (SecurityDecorator<>)));<br />
+        container.Register(Component.For(typeof (IRepository<>)).ImplementedBy(typeof (StubRepository<>)));<br />
+    }</p>
+<p>    [Fact]<br />
+    public void GetRepository_ForWidget_ReturnsSecurityDecoratorOfTypeWidget()<br />
+    {<br />
+        var widgetRepository = container.Resolve<IRepository<Widget>>();<br />
+        Assert.True(widgetRepository is SecurityDecorator<Widget>);<br />
+    }</p>
+<p>    [Fact]<br />
+    public void GetRepository_ForWidget_WhenSupplyingUserInjectsUserIntoSecurityRepository()<br />
+    {<br />
+        var securityDecoratorForWidget = (SecurityDecorator<Widget>) container.Resolve<IRepository<Widget>>(new {User = user});<br />
+        Assert.Same(user, securityDecoratorForWidget.User);<br />
+    }<br />
+}<br />
+<&#47;pre></p>
+<p><&#47;div><br />
+Notice the additional argument of an anonymous class being passed to Resolve, this allows us to provide additional parameter dependencies (in this case a stub user is being supplied).</p>
+<p>Finally what about passing in some roles... this is much of the same, but I'll include it for completeness... so we add a role interface:</p>
+<div>
+<pre>
+public interface IRole<br />
+{<br />
+    bool IsMember(IUser user);<br />
+}<br />
+<&#47;pre></p>
+<p><&#47;div><br />
+Then we'll add a collection of roles to the decorator and provide a rather primitive check against the roles when attempting to get a widget instance:</p>
+<div>
+<pre>
+public class SecurityDecorator<T> : IRepository<T><br />
+    where T : class, new()<br />
+{<br />
+    private readonly IRepository<T> _inner;</p>
+<p>    public SecurityDecorator(IRepository<T> inner)<br />
+    {<br />
+        _inner = inner;<br />
+    }</p>
+<p>    public T Get(int id)<br />
+    {<br />
+        CheckPermission();<br />
+        return _inner.Get(id);<br />
+    }</p>
+<p>    public IUser User { get; set; }</p>
+<p>    public IList<IRole> Roles { get; set; } &#47;&#47; <-- the roles to check</p>
+<p>    private void CheckPermission()<br />
+    {<br />
+        if (User == null || Roles == null) return;<br />
+        if (Roles.Any(role => !role.IsMember(User)))<br />
+        {<br />
+            throw new Exception("You do not have permission");<br />
+        }<br />
+    }<br />
+}<br />
+<&#47;pre></p>
+<p><&#47;div><br />
+And finally we update our test with checks for both passing and failing on the permissions check.</p>
+<div>
+<pre>
+public class ContainerTests<br />
+{<br />
+    private readonly IWindsorContainer container;<br />
+    private readonly IUser user = MockRepository.GenerateStub<IUser>();<br />
+    private readonly IRole failingRole = MockRepository.GenerateStub<IRole>();<br />
+    private readonly IRole passingRole = MockRepository.GenerateStub<IRole>();</p>
+<p>    public ContainerTests()<br />
+    {<br />
+        container = new WindsorContainer();<br />
+        container.Register(Component.For(typeof (IRepository<>)).ImplementedBy(typeof (SecurityDecorator<>)));<br />
+        container.Register(Component.For(typeof (IRepository<>)).ImplementedBy(typeof (StubRepository<>)));<br />
+        passingRole.Stub(stub => stub.IsMember(user)).Return(true);<br />
+    }</p>
+<p>    [Fact]<br />
+    public void GetRepository_ForWidget_ReturnsSecurityDecoratorOfTypeWidget()<br />
+    {<br />
+        var widgetRepository = container.Resolve<IRepository<Widget>>();<br />
+        Assert.True(widgetRepository is SecurityDecorator<Widget>);<br />
+    }</p>
+<p>    [Fact]<br />
+    public void GetRepository_ForWidget_WhenSupplyingUserInjectsUserIntoSecurityRepository()<br />
+    {<br />
+        var securityDecoratorForWidget = (SecurityDecorator<Widget>) container.Resolve<IRepository<Widget>>(new {User = user});<br />
+        Assert.Same(user, securityDecoratorForWidget.User);<br />
+    }</p>
+<p>    [Fact]<br />
+    public void Get_ForWidgetWhenUserMatchesAllRoles_ReturnsWidget()<br />
+    {<br />
+        var securityDecoratorForWidget = (SecurityDecorator<Widget>) container.Resolve<IRepository<Widget>>(new {User = user, Roles = new List<IRole> {passingRole}});<br />
+        Assert.NotNull(securityDecoratorForWidget.Get(1));<br />
+    }</p>
+<p>    [Fact]<br />
+    public void Get_ForWidgetWhenUserDoesNotMatchAllRoles_ThrowsException()<br />
+    {<br />
+        var securityDecoratorForWidget = (SecurityDecorator<Widget>) container.Resolve<IRepository<Widget>>(new {User = user, Roles = new List<IRole> {passingRole, failingRole}});<br />
+       var exception = Assert.Throws<Exception>(() => securityDecoratorForWidget.Get(1));<br />
+       Assert.Equal("You do not have permission", exception.Message);<br />
+    }<br />
+}<br />
+<&#47;pre><br />
+<&#47;div><br />
+And that's it... could not be simpler.</p>

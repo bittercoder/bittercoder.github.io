@@ -1,0 +1,41 @@
+---
+layout: post
+status: publish
+published: true
+title: Some notes on creating your own license keys
+author:
+  display_name: bittercoder
+  login: admin
+  email: alex@devdefined.com
+  url: http://blog.bittercoder.com/
+author_login: admin
+author_email: alex@devdefined.com
+author_url: http://blog.bittercoder.com/
+wordpress_id: 439
+wordpress_url: http://blog.bittercoder.com/?p=439
+date: '2007-03-28 11:23:15 +0000'
+date_gmt: '2007-03-28 11:23:15 +0000'
+categories:
+- ".Net"
+tags: []
+comments: []
+---
+<p>If you have to make your own license keys i.e.</p>
+<p>ABCDE-ABCDE-ABCDE-ABC1Z-A32DE</p>
+<p>Here's some thoughts&#47;ideas for things you can do to break up the&nbsp;key space a little so people can not easily brute-force your keys&nbsp;by fiddliing just a couple of numbers.</p>
+<ul>
+<li>Select a range of numbers and letters that can be directly&nbsp;mapped to 32 values (10 digits and 22 alpha maybe?).<&#47;li>
+<li>Know your maths.. creating helper classes for unpacking and&nbsp;packing bytes will help.<&#47;li>
+<li>In this example you could carry 125bits (15 bytes and just&nbsp;over a nibble ;o) ... or 13 bytes + CRC16 (or Maybe an&nbsp;Adler16).<&#47;li>
+<li>Use lookup tables to translate sequential values into&nbsp;pseudo-random values.<&#47;li>
+<li>Break any multi-byte values up into individual bytes, stuff&nbsp;em around your payload of bytes in non-sequential offsets.<&#47;li>
+<li>Calculate the CRC for your payload and include it as part of&nbsp;the key's data, verify it when you're decoding.<&#47;li>
+<li>You can use structs with a sequential layout and a packing of&nbsp;1 to define your structure...<&#47;li>
+<li>Use Marshal.Copy etc. methods to copy between the struct and&nbsp;a byte array.<&#47;li>
+<li>Remap individual bits in the overall payload.<&#47;li><br />
+<&#47;ul><br />
+The last one is something that works really well... it's hard<br />
+to avoid certain digits "sticking" when generating sequential keys<br />
+no matter what you do... but if you remap the individual bits of a<br />
+15 byte array (i.e. using a lookup table containing 120 indexes)<br />
+you end up with very unique looking keys that have no sequential&nbsp;behaviour to them (especially if you redistribute the bits of the&nbsp;CRC into all the bytes of the key, which in turn are repacked into&nbsp;5 bit letters).</p>

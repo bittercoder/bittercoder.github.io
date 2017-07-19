@@ -1,0 +1,37 @@
+---
+layout: post
+status: publish
+published: true
+title: Family.Show
+author:
+  display_name: bittercoder
+  login: admin
+  email: alex@devdefined.com
+  url: http://blog.bittercoder.com/
+author_login: admin
+author_email: alex@devdefined.com
+author_url: http://blog.bittercoder.com/
+wordpress_id: 49
+wordpress_url: http://blog.bittercoder.com/?p=49
+date: '2007-05-07 21:22:38 +0000'
+date_gmt: '2007-05-07 21:22:38 +0000'
+categories:
+- ".Net"
+tags:
+- WPF
+comments: []
+---
+<p>So I quite like <a href="http:&#47;&#47;www.vertigo.com&#47;familyshow.aspx">Family.Show<&#47;a> as an end to end solution of WPF goes... but I think what's been more fascinating is seeing how my (beautiful) Financee is finding it as a working product.</p>
+<p>So she's a big genealogy zealot - and for the first time when saying "hey have a look at this" for some random piece of tech I could see here interest was piqued, so we click-once'd it onto her machine and she's been playing around with it for the last day or so - having loaded around 300 people into it so far.</p>
+<p>First off the <strong>good<&#47;strong> - it's pretty, and very fluent - you can see immediately who's being edited, current vs. past relationships, dead vs. alive (hollow people are dead... ) And it performs nicely... 200+ vector "people" on screen and the machines not sweating a bit.</p>
+<p>Surprisingly it's also pretty quick for data entry, something I had my doubts about when first looking at the application vs. something a little more traditional - after about 5 minutes of experimentation she was an expert.</p>
+<p>Second the <strong>bugs<&#47;strong>... well the main one is that certain characters in a name like a double quote causes the "stories" data screen to crash upon saving...&nbsp; And every now and then it just flakes out completely... I might throw some logging into and see just what's going on, it doesn't even let you get a stack trace *erk*.</p>
+<p>Interaction - well here's where she's getting pissed with it and I'll probably need to enhance it a little - and it's all to do with relationships...&nbsp; there doesn't appear to be any way to establish a relationship between two people once their added to the tree... a pretty big oversight - they expect you to add all relationships by adding a brother&#47;mother&#47;father&#47;sister&#47;spouse&#47;child to the person currently being edited, but that means you cant actually implement something like:</p>
+<ul>
+<li>Joe marries Jane<&#47;li>
+<li>Bob marries Martha<&#47;li>
+<li>Jane &amp; Bob die<&#47;li>
+<li>Joe marries Martha<&#47;li><br />
+<&#47;ul><br />
+A big problem during times of war because it was not uncommon for widows to marry the brother of their dead husband.&nbsp; This seems like a big oversight (though it is just a tech demo).</p>
+<p>Interesting though, and this sample is definitely the best WPF app with source code I've had to play&#47;learn from... great stuff <a href="http:&#47;&#47;www.vertigo.com&#47;">Vertigo<&#47;a>.</p>

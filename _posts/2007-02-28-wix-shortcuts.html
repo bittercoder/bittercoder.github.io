@@ -1,0 +1,109 @@
+---
+layout: post
+status: publish
+published: true
+title: WiX shortcuts...
+author:
+  display_name: bittercoder
+  login: admin
+  email: alex@devdefined.com
+  url: http://blog.bittercoder.com/
+author_login: admin
+author_email: alex@devdefined.com
+author_url: http://blog.bittercoder.com/
+wordpress_id: 367
+wordpress_url: http://blog.bittercoder.com/?p=367
+date: '2007-02-28 04:35:54 +0000'
+date_gmt: '2007-02-28 04:35:54 +0000'
+categories:
+- ".Net"
+tags:
+- WiX
+comments:
+- id: 24
+  author: Rob Mensching
+  author_email: robmen@microsoft.com
+  author_url: http://robmensching.com/blog
+  date: '2007-04-27 09:59:21 +0000'
+  date_gmt: '2007-04-27 09:59:21 +0000'
+  content: Manual trackback <a href="http:&#47;&#47;robmensching.com&#47;blog&#47;archive&#47;2007&#47;04&#47;27&#47;How-to-create-an-uninstall-shortcut-and-pass-all-the.aspx"
+    rel="nofollow">How to create an uninstall shortcut (and pass all the ICE validation).<&#47;a>
+---
+<h2>(Long) Shortcuts<&#47;h2></p>
+<p>Shortcuts are a basic concept in installers... and doing them with WiX is easy... <span stylesrc="text-decoration: underline">once<&#47;span> you know how... I just spent the last 10 minutes trying to get an Icon assigned to an advertised shortcut, here's how you do it...<br &#47;><br />
+<br &#47;></p>
+<pre>
+<Component Id="StandAloneApplication" Guid="C8D5DB05-2D68-40e8-88D1-EF5BEA18DBE1"><br />
+  <File Id="SomeCompanySomeProductHostApp"<br />
+        Name="SomeCompany.SomeProduct.HostApp.exe"<br />
+        DiskId="1"<br />
+        Source="....buildSomeCompany.SomeProduct.HostApp.exe"<br />
+        Vital="yes"></p>
+<p>    <Shortcut Advertise="yes"<br />
+              Id="SomeCompanySomeProductHostAppShortcut"<br />
+              Directory="ProgramMenuDir"<br />
+              Name="My Product"<br />
+              WorkingDirectory="INSTALLDIR"<br />
+              Description="SomeProduct Application"<br />
+              Icon="HostAppShortcutIcon.exe"></p>
+<p>      <Icon Id="HostAppShortcutIcon.exe"<br />
+            SourceFile="....buildSomeCompany.SomeProduct.HostApp.exe" &#47;></p>
+<p>    <&#47;Shortcut><br />
+  <&#47;File><br />
+<&#47;Component><br />
+<&#47;pre><br &#47;><br />
+The oddity is the way the Icon must be named with an ".exe" extension for it to work....&nbsp; For non-advertised shortcuts you can get away with just leaving the icon out altogether.<br &#47;><br />
+<br &#47;><br />
+Now something else my client wanted that I had to wrestle with a bit... how to create an uninstall shortcut for your product in the program menu's directory... here's how I achieved it, by creating a shortcut to msiexec.exe - I'm damn sure there must be easier way though, this is very clunky, but at least it works for now - if anyone knows an easier way then drop me a comment...</p>
+<p>Personally I think uninstall links in the program menu are a waste of time... but in this case I wasn't the target audience I guess :P<br &#47;><br />
+<br &#47;><br />
+<b>Note:<&#47;b> The "$(var.PRODUCTGUID)" refers to a constant being passed to WiX from my continuous integration build (I have a custom msbuild task for generating a single unique productId guid per revision in SVN)...<br &#47;><br />
+<br &#47;><br />
+First off I define a couple of custom actions...<br &#47;><br />
+<br &#47;></p>
+<pre><CustomAction Id="SetUninstallArgs" Property="UNINSTALLARGS" Value="&#47;x $(var.PRODUCTGUID)" &#47;><br />
+<CustomAction Id="SetUninstallCmd" Property="UNINSTALLCMD" Value="MSIEXEC.EXE" &#47;><br />
+<&#47;pre></p>
+<p>
+  I then evaluate them as part of the "InstallExecuteSequence" ...   this doesn't actually have to be run before  "FindRelatedProducts"... you can evaluate them quite late in the installation process.<br &#47;><br />
+  <br &#47;><br />
+<&#47;p></p>
+<pre><InstallExecuteSequence>  <Custom Action="SetUninstallArgs" Before="FindRelatedProducts" &#47;><br />
+  <Custom Action="SetUninstallCmd" Before="FindRelatedProducts" &#47;><br />
+<&#47;pre><br />
+<br &#47;><br />
+And then we can create our shortcut...<br &#47;><br />
+<br &#47;></p>
+<pre>
+<Component Id="Uninstaller" Guid="0454D0FC-190C-42c9-9506-DBA17DECBCB2">    <RegistryKey Action="createAndRemoveOnUninstall" Root="HKCU" Key="SoftwareMyProductUninstaller"><br />
+    <RegistryValue Value="" Type="string" KeyPath="yes" &#47;><br />
+  <&#47;RegistryKey><br />
+  <Shortcut Id="InvokeRemove" Name="Uninstall" Target="[UNINSTALLCMD]" Arguments="[UNINSTALLARGS]" WorkingDirectory="SystemDir" Directory="ProgramMenuDir" Description="Uninstall" &#47;><br />
+<&#47;Component><br />
+<&#47;pre><br &#47;><br />
+You might be wondering why I place a dummy registry entry in there... well it's because otherwise you end up with an <a href="http:&#47;&#47;msdn.microsoft.com&#47;library&#47;en-us&#47;msi&#47;setup&#47;ice38.asp">ICE 38<&#47;a> error - which seems daft to me, but then I don't really know enough about the windows installer architecture to dispute ICE's errors ;o) (ICE stands for Internal Consistency Evaluator(s) - which is used to validate the installer produced by WiX - have a <a href="http:&#47;&#47;msdn2.microsoft.com&#47;en-us&#47;library&#47;aa369206.aspx">look here<&#47;a> for more info).<br &#47;><br />
+<br &#47;><br />
+At any rate... I like the way WiX works... I would never go back to a gui-based setup project tool again, they might be fine for small projects, but once your project grows it just starts to suck hard... why? well... 4 reasons off the top of my head:<br &#47;></p>
+<ul>
+<li>You can't diff between versions easily... just what did you coworker change in the setup last checkin?<br />
+  <&#47;li></p>
+<li>Lack of global search and replace...<br />
+  <&#47;li></p>
+<li>Generally a little more difficult to fit into CI builds.<br />
+  <&#47;li></p>
+<li>Some of the products require you to use regasm or CLR code to register assemblies for com interop.<br &#47;><br />
+  <&#47;li><br />
+<&#47;ul>I just wish there was a decent cookbook... WiX has been going for over 2 years now, and It still seems a little hard to find decent information, I mostly rely on the official stuff... and of course examining how some open source projects have build their installers.<br &#47;></p>
+<ul>
+<li>
+    <a href="http:&#47;&#47;sourceforge.net&#47;mailarchive&#47;forum.php?forum_id=39978">The wix user group<&#47;a> on sourceforge.<br />
+  <&#47;li></p>
+<li>
+    <a href="http:&#47;&#47;www.wixwiki.com&#47;">The wix wiki<&#47;a> - though it's a little light on content in places.<br &#47;><br />
+  <&#47;li></p>
+<li>
+    <a href="http:&#47;&#47;msdn2.microsoft.com&#47;en-us&#47;library&#47;aa372866.aspx">Windows installer reference<&#47;a> on MSDN.<br />
+  <&#47;li><br />
+<&#47;ul>I might post a little bit on upgrades next time, that's the other task that took me a little time to get sorted, might proove useful to someone starting out with WiX... who could say.<br &#47;><br />
+<br &#47;><br />
+BTW - I haven't forgotten about my LINQ series... It's just on the back burner at the moment.</p>

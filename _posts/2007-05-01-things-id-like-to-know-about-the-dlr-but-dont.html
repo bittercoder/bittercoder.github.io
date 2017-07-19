@@ -1,0 +1,72 @@
+---
+layout: post
+status: publish
+published: true
+title: Things I'd like to know about the DLR, but don't...
+author:
+  display_name: bittercoder
+  login: admin
+  email: alex@devdefined.com
+  url: http://blog.bittercoder.com/
+author_login: admin
+author_email: alex@devdefined.com
+author_url: http://blog.bittercoder.com/
+wordpress_id: 83489659
+wordpress_url: http://blog.bittercoder.com/?p=83489659
+date: '2007-05-01 20:46:06 +0000'
+date_gmt: '2007-05-01 20:46:06 +0000'
+categories:
+- ".Net"
+tags: []
+comments:
+- id: 98
+  author: Alex Henderson
+  author_email: bittercoder@gmail.com
+  author_url: http://blog.bittercoder.com/
+  date: '2007-05-01 23:28:11 +0000'
+  date_gmt: '2007-05-01 23:28:11 +0000'
+  content: |-
+    Thanks for the comments Dino :) you must be having a lot of fun at the moment!
+
+    Attributes are understandably tricky - I guess I'm just interested in the interoperability story in the short and long term... at this point we cant really write everything we currently do with say C# in a dynamic language like IronPython ... will the DLR move towards reducing the gap over time, so that existing technologies like WCF are easier to work with from dynamic languages, and how soon could this be expected?
+
+    Also with regards to things like Continuations (Which to be honest don't really matter to most of us morts :) - is there a time line for getting support in the CLR to nurture these kinds of dynamic language friendly features?
+
+    Getting the calling languages behavior makes sense... but I wonder if that might cause problems when interoperability (i.e. consuming a ruby library from python, where say a factory used to create the ruby object is actually changing the functions on a per-instance basis, but from python we end up falling through to a default missing method function).  Opposite might be true for say the way IronPython handles multiple inheritance vs another dynamic language like VBScript.
+
+    I'll keep any eye on Jim's blog... Are you going to start blogging again yourself Dino?
+---
+<p>Has anyone had a chance to really dig into the DLR??... I've<br />
+briefly browsed the source code in IronPython 2.0 for the<br />
+Microsoft.Scripting project, it looks promising... but I really<br />
+need to sit down and write myself a simple little DSL from<br />
+end-to-end to get a handle on it (when I get time, I'll be sure to<br />
+post a mini-series on it ;o)<br &#47;><br />
+<br &#47;><br />
+Things I have been wondering though are:<br &#47;></p>
+<ul>
+<li>Is it possible to decorate dynamic classes with attributes<br />
+  yet? (i.e. create say an WCF message class and decorate it with<br />
+  [DataMember] attributes dynamically) - no attribute support in<br />
+  IronPython 1.x was a problem for <a href="http:&#47;&#47;www.flanders.co.nz&#47;Blog&#47;2006&#47;11&#47;07&#47;BooIronpythonScriptaculousMSAjaxAndMe.aspx">Ivan<&#47;a> a while ago.<br &#47;><br />
+  <&#47;li></p>
+<li>Are continuations supported (and how) ?<br />
+  <&#47;li></p>
+<li>Just how well does the language mixing work... Can I grab an<br />
+  instance of an IronPython class and change just a single<br />
+  instances methods using features particular to (Iron)Ruby<br &#47;><br />
+  <&#47;li><br />
+<&#47;ul>I'd love to know a few things, but just don't have the time at<br />
+the moment to find out right now.<br &#47;><br />
+<br &#47;><br />
+Also I wonder if pushing IronPython &amp; IronRuby into the<br />
+mainstream is going to see a surge in interest for projects like<br />
+<a href="http:&#47;&#47;fepy.sourceforge.net&#47;">FePy<&#47;a> ?&nbsp; I still<br />
+feel the value proposition for a lot of the dynamic languages on<br />
+the CLR&#47;DLR is weakened by the fact that the BCL isn't as much fun<br />
+to use from a dynamic langauge as the native equivalents for the<br />
+ruby or python (or certainly makes it difficult to port python or<br />
+ruby knowledge of the managed equivalents) ... I'm sure I could<br />
+write a YAML parser in C# that would be "good" - but it's not going<br />
+to feel as nice to use as say Why's <a href="http:&#47;&#47;whytheluckystiff.net&#47;syck&#47;">Syck<&#47;a> parser which is built<br />
+with dynamic languages in mind.<br &#47;></p>

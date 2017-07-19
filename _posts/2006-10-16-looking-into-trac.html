@@ -1,0 +1,350 @@
+---
+layout: post
+status: publish
+published: true
+title: Looking into Trac
+author:
+  display_name: bittercoder
+  login: admin
+  email: alex@devdefined.com
+  url: http://blog.bittercoder.com/
+author_login: admin
+author_email: alex@devdefined.com
+author_url: http://blog.bittercoder.com/
+wordpress_id: 2346
+wordpress_url: http://blog.bittercoder.com/?p=2346
+date: '2006-10-16 08:37:48 +0000'
+date_gmt: '2006-10-16 08:37:48 +0000'
+categories:
+- ".Net"
+tags:
+- trac
+- xmlrpc
+comments: []
+---
+<h2>
+  Trac<br />
+<&#47;h2></p>
+<h2>
+  I know it's not .Net, but that's not always a bad thing...<br />
+<&#47;h2>Well I tend to keep my eye out for things which take my fancy, or more importantly, free things that take my fancy...<br &#47;><br />
+<br &#47;><br />
+<a href="http:&#47;&#47;trac.edgewall.org&#47;">Trac<&#47;a> is one of those things, a project management and bug database web app written in Python, written by <a href="http:&#47;&#47;www.edgewall.org&#47;">edgewall software<&#47;a>... it's actually pretty cool... for RoR enthusiasts they're probably aware of it's existence already (considering <a href="http:&#47;&#47;dev.rubyonrails.org&#47;">RoR use this<&#47;a> for manging their bugs and patches)<br &#47;><br />
+<br &#47;><br />
+First off, you can run it on windows...&nbsp; though a *nix is generally better, and it's not too hard to get going - took me about half an hour... second thing, it's a lot better once you install a few <a href="http:&#47;&#47;www.trac-hacks.org&#47;">hacks<&#47;a> especially:<br &#47;></p>
+<ul>
+<li>
+    <a href="http:&#47;&#47;trac.edgewall.org&#47;wiki&#47;WebAdmin">WebAdmin<&#47;a><br />
+  <&#47;li></p>
+<li>
+    <a href="http:&#47;&#47;www.trac-hacks.org&#47;wiki&#47;AccountManagerPlugin">AccountManagerPlugin<&#47;a><br />
+  <&#47;li></p>
+<li>
+    <a href="http:&#47;&#47;www.trac-hacks.org&#47;wiki&#47;XmlRpcPlugin">XmlRpcPlugin<&#47;a><br />
+  <&#47;li><br />
+<&#47;ul>Now, at this point what makes it good?<br &#47;></p>
+<ul>
+<li>SVN Integration<br />
+  <&#47;li></p>
+<li>Wiki Integration<br />
+  <&#47;li></p>
+<li>Extensibility and community support<br />
+  <&#47;li><br />
+<&#47;ul>Basically I can check in code with comments containing wiki markup and references to existing "tickets" logged in the system... The wiki integration incidentally is my primary motivation for looking so closely at using this for some of the projects I've been working on... I'm a liability to Seismic Technologies... documenting build processes etc. in a wiki are one way we can minimize that... We already have a customer-focused wiki, but it doesn't encourage maintenance on a day-to-day basis like this product does.<br &#47;><br />
+<br &#47;><br />
+secondary to that is the very good subversion integration, a must considering that's the only source control system I use.<br &#47;></p>
+<h2>
+  Creating tickets via XML-RPC in C#<br />
+<&#47;h2>Now the last hack I suggested exposes plenty of functionality in the system via XML RPC... at which point we can start logging bugs remotely, from C#... to do this we'll need a copy of the <a href="http:&#47;&#47;www.xml-rpc.net&#47;">xmlrpc.net library<&#47;a><br &#47;><br />
+<br &#47;><br />
+I'm not conducting a tutorial here ;o) but if Trac takes your fancy you might find this code handy... first off this is our interface for logging tickets in Trac - incidentally this is only a small subset of the funcionality exposed.<br &#47;><br />
+<br &#47;></p>
+<pre>
+[XmlRpcUrl("http:&#47;&#47;localhost&#47;trac&#47;login&#47;xmlrpc")]<br />
+public interface ITicket : IXmlRpcProxy<br />
+{<br />
+    [XmlRpcMethod("ticket.query")]<br />
+    int[] Query(string qstr);</p>
+<p>    [XmlRpcMethod("ticket.getRecentChanges")]<br />
+    int[] GetRecentChanges(DateTime since);</p>
+<p>    [XmlRpcMethod("ticket.getAvailableActions")]<br />
+    string[] GetAvailableActions(int id);</p>
+<p>    [XmlRpcMethod("ticket.getTicketFields")]<br />
+    TicketField[] GetTicketFields();</p>
+<p>    [XmlRpcMethod("ticket.create")]<br />
+    int Create(string summary, string description, XmlRpcStruct attributes);</p>
+<p>    [XmlRpcMethod("ticket.get")]<br />
+    object[] GetTicket(int id);</p>
+<p>    [XmlRpcMethod("ticket.delete")]<br />
+    void Delete(int id);</p>
+<p>    [XmlRpcMethod("ticket.update")]<br />
+    object[] Update(int id, string comment, XmlRpcStruct attributes);</p>
+<p>    [XmlRpcMethod("ticket.type.getAll")]<br />
+    string[] GetAllTypes();</p>
+<p>    [XmlRpcMethod("ticket.resolution.getAll")]<br />
+    string[] GetAllResolutions();</p>
+<p>    [XmlRpcMethod("ticket.priority.getAll")]<br />
+    string[] GetAllPriorities();</p>
+<p>    [XmlRpcMethod("ticket.component.getAll")]<br />
+    string[] GetAllComponents();</p>
+<p>    [XmlRpcMethod("ticket.version.getAll")]<br />
+    string[] GetAllVersions();</p>
+<p>    [XmlRpcMethod("ticket.severity.getAll")]<br />
+    string[] GetAllSeverities();</p>
+<p>    [XmlRpcMethod("ticket.milestone.getAll")]<br />
+    string[] GetAllMilestones();<br />
+}<br />
+<&#47;pre><br &#47;><br />
+Now, tickets have a bunch of attributes associated with them...<br &#47;><br />
+<br &#47;></p>
+<pre>
+public static class TicketAttributes<br />
+{<br />
+    public const string Cc = "cc";<br />
+    public const string Keywords = "keywords";<br />
+    public const string Status = "status";<br />
+    public const string Type = "type";<br />
+    public const string Owner = "owner";<br />
+    public const string Version = "version";<br />
+    public const string Resolution = "resolution";<br />
+    public const string Reporter = "reporter";<br />
+    public const string Milestone = "milestone";<br />
+    public const string Component = "component";<br />
+    public const string Summary = "summary";<br />
+    public const string Description = "description";<br />
+    public const string Priority = "priority";<br />
+}<br />
+<&#47;pre><br &#47;><br />
+And we can make ticket information easier to get a hold of with a simple class:<br &#47;><br />
+<br &#47;></p>
+<pre>
+&#47;&#47;&#47;<br />
+<summary>
+&#47;&#47;&#47; represents the information for a ticket<br />
+&#47;&#47;&#47; <&#47;summary><br />
+public class TicketInfo<br />
+{<br />
+    private int _ticketId;<br />
+    private DateTime _created;<br />
+    private DateTime _lastModified;<br />
+    private XmlRpcStruct _attributes;</p>
+<p>    public TicketInfo()<br />
+    {<br />
+    }</p>
+<p>    public TicketInfo(object[] values)<br />
+    {<br />
+        Update(values);<br />
+    }</p>
+<p>    internal void Update(object[] values)<br />
+    {<br />
+        if (values == null) throw new ArgumentNullException("values");<br />
+        if (values.Length != 4) throw new ArgumentException("values should have 4 elements");</p>
+<p>        _ticketId = (int)values[0];<br />
+        _created = DateHelper.ParseUnixTimestamp((int)values[1]);<br />
+        _lastModified = DateHelper.ParseUnixTimestamp((int)values[2]);<br />
+        _attributes = (XmlRpcStruct)values[3];<br />
+    }</p>
+<p>    &#47;&#47;&#47;<br />
+<summary>
+    &#47;&#47;&#47; The identifier for this ticket<br />
+    &#47;&#47;&#47; <&#47;summary><br />
+    public int TicketId<br />
+    {<br />
+        get { return _ticketId; }<br />
+        set { _ticketId = value; }<br />
+    }</p>
+<p>    &#47;&#47;&#47;<br />
+<summary>
+    &#47;&#47;&#47; date and time the ticket was created<br />
+    &#47;&#47;&#47; <&#47;summary><br />
+    public DateTime Created<br />
+    {<br />
+        get { return _created; }<br />
+        set { _created = value; }<br />
+    }</p>
+<p>    &#47;&#47;&#47;<br />
+<summary>
+    &#47;&#47;&#47; date and time the ticket was last modified<br />
+    &#47;&#47;&#47; <&#47;summary><br />
+    public DateTime LastModified<br />
+    {<br />
+        get { return _lastModified; }<br />
+        set { _lastModified = value; }<br />
+    }</p>
+<p>    &#47;&#47;&#47;<br />
+<summary>
+    &#47;&#47;&#47; The attributes for this ticket, this will include any additional fields<br />
+    &#47;&#47;&#47; that aren't defined explicitly as members of this class.<br />
+    &#47;&#47;&#47; <&#47;summary><br />
+    public XmlRpcStruct Attributes<br />
+    {<br />
+        get<br />
+        {<br />
+            if (_attributes == null) _attributes = new XmlRpcStruct();<br />
+            return _attributes;<br />
+        }<br />
+        set { _attributes = value; }<br />
+    }</p>
+<p>    public string Cc<br />
+    {<br />
+        get { return GetAttribute(TicketAttributes.Cc); }<br />
+        set { SetAttribute(TicketAttributes.Cc, value); }<br />
+    }</p>
+<p>    public string Keywords<br />
+    {<br />
+        get { return GetAttribute(TicketAttributes.Keywords); }<br />
+        set { SetAttribute(TicketAttributes.Keywords, value); }<br />
+    }</p>
+<p>    public string Status<br />
+    {<br />
+        get { return GetAttribute(TicketAttributes.Status); }<br />
+        set { SetAttribute(TicketAttributes.Status, value); }<br />
+    }</p>
+<p>    public string Type<br />
+    {<br />
+        get { return GetAttribute(TicketAttributes.Type); }<br />
+        set { SetAttribute(TicketAttributes.Type, value); }<br />
+    }</p>
+<p>    public string Owner<br />
+    {<br />
+        get { return GetAttribute(TicketAttributes.Owner); }<br />
+        set { SetAttribute(TicketAttributes.Owner, value); }<br />
+    }</p>
+<p>    public string Version<br />
+    {<br />
+        get { return GetAttribute(TicketAttributes.Version); }<br />
+        set { SetAttribute(TicketAttributes.Version, value); }<br />
+    }</p>
+<p>    public string Resolution<br />
+    {<br />
+        get { return GetAttribute(TicketAttributes.Resolution); }<br />
+        set { SetAttribute(TicketAttributes.Resolution, value); }<br />
+    }</p>
+<p>    public string Reporter<br />
+    {<br />
+        get { return GetAttribute(TicketAttributes.Reporter); }<br />
+        set { SetAttribute(TicketAttributes.Reporter, value); }<br />
+    }</p>
+<p>    public string Milestone<br />
+    {<br />
+        get { return GetAttribute(TicketAttributes.Milestone); }<br />
+        set { SetAttribute(TicketAttributes.Milestone, value); }<br />
+    }</p>
+<p>    public string Component<br />
+    {<br />
+        get { return GetAttribute(TicketAttributes.Component); }<br />
+        set { SetAttribute(TicketAttributes.Component, value); }<br />
+    }</p>
+<p>    public string Summary<br />
+    {<br />
+        get { return GetAttribute(TicketAttributes.Summary); }<br />
+        set { SetAttribute(TicketAttributes.Summary, value); }<br />
+    }</p>
+<p>    public string Description<br />
+    {<br />
+        get { return GetAttribute(TicketAttributes.Description); }<br />
+        set { SetAttribute(TicketAttributes.Description, value); }<br />
+    }</p>
+<p>    public string Priority<br />
+    {<br />
+        get { return GetAttribute(TicketAttributes.Priority); }<br />
+        set { SetAttribute(TicketAttributes.Priority, value); }<br />
+    }</p>
+<p>    #region Support methods</p>
+<p>    private string GetAttribute(string name)<br />
+    {<br />
+        if (Attributes.Contains(name))<br />
+        {<br />
+            return Convert.ToString(Attributes[name]);<br />
+        }<br />
+        return null;<br />
+    }</p>
+<p>    private void SetAttribute(string name, string value)<br />
+    {<br />
+        if (Attributes.Contains(name))<br />
+        {<br />
+            Attributes[name] = value;<br />
+        }<br />
+        else<br />
+        {<br />
+            Attributes.Add(name, value);<br />
+        }<br />
+    }</p>
+<p>    #endregion<br />
+}<br />
+<&#47;pre><br &#47;><br />
+And last of all we have a class for managing tickets.. by the way this isn't complete, I haven't finished writing it because this is just one of my back burner projects...<br &#47;><br />
+<br &#47;></p>
+<pre>
+public class TicketManager<br />
+{<br />
+    private ITicket _ticket;</p>
+<p>    public void Connect(string url, string userName, string password)<br />
+    {<br />
+        _ticket = XmlRpcProxyGen.Create<ITicket>();<br />
+        _ticket.Url = url;<br />
+        _ticket.PreAuthenticate = true;<br />
+        _ticket.Credentials = new NetworkCredential(userName, password);<br />
+    }</p>
+<p>    public string[] GetAvailableActions(int id)<br />
+    {<br />
+        return _ticket.GetAvailableActions(id);<br />
+    }</p>
+<p>    public string[] GetAvailableActions(TicketInfo ticket)<br />
+    {<br />
+        ValidateTicket(ticket);<br />
+        return _ticket.GetAvailableActions(ticket.TicketId);<br />
+    }</p>
+<p>    public int[] GetRecentChanges(DateTime since)<br />
+    {<br />
+        return _ticket.GetRecentChanges(since);<br />
+    }</p>
+<p>    public void DeleteTicket(int ticketId)<br />
+    {<br />
+        _ticket.Delete(ticketId);<br />
+    }</p>
+<p>    public void DeleteTicket(TicketInfo ticket)<br />
+    {<br />
+        ValidateTicket(ticket);<br />
+        DeleteTicket(ticket.TicketId);<br />
+    }</p>
+<p>    public void UpdateTicket(TicketInfo ticket, string comment)<br />
+    {<br />
+        ValidateTicket(ticket);<br />
+        object[] values = _ticket.Update(ticket.TicketId, comment, ticket.Attributes);<br />
+        ticket.Update(values);<br />
+    }</p>
+<p>    public void CreateTicket(TicketInfo ticket)<br />
+    {<br />
+        if (string.IsNullOrEmpty(ticket.Summary)) throw new ArgumentNullException("ticket.Summary");<br />
+        if (string.IsNullOrEmpty(ticket.Description)) throw new ArgumentNullException("ticket.Description");<br />
+        if (string.IsNullOrEmpty(ticket.Type)) throw new ArgumentNullException("ticket.Type");<br />
+        if (string.IsNullOrEmpty(ticket.Priority)) throw new ArgumentNullException("ticket.Priority");<br />
+        if (string.IsNullOrEmpty(ticket.Component)) throw new ArgumentNullException("ticket.Component");</p>
+<p>        XmlRpcStruct tempAttributes = new XmlRpcStruct();<br />
+        foreach (object key in ticket.Attributes.Keys)<br />
+        {<br />
+            if ((((string)key) != TicketAttributes.Description) &amp;&amp; (((string)key) != TicketAttributes.Summary))<br />
+            {<br />
+                tempAttributes.Add(key, ticket.Attributes[key]);<br />
+            }<br />
+        }</p>
+<p>        int id = _ticket.Create(ticket.Summary, ticket.Description, ticket.Attributes);<br />
+        ticket.TicketId = id;<br />
+    }</p>
+<p>    private void ValidateTicket(TicketInfo ticket)<br />
+    {<br />
+        if (ticket == null) throw new ArgumentNullException("ticket");<br />
+        if (ticket.TicketId <= 0) throw new ArgumentException("ticketId must be greater then 0");<br />
+    }<br />
+}<br />
+<&#47;pre><br &#47;><br />
+About the only trick here is that some of the date values get returned as unix time stamps so you need to convert them...<br &#47;><br />
+<br &#47;></p>
+<pre>
+public static DateTime ParseUnixTimestamp(double timestamp)<br />
+{<br />
+    return new DateTime(1970, 1, 1, 0, 0, 0, 0).AddSeconds(timestamp);<br />
+}<br />
+<&#47;pre><br &#47;><br />
+Because the Syzmk Rich Media Processor product I work on is a clearing house for simple messages among other things... It becomes a small jump from here (about 30 lines of C# code, 5 for a quick and dirty "IronPython" script) to start submitting tasks and bugs via email or mobile... who knows, it could be handy if you get a call while your out of the office and need to log a bug or task.<br &#47;></p>

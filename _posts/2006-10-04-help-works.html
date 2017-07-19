@@ -1,0 +1,124 @@
+---
+layout: post
+status: publish
+published: true
+title: help() works...
+author:
+  display_name: bittercoder
+  login: admin
+  email: alex@devdefined.com
+  url: http://blog.bittercoder.com/
+author_login: admin
+author_email: alex@devdefined.com
+author_url: http://blog.bittercoder.com/
+wordpress_id: 66
+wordpress_url: http://blog.bittercoder.com/?p=66
+date: '2006-10-04 00:20:53 +0000'
+date_gmt: '2006-10-04 00:20:53 +0000'
+categories:
+- ".Net"
+tags:
+- IronPython
+comments: []
+---
+<p>
+  Well, Seo Sanghyeon asked me a pretty reasonable question of the last entry<br &#47;><br />
+  <br &#47;><br />
+  <i>"Why don't you use <b>help()<&#47;b>, instead of printing Overloads?"<&#47;i><br &#47;><br />
+  <br &#47;><br />
+ Good question, I didn't realise that actually worked in IronPython for .Net types, I was very pleasantly surprised, I remember in the early betas i tried using help() on various managed types and it would just raise a NotImplementedException exception (or something like that, I forget now) - so what does that mean for my examples... well... let's take a system type like <b>Guid<&#47;b> and use help() on it.<br &#47;><br />
+  <br &#47;><br />
+  <b>IronPython 1.0.60816 on .NET 2.0.50727.42<br &#47;> Copyright (c) Microsoft Corporation. All rights reserved.<br &#47;><br />
+  >>> import System<br &#47;><br />
+  >>> from System import *<br &#47;><br />
+  >>> help(Guid)<br &#47;><br />
+  Help on Guid in module System in mscorlib, Version=2.0.0.0,<br />
+  Culture=neutral, PublicKeyToken=b77a5c561934e089<br &#47;><br />
+  <br &#47;><br />
+  &nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Guid(Array[Byte] b)<br &#47;><br />
+  &nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Guid(UInt32 a, UInt16 b,<br />
+  UInt16 c, Byte d, Byte e, Byte f, Byte g, Byteh, Byte i, Byte j,<br />
+  Byte k)<br &#47;><br />
+  &nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Guid(str g)<br &#47;><br />
+  &nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Guid(int a, Int16 b, Int16<br />
+  c, Array[Byte] d)<br &#47;><br />
+  &nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Guid(int a, Int16 b, Int16<br />
+  c, Byte d, Byte e, Byte f, Byte g, Byte h, Byte i, Byte j, Byte<br />
+  k)<br &#47;><br />
+  &nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Guid<br />
+  CreateInstance[Guid]()<br &#47;><br />
+  &nbsp;|<br &#47;><br />
+  &nbsp;|&nbsp; Data and other attributes defined here:<br &#47;><br />
+  &nbsp;|<br &#47;><br />
+  &nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; CompareTo(...)<br &#47;><br />
+  &nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+  int CompareTo(self, object value)<br &#47;><br />
+  &nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+  int CompareTo(self, Guid value)<br &#47;><br />
+  &nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Equals(...)<br &#47;><br />
+  &nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+  bool Equals(self, object o)<br &#47;><br />
+  &nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+  bool Equals(self, Guid g)<br &#47;><br />
+  &nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Finalize(...)<br &#47;><br />
+  &nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+  Finalize(self)<br &#47;><br />
+  &nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; GetHashCode(...)<br &#47;><br />
+  &nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+  int GetHashCode(self)<br &#47;><br />
+  &nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; GetType(...)<br &#47;><br />
+  &nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+  Type GetType(self)<br &#47;><br />
+  &nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; MemberwiseClone(...)<br &#47;><br />
+  &nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+  object MemberwiseClone(self)<br &#47;><br />
+  &nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; NewGuid(...)<br &#47;><br />
+  &nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+  Guid NewGuid()<br &#47;><br />
+  &nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ToByteArray(...)<br &#47;><br />
+  &nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+  Array[Byte] ToByteArray(self)<br &#47;><br />
+  &nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ToString(...)<br &#47;><br />
+  &nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+  str ToString(self)<br &#47;><br />
+  &nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+  str ToString(self, str format)<br &#47;><br />
+  &nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+  str ToString(self, str format, IFormatProvider provider)<br &#47;><br />
+  &nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; __eq__(...)<br &#47;><br />
+  &nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+  bool op_Equality(Guid a, Guid b)<br &#47;><br />
+  &nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; __init__(...)<br &#47;><br />
+  &nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+  x.__init__(...) initializes x; see x.__class__.__doc__ for<br />
+  signature<br &#47;><br />
+  &nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+  x.__init__(...) initializes x; see x.__class__.__doc__ for<br />
+  signature<br &#47;><br />
+  &nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; __ne__(...)<br &#47;><br />
+  &nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+  bool op_Inequality(Guid a, Guid b)<br &#47;><br />
+  &nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; __new__(...)<br &#47;><br />
+  &nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+  __new__(cls, Array[Byte] b)<br &#47;><br />
+  &nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+  __new__(cls, UInt32 a, UInt16 b, UInt16 c, Byte d, Byte e, Bytef,<br />
+  Byte g, Byte h, Byte i, Byte j, Byte k)<br &#47;><br />
+  &nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+  __new__(cls, str g)<br &#47;><br />
+  &nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+  __new__(cls, int a, Int16 b, Int16 c, Array[Byte] d)<br &#47;><br />
+  &nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+  __new__(cls, int a, Int16 b, Int16 c, Byte d, Byte e, Byte f,<br />
+  Byte g, Byte h, Byte i, Byte j, Byte k)<br &#47;><br />
+  &nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+  Guid CreateInstance[Guid]()<br &#47;><br />
+  &nbsp;|<br &#47;><br />
+  <br &#47;><br />
+  >>><br &#47;><br />
+  <br &#47;><&#47;b> Sweet, it works a treat - and will save a lot of digging time - though you might want to capture the results for big classes ;o)<br &#47;><br />
+  <br &#47;><br />
+  Thanks Seo!<br &#47;><br />
+  <br &#47;><br />
+  (btw, Seo is the man behind the Iron Python Community Edition &amp; FePy projects - which can be found on <a href="http:&#47;&#47;fepy.sourceforge.net&#47;">sourceforge<&#47;a>) and I would have to agree with this <a href="http:&#47;&#47;www.oreillynet.com&#47;windows&#47;blog&#47;2006&#47;09&#47;seo_sanghyeonipce_ironpython_c.html">article<&#47;a> that he does seem almost OmniPresent in the IronPython community...<br &#47;><br />
+<&#47;p></p>

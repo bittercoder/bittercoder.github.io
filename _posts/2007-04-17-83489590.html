@@ -1,0 +1,72 @@
+---
+layout: post
+status: publish
+published: true
+title: Part 5 - Configuration parameters
+author:
+  display_name: bittercoder
+  login: admin
+  email: alex@devdefined.com
+  url: http://blog.bittercoder.com/
+author_login: admin
+author_email: alex@devdefined.com
+author_url: http://blog.bittercoder.com/
+wordpress_id: 83489590
+wordpress_url: http://blog.bittercoder.com/?p=83489590
+date: '2007-04-17 09:54:52 +0000'
+date_gmt: '2007-04-17 09:54:52 +0000'
+categories:
+- ".Net"
+tags:
+- castle windsor
+- container tutorials
+- IoC
+comments: []
+---
+<p><img src="http:&#47;&#47;blog.bittercoder.com&#47;images&#47;ioc_tutorial_titles&#47;5_config_parameters.png" alt="5_config_parameters.png" width="270" height="189" border="0" &#47;><br />
+So in this part we're going to look at configuration parameters - parameters let you consolidate or seperate individual configuration parameters away from the components themselves, in this case we are going to create 2 config files, one for parameters to use in the live system, and the other for parameters in the debug system.</p>
+<p>The advantage with this approach is that you don't have to duplicate the component registrations, you can leave those in one place (for the example, we just put them in the app.config)... so lets start by looking at our two sets of property configurations...</p>
+<ul>
+<li>properties-debug.config<&#47;li>
+<li>properties-live.config<&#47;li><br />
+<&#47;ul><br />
+<span style="text-decoration: underline;">properties-debug.config<&#47;span></p>
+<pre>
+<configuration><br />
+&nbsp;
+<properties>
+&nbsp; &nbsp; <configName>Debug<&#47;configName><br />
+&nbsp; <&#47;properties><br />
+<&#47;configuration><br />
+<&#47;pre></p>
+<p><span style="text-decoration: underline;">properties-live.config<&#47;span></p>
+<pre>
+<configuration></p>
+<properties>
+    <configName>Live<&#47;configName><br />
+  <&#47;properties><br />
+<&#47;configuration><br />
+<&#47;pre></p>
+<p>And now the app.config...</p>
+<pre>
+<configuration><br />
+  <configSections></p>
+<section name="castle"<br />
+        type="Castle.Windsor.Configuration.AppDomain.CastleSectionHandler, Castle.Windsor" &#47;><br />
+  <&#47;configSections><br />
+  <castle><br />
+    <components><br />
+      <include uri="file:&#47;&#47;properties-debug.config" &#47;><br />
+      <!--<include uri="file:&#47;&#47;properties-live.config" &#47;>--><br />
+      <component id="whatConfig.service" type="IoC.Tutorials.Part5.WhatConfigurationService, IoC.Tutorials.Part5"></p>
+<parameters>
+          <Configuration>#{configName}<&#47;Configuration><br />
+        <&#47;parameters><br />
+      <&#47;component><br />
+    <&#47;components><br />
+  <&#47;castle><br />
+<&#47;configuration><br />
+<&#47;pre></p>
+<p>Notice how the components configuration value has a hash (#) and some braces surrounding the word "configName" - that causes castle to look up the value of the property by the same name (which we declared in the property config file).</p>
+<p>The application code is the same as part 4.</p>
+<p>A common approach when working with developers who may need different configurations is to a file called say <span style="text-decoration: underline;">properties.config<&#47;span> that contains all the configuration values that need to change between machines, and to <span style="text-decoration: underline;">not<&#47;span> check that into source control... Be sure to also keep a "master" copy of the properties, say "master-properties.config" which provides a template for developers to create their own configuration (it's not a bad place to stick the instructions for doing this as well).</p>

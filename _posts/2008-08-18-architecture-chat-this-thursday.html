@@ -1,0 +1,56 @@
+---
+layout: post
+status: publish
+published: true
+title: Architecture Chat this Thursday
+author:
+  display_name: bittercoder
+  login: admin
+  email: alex@devdefined.com
+  url: http://blog.bittercoder.com/
+author_login: admin
+author_email: alex@devdefined.com
+author_url: http://blog.bittercoder.com/
+wordpress_id: 83488720
+wordpress_url: http://blog.bittercoder.com/?p=83488720
+date: '2008-08-18 10:47:10 +0000'
+date_gmt: '2008-08-18 10:47:10 +0000'
+categories:
+- Architecture Chat
+tags: []
+comments:
+- id: 75
+  author: Eric Davis
+  author_email: edavis@littlestreamsoftware.com
+  author_url: http://theadmin.org
+  date: '2008-09-15 23:00:36 +0000'
+  date_gmt: '2008-09-15 23:00:36 +0000'
+  content: |-
+    I think a screen scraper is overkill.  You can easily use the Rails console runner and some Rake tasks to do the heavy lifting:
+
+    (trying blockquote for code since I don't see pre support)
+    <blockquote>
+    existing_issue = Issue.find_by_subject(incoming_exception.summary)
+    if existing_issue
+      # Do nothing, issue already exists.  Or maybe increment something to track how often the issue occurs
+    else
+      # Create a new issue from the incoming exception
+      issue = Issue.create({ :subject => incoming_exception.summary, :description => incoming_exception.body...})
+    end
+    <&#47;blockquote>
+---
+<p>Hi all, there's an Architecture chat this Thursday - 21st August @&nbsp;11:30am onwards.</p>
+<p>Some things that I've caught my eye since last time:</p>
+<ul>
+<li><a href="http:&#47;&#47;msdn.microsoft.com&#47;en-us&#47;vstudio&#47;products&#47;cc533447.aspx">.Net 3.5 SP1 and VS2008 RTM are here<&#47;a><&#47;li>
+<li>VS2K8SP1 and SQL2K8 installs are a big mixed bag, some people&nbsp;no problem, other tearing hair out!<&#47;li>
+<li>And so are the war stories such as <a href="http:&#47;&#47;feeds.feedburner.com&#47;%7Er&#47;AyendeRahien&#47;%7E3&#47;365603718&#47;Waiting-for-the-Service-Pack-I-dont-think-so.aspx">regressions<&#47;a> and <a href="http:&#47;&#47;blog.domaindotnet.com&#47;2008&#47;08&#47;11&#47;undocumented-linq-net-35-sp1-gold-forgot-to-mention-these-critical-changes-that-might-break-your-code&#47;">critical changes<&#47;a> - doh!<&#47;li>
+<li>Visibility and trouble with non-developers being unable to&nbsp;quantify the quality of developer outputs - sparked off by this&nbsp;<a href="http:&#47;&#47;devlicio.us&#47;blogs&#47;casey&#47;archive&#47;2008&#47;08&#47;18&#47;software-development-is-a-creative-skill-building-houses-is-a-technical-one.aspx">post by Casey<&#47;a>.<&#47;li>
+<li>Resharper 4.01 RC1 is out.<&#47;li>
+<li>ASP.NET MVC now and in the future (i.e. where it's going, and&nbsp;perhaps a discussion on future of monorail vs. MVC and Monorail&nbsp;2??).<&#47;li>
+<li>Security practices on MVC, WCF etc.<&#47;li>
+<li><a href="http:&#47;&#47;www.redmine.org&#47;%20">Redmine<&#47;a> - an interesting (and&nbsp;nicer) alternative to Trac - wonder if there's an easy&nbsp;transition path for existing Trac sites?<&#47;li><br />
+<&#47;ul><br />
+<strong>Edit<&#47;strong>: updated this list with some suggestions from&nbsp;others.</p>
+<p>If anyone has any topic suggestions - just make a post on this&nbsp;entry, or send me an email &#47; IM message.</p>
+<p>Details of previous posts and directions etc. can be found <a href="http:&#47;&#47;wiki.bittercoder.com&#47;SylviaParkArchitectureChats.ashx">here&nbsp;on the wiki<&#47;a>.</p>

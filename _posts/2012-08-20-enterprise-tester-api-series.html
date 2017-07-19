@@ -1,0 +1,64 @@
+---
+layout: post
+status: publish
+published: true
+title: Enterprise Tester API Series
+author:
+  display_name: bittercoder
+  login: admin
+  email: alex@devdefined.com
+  url: http://blog.bittercoder.com/
+author_login: admin
+author_email: alex@devdefined.com
+author_url: http://blog.bittercoder.com/
+wordpress_id: 83489862
+wordpress_url: http://blog.bittercoder.com/?p=83489862
+date: '2012-08-20 16:18:27 +0000'
+date_gmt: '2012-08-20 04:18:27 +0000'
+categories:
+- ".Net"
+tags: []
+comments:
+- id: 156
+  author: Enterprise Tester 4.3 | A Sneak Peek&#8230; | Catch Blogs
+  author_email: ''
+  author_url: http://blogs.catchlimited.com/2012/08/enterprise-tester-4-3-a-sneak-peak/
+  date: '2012-08-22 15:29:58 +0000'
+  date_gmt: '2012-08-22 03:29:58 +0000'
+  content: "[...]  [...]"
+- id: 157
+  author: Enterprise Tester 4.3 | You Asked For It! | Catch Blogs
+  author_email: ''
+  author_url: http://blogs.catchlimited.com/2012/08/enterprise-tester-4-3-you-asked-for-it/
+  date: '2012-08-22 16:28:49 +0000'
+  date_gmt: '2012-08-22 04:28:49 +0000'
+  content: "[...] our Lead Developer has put together an awesome blog series on his
+    personal blog. You can find it here.   This entry was posted in Enterprise Tester
+    and tagged agile, enterprise tester, sneak peak by [...]"
+---
+<h2>Introduction<&#47;h2></p>
+<blockquote class="twitter-tweet"><p>APIs are exciting. Not because of their tech per se but because they unlock the ability to innovate. It's all about enablement..<&#47;p>&mdash; Ben Kepes (@benkepes) <a href="https:&#47;&#47;twitter.com&#47;benkepes&#47;status&#47;236615926265544704" data-datetime="2012-08-18T00:10:07+00:00">August 18, 2012<&#47;a><&#47;blockquote><br />
+<script src="&#47;&#47;platform.twitter.com&#47;widgets.js" charset="utf-8"><&#47;script></p>
+<p>As I mentioned in my last post, part of the development for the latest version of Enterprise Tester has included a greatly expanded REST API.</p>
+<p>This REST API is implemented using <a href="http:&#47;&#47;www.asp.net&#47;web-api">ASP.Net WebAPI<&#47;a>.</p>
+<p>The technology Behind the API is not necessarily "exciting" (compared to what the API enables for customers and 3rd party developers) - but demonstrates taking a large and complex application and exposing much of the functionality through the API.</p>
+<p>There are plenty of examples of WebAPI usage out there on blogs, but not much information from people implementing larger API's end-to-end, or retro-fitting an API to an existing (brown-fields) application.  </p>
+<p>So I thought this was a good opportunity to dive a little deeper into the implementation of the API. </p>
+<p>I'm going to break this up into a few posts covering the various aspects of the API implementation:</p>
+<ol>
+<li><a href="&#47;?p=83489868">Links, absolute URI's and JSON rewriting.<&#47;a><&#47;li>
+<li><a href="&#47;?p=83489876">Expand" implementation and view model mapping.<&#47;a><&#47;li>
+<li><a href="&#47;?p=83489900">Generating API documentation.<&#47;a><&#47;li>
+<li><a href="&#47;?p=83489915">OData, TQL and Filtering.<&#47;a><&#47;li>
+<li><a href="&#47;?p=83489964">Authentication - Session, Basic and OAuth.<&#47;a><&#47;li>
+<li><a href="&#47;?p=83489922">Long running tasks.<&#47;a><&#47;li>
+<li><a href="&#47;?p=83489985">WebAPI Testing.<&#47;a><&#47;li>
+<li><a href="&#47;?p=83489992">Anatomy of an API plugin.<&#47;a><&#47;li>
+<li><a href="&#47;?p=83490005">Final Thoughts.<&#47;a><&#47;li><br />
+<&#47;ol></p>
+<p><a href="&#47;?p=83489868">Click here to take a look at part 1 - Links, absolute URL's and JSON rewriting<&#47;a> - where I cover the process we went through to generate our JSON responses including links and transforming relative URL to absolute URI's as part of the request.</p>
+<h2>Disclaimer<&#47;h2></p>
+<p>Though I work for Catch Software, I'm publishing this series on my personal blog - so any opinions expressed here are strictly my own and not those of Catch Limited New Zealand (and certainly are likely to fall out of date after publishing this series) - for the official word on Enterprise Tester, please instead check out the company blogs - <a href="http:&#47;&#47;blogs.catchsoftware.com">http:&#47;&#47;blogs.catchsoftware.com<&#47;a> or the website <a href="http:&#47;&#47;www.enterprisetester.com">http&#47;&#47;www.enterprisetester.com<&#47;a>.</p>
+<h2>Catch Software is hiring<&#47;h2></p>
+<p><a href="http:&#47;&#47;www.catchsoftware.com&#47;">Catch Software<&#47;a> is needing to expand the development team and are looking for a passionate senior developer, or highly motivated intermediate developer looking to move into a senior position.</p>
+<p>You would be working on the Enterprise Tester application (as well as other existing and new products Catch Software are developing) alongside myself and the rest of the great Catch Software team - <a href="http:&#47;&#47;bit.ly&#47;catchdeveloperjob">you can find more about the job offer here<&#47;a>.</p>

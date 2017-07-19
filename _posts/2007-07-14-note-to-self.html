@@ -1,0 +1,50 @@
+---
+layout: post
+status: publish
+published: true
+title: Note to self...
+author:
+  display_name: bittercoder
+  login: admin
+  email: alex@devdefined.com
+  url: http://blog.bittercoder.com/
+author_login: admin
+author_email: alex@devdefined.com
+author_url: http://blog.bittercoder.com/
+wordpress_id: 83488753
+wordpress_url: http://blog.bittercoder.com/?p=83488753
+date: '2007-07-14 01:13:35 +0000'
+date_gmt: '2007-07-14 01:13:35 +0000'
+categories:
+- ".Net"
+tags:
+- castle
+- monorail
+- rhino commons
+comments:
+- id: 35
+  author: Alex Henderson
+  author_email: bittercoder@gmail.com
+  author_url: http://blog.bittercoder.com/
+  date: '2007-07-27 12:58:48 +0000'
+  date_gmt: '2007-07-27 12:58:48 +0000'
+  content: |-
+    I doubt you would ever strike a problem in the NHibernate Trunk that would cause catastrophic failure for a production site, if the site has passed all the automated tests, and satisfied the test team enough to end up being cut to production then it's hardly going to be a source of problems, especially if you only use builds from the trunk that have passed all the tests (which is what I normally do with the Castle project (though I only care about tests in the core&#47;windsor and monorail... I don't use a lot of peripheral stuff).
+
+    Be careful when putting trust into stable builds, in a number of cases the trunk fixes bug's that are in the stable release but weren't identified or resolved in time - that's certainly the case with the Castle Project.
+---
+<p>Wasted 5 minutes figuring out what was going wrong, maybe this will save someone else the effort!</p>
+<p>When using <a href="http:&#47;&#47;www.ayende.com&#47;Blog&#47;category&#47;486.aspx">RhinoCommons<&#47;a> and&nbsp;<a href="http:&#47;&#47;www.castleproject.org&#47;">CastleProject<&#47;a> both from trunk there's a version conflict with <a href="http:&#47;&#47;www.nhibernate.org&#47;">NHibernate<&#47;a>.</p>
+<p>RhinoCommons has NHibernate Version 2.0.0.1001 (Including support for things like Multi criteria) ... and then the Castle Project is using NHibernate Version (1.2.0.4000) - this took me a little bit by surprise when I discovered that a monorail project I had was failing when attempting to databind properly when using the <a href="http:&#47;&#47;www.castleproject.org&#47;monorail&#47;documentation&#47;v1rc2&#47;integration&#47;ar.html">ARSmartDispatcherController<&#47;a>... because I wasn't checking the binding errors collection, this was just failing silently... so a save would just load&#47;save the existing record, without any binding.</p>
+<p>Quick fix is just to use a &nbsp;<a href="http:&#47;&#47;msdn2.microsoft.com&#47;en-us&#47;library&#47;2fc472t2%28VS.71%29.aspx">assembly binding redirect<&#47;a> in the web.config:</p>
+<pre>
+<runtime><br />
+    <assemblyBinding xmlns="urn:schemas-microsoft-com:asm.v1"> </p>
+<publisherPolicy apply="no"&#47;>
+        <dependentAssembly><br />
+          <assemblyIdentity name="NHibernate" publicKeyToken="aa95f207798dfdb4" culture="neutral" &#47;><br />
+          <bindingRedirect oldVersion="1.2.0.4000" newVersion="2.0.0.1001"&#47;><br />
+        <&#47;dependentAssembly><br />
+    <&#47;assemblyBinding><br />
+<&#47;runtime><br />
+<&#47;pre></p>

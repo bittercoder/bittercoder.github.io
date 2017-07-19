@@ -1,0 +1,56 @@
+---
+layout: post
+status: publish
+published: true
+title: SharePoint Peeves
+author:
+  display_name: bittercoder
+  login: admin
+  email: alex@devdefined.com
+  url: http://blog.bittercoder.com/
+author_login: admin
+author_email: alex@devdefined.com
+author_url: http://blog.bittercoder.com/
+wordpress_id: 51
+wordpress_url: http://blog.bittercoder.com/?p=51
+date: '2008-02-12 20:28:02 +0000'
+date_gmt: '2008-02-12 20:28:02 +0000'
+categories:
+- ".Net"
+tags:
+- SharePoint
+comments:
+- id: 50
+  author: Alex Henderson
+  author_email: bittercoder@gmail.com
+  author_url: http://blog.bittercoder.com/
+  date: '2008-02-15 00:28:31 +0000'
+  date_gmt: '2008-02-15 00:28:31 +0000'
+  content: "Hi Chris,\n\nNo I organise the Sylvia Park Architecture Chat (Geek Coffee
+    Group) which is Based in Auckland, New Zealand.   \n\nIt was originally started
+    by Alex James, which I think is what Alex James meant in his comment.. rather
+    then that I'm running the Sydney one!\n\nIf you're ever in Auckland on the right
+    day feel free to pop along, more details can found here:\n\nhttp:&#47;&#47;wiki.bittercoder.com&#47;SylviaParkArchitectureChats.ashx\n\nChez,\n\n
+    - Alex\n"
+---
+<p>I have to say SharePoint just continues to underwhelm me (as a&nbsp;developer, I don't mind the product itself I should probably make&nbsp;that clear)...</p>
+<p>A couple of quick examples:</p>
+<h3>Configuration over Convention<&#47;h3><br />
+Regional settings and dates are a prime example - for instance&nbsp;you get a <SharePoint:DateTimeControl &#47;> which brings with it&nbsp;a common look and feel for date pickers in SharePoint... and on the&nbsp;various pre-canned forms etc. everything appears to display with&nbsp;the current user&#47;sites regional settings.</p>
+<p>However whenever you use this control you end up resorting to code&nbsp;along the lines of:</p>
+<pre>SPRegionalSettings regionalSettings = SPContext.Current.Web.CurrentUser.RegionalSettings ?? SPContext.Current.Web.RegionalSettings; myDatePickerControl.LocaleId = (int)regionalSettings.LocaleId;<&#47;pre><br />
+Or extending your control yourself to do the same... why on earth&nbsp;would I not want the control to default to the current regional&nbsp;settings?</p>
+<p>Again the lack of convention rears it's ugly head when working with&nbsp;SharePoint's SPGridView - if it's going to a render a date, why&nbsp;doesn't it render it with the current user's Locale in mind (which&nbsp;I've talked about in this &nbsp;<a href="http:&#47;&#47;wiki.bittercoder.com&#47;DatesNotWorkingWithDSTInSPGridView.ashx">hack<&#47;a> last year) - shouldn't these controls be taking that&nbsp;burden of responsibility away from me?</p>
+<h3>Useless Extensions Points<&#47;h3><br />
+When something is extensible in SharePoint, then&nbsp;generally:</p>
+<ol>
+<li>It's not documented (except by the community)<&#47;li>
+<li>It doesn't really work for the most common scenario.<&#47;li><br />
+<&#47;ol><br />
+Take the &nbsp;<a href="http:&#47;&#47;msdn2.microsoft.com&#47;en-us&#47;library&#47;microsoft.sharepoint.webcontrols.spgridview.aspx">SPGridView<&#47;a> and &nbsp;<a href="http:&#47;&#47;msdn2.microsoft.com&#47;en-us&#47;library&#47;microsoft.sharepoint.webcontrols.spdatasource.aspx">SPDataSource<&#47;a> combo - with this you can setup a grid to feed<br />
+from a CAML query pretty easily ... and it's smart enough to add&nbsp;the required <OrderBy&#47;> to the underlying CAML query when you&nbsp;sort on a column... so far so good.</p>
+<p>But what if you want to sort on more then one column?</p>
+<p>Well, you could try specifying more then one column in the grid's&nbsp;SortExpression - but this causes the SPDataSource to spit the&nbsp;dummy... so obviously the first question is why doesn't that work,&nbsp;when it works for other data sources, and would have been trivial<br />
+to implement.</p>
+<p>But not all hope is lost after opening reflector and perusing the&nbsp;code (which thankfully wasn't obfuscated in this case, though quite&nbsp;a bit of it is) you see that in fact you can specify additional&nbsp;sort columns in the original query and the SPDataSource is smart&nbsp;enough to keep them and insert the new field references into the&nbsp;existing <OrderBy&#47;>... a handy way for extending your query&nbsp;to have a number of default sort columns.</p>
+<p>But there's a catch, it sticks the entries in the wrong position,&nbsp;so it will sort by the fixed columns first - rather then last -&nbsp;making it all but useless in most cases (users expect to click on a&nbsp;column and see the results sorted by the selected column first) ..&nbsp;And to be honest this still wouldn't worry me if I was given at&nbsp;least one virtual method to override allowing me to mutate the CAML&nbsp;query appropriately.</p>

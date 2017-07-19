@@ -1,0 +1,47 @@
+---
+layout: post
+status: publish
+published: true
+title: News...
+author:
+  display_name: bittercoder
+  login: admin
+  email: alex@devdefined.com
+  url: http://blog.bittercoder.com/
+author_login: admin
+author_email: alex@devdefined.com
+author_url: http://blog.bittercoder.com/
+wordpress_id: 83488780
+wordpress_url: http://blog.bittercoder.com/?p=83488780
+date: '2006-11-01 23:33:00 +0000'
+date_gmt: '2006-11-01 23:33:00 +0000'
+categories:
+- ".Net"
+tags:
+- base4
+- castle
+- IronPython
+- splicer
+comments:
+- id: 21
+  author: Alex Henderson
+  author_email: bittercoder@gmail.com
+  author_url: http://blog.bittercoder.com/
+  date: '2006-11-02 03:52:29 +0000'
+  date_gmt: '2006-11-02 03:52:29 +0000'
+  content: That's similar to how our Syzmk service works, we have a housing called
+    the "hub" where individual services are created (by firing up and app domain with
+    it's own container) - when we want to restart a service we dispose of the container
+    and app domain, and create a new container&#47;app domain to take over...
+---
+<h2>Castle goes RC2<&#47;h2><br />
+Well it's an exciting week for <a href="http:&#47;&#47;www.castleproject.org&#47;">Castle<&#47;a> users, <a href="http:&#47;&#47;hammett.castleproject.org&#47;?p=66">RC2<&#47;a> is out the door,&nbsp;and with it a new website look and feel with up-to-date content,&nbsp;and most interesting to me is the introduction of a new entity&nbsp;"<a href="http:&#47;&#47;hammett.castleproject.org&#47;?p=67">CastleStronghold<&#47;a>" a&nbsp;commercial venture, run by <a href="http:&#47;&#47;hammett.castleproject.org&#47;">Hammet<&#47;a> which offers&nbsp;professional support for developers and organisations&nbsp;implementing solutions in Castle, including guaranteed response&nbsp;times to inquiries and access&nbsp;to additional skilled&nbsp;development resources.</p>
+<p>Personally Castle Stronghold is <strong>great<&#47;strong> news, as a&nbsp;developer for a company which has been using the Castle IoC for&nbsp;over a year now it adds a certain weight to our decision to run&nbsp;with this technology, and I think it offers a clear indication of&nbsp;the longevity this technology and product has... In time as our&nbsp;customer base grows&nbsp;it certainly looks appealing to have&nbsp;guaranteed&nbsp;support backing us up - and also helps customers&nbsp;to understand&nbsp;it's not some half backed open source project&nbsp;that's just going to fizzle out one day...</p>
+<p>The RC2 release itself is exciting from a community point of&nbsp;view, it should be better then ever for people to pick up and&nbsp;play with this stuff&nbsp;- though we generally use interim&nbsp;snapshots of the trunk (ie. the last trunk release that didn't&nbsp;break our build...) so we've been exposed to most of the features&nbsp;for a while now, albeit without alot of the bug fixes ;o)</p>
+<h2>IronPython<&#47;h2><br />
+I've been a bit quiet on the IronPython front... which is mostly&nbsp;because I haven't had the time to play around with it much lately&nbsp;- however I'll try to finish off my look into IronPython&nbsp;as&nbsp;a&nbsp;scripting engine, and in particular the good and bad&nbsp;aspects of getting it to play with your .Net code... In the mean&nbsp;time a collection of useful IronPython links is slowly growing&nbsp;here: <a href="http:&#47;&#47;ironpython-urls.blogspot.com&#47;">http:&#47;&#47;ironpython-urls.blogspot.com&#47;<&#47;a></p>
+<h2>Base4.Net<&#47;h2><br />
+A week into using the Base4.Net's <a href="http:&#47;&#47;www.base4.net&#47;Blog.aspx?ID=165">latest release<&#47;a>, with&nbsp;compile-time query support, I'm loving it... it definitely gives&nbsp;a huge leap in productivity and expressability (if that's even a&nbsp;word ;o) - looking forward to seeing these features rounded out&nbsp;at some point (with support for scopes,&nbsp;projections&nbsp;and&nbsp;ordering) - <a href="http:&#47;&#47;www.base4.net&#47;Blog.aspx">Alex&nbsp;James<&#47;a> is talking about <a href="http:&#47;&#47;www.base4.net&#47;Blog.aspx?ID=172">migrations<&#47;a> (my&nbsp;"most-wanted" feature) and it's looking encouraging, it's where I&nbsp;feel the most pain at the moment as base4 isn't particularly&nbsp;friendly when you try to approach the problem of building your&nbsp;schema in a YAGNI fashion - there is quite a bit of&nbsp;pain&nbsp;involved in adding and removing properties from types during&nbsp;development as requirements are refined.</p>
+<p>The rub is that the current "on the table" solution will require&nbsp;restarting the base4 service to apply the migration... which at&nbsp;the moment means restarting the windows service with a different&nbsp;command line... or more likely, stopping the service, then&nbsp;starting the standalone server with the right command line&nbsp;arguments, waiting till it's done, stopping the standalone server&nbsp;and starting the service again...&nbsp; I was originally thinking&nbsp;of implementing these as a Nant or MSBuild task (much like RoR's&nbsp;migrations work with rake) but I think it might be a bit&nbsp;chunky... I need to think about it a bit more.</p>
+<h2>Splicer<&#47;h2><br />
+I haven't forgot about my little side project (<a href="http:&#47;&#47;www.codeplex.com&#47;Wiki&#47;View.aspx?ProjectName=splicer">Splicer<&#47;a>&nbsp;is a library I've written for "attempting" to eliminate the pain&nbsp;of using DirectShow.Net to encode audio and video)&nbsp;- and I&nbsp;do intend to keep updating and supporting it as-needed...&nbsp;next release should see WinForm samples for encoding audio and&nbsp;video added, and updated code examples... after that I might&nbsp;review the implementation a bit, to see how effects and&nbsp;transitions can be made easier to use via relative times - I'm&nbsp;interested in DSL's at the moment, so maybe I could create&nbsp;a&nbsp;DSL for video editing ;o)... if nothing else it would be&nbsp;amusing...&nbsp;I've yet to establish if&nbsp;<span style="text-decoration: underline;">anyone<&#47;span> actually uses the&nbsp;library yet (other than myself of course).</p>

@@ -1,0 +1,132 @@
+---
+layout: post
+status: publish
+published: true
+title: WebAPI Testing
+author:
+  display_name: bittercoder
+  login: admin
+  email: alex@devdefined.com
+  url: http://blog.bittercoder.com/
+author_login: admin
+author_email: alex@devdefined.com
+author_url: http://blog.bittercoder.com/
+wordpress_id: 83489985
+wordpress_url: http://blog.bittercoder.com/?p=83489985
+date: '2012-08-20 16:52:09 +0000'
+date_gmt: '2012-08-20 04:52:09 +0000'
+categories:
+- ".Net"
+tags: []
+comments: []
+---
+<h2>In the past...<&#47;h2></p>
+<p>Before WebAPI we were implementing API's using the Monorail MVC Framework (It was adopted in the application long before ASP.Net MVC had established a comparable set of features).</p>
+<p>Monorail is very test friendly, but generally speaking our test approach was one of:</p>
+<ul>
+<li>Constructing a controller by hand, or via some auto-registering IoC container<&#47;li>
+<li>Stub&#47;mock out the necessary mechanics of Monorail<&#47;li>
+<li>Invoke the action methods directly, then check the returned values + state of the controller<&#47;li><br />
+<&#47;ul></p>
+<p>It let's you focus on testing the controller in Isolation, but ignores all the mechanics such as routing, filters etc.</p>
+<h2>End to end testing<&#47;h2></p>
+<p>When moving to the WebAPI for the API implementation, we found it was in fact much easier to setup the entire pipeline (including all the DelegatingHandlers, routes etc.) and execute a request and get a response, here's the constructor for our base class for API tests:</p>
+<pre>
+Reset();</p>
+<p>InitializeEnvironmentForPluginInstallation();</p>
+<p>new RestAPIPluginInstaller().Install(helper);</p>
+<p>new CoreRestResourcesPluginInstaller().Install(helper);</p>
+<p>var host = IoC.Resolve<ApiHost>();</p>
+<p>jsonNetFormatter = host.JsonNetFormatter;</p>
+<p>server = new HttpServer(host.Configuration);</p>
+<p>client = new HttpClient(server);<br />
+<&#47;pre></p>
+<p>And here's how a simple test looks:</p>
+<pre>
+[Fact]<br />
+public void Post_for_existing_package_throws_forbidden()<br />
+{<br />
+    var model = new CreateOrUpdateScriptPackageModel<br />
+        {<br />
+            Id = new Guid("FBA8F2E7-43E8-417E-AF4E-ADA7A4CF7A9E"),<br />
+            Name = "My Package"<br />
+        };</p>
+<p>    HttpRequestMessage request = CreateRequest("api&#47;scriptpackages", "application&#47;json", HttpMethod.Post, model);</p>
+<p>    using (HttpResponseMessage response = client.SendAsync(request).Result)<br />
+    {<br />
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);<br />
+        Assert.Equal("POST can not be used for updates.", GetJsonMessage(response));<br />
+    }<br />
+}<br />
+<&#47;pre></p>
+<p>The <b>GetJsonMessage<&#47;b> method in this case just extracts the error information from the JSON response.</p>
+<p>For tests returning full responses we used <a href="http:&#47;&#47;approvaltests.sourceforge.net&#47;" target="_blank">ApprovalTests<&#47;a> with the DiffReporter - this proved incredibly productive.</p>
+<pre>
+[Fact]<br />
+[UseReporter(typeof (DiffReporter))]<br />
+public void Post_script_package_for_project()<br />
+{<br />
+    var project = new Project {Id = new Guid("59C1A577-2248-4F73-B55E-A778251E702B")};</p>
+<p>    UnitOfWork.CurrentSession.Stub(stub => stub.Get<Project>(project.Id)).Return(project);</p>
+<p>    authorizationService.Stub(stub => stub.HasOperations((TestScriptPackage) null, CoreOperations.Instance.TestManagement.ManageScripts)).IgnoreArguments().Return(true);</p>
+<p>    var model = new CreateOrUpdateScriptPackageModel<br />
+        {<br />
+            Name = "My Package",<br />
+            ProjectId = project.Id<br />
+        };</p>
+<p>    HttpRequestMessage request = CreateRequest("api&#47;scriptpackages", "application&#47;json", HttpMethod.Post, model);</p>
+<p>    using (HttpResponseMessage response = client.SendAsync(request).Result)<br />
+    {<br />
+        Assert.Equal(HttpStatusCode.Created, response.StatusCode);<br />
+        Assert.Equal("application&#47;json", response.Content.Headers.ContentType.MediaType);<br />
+        Approvals.Verify(response.Content.ReadAsStringAsync().Result);<br />
+    }<br />
+}<br />
+<&#47;pre></p>
+<p>If you have not used ApprovalTests before, the magic occurs here:</p>
+<p><code>Approvals.Verify(response.Content.ReadAsStringAsync().Result);<&#47;code></p>
+<p>This get's the content of the response (JSON) as a string and then checks to see if it matches our "golden master" - if it does not, you are shown a Merge UI with the results of the current test compared to the golden master:</p>
+<p><a href="http:&#47;&#47;blog.bittercoder.com&#47;wp-content&#47;uploads&#47;2012&#47;08&#47;DiffReporter.png" target="_blank"><img src="http:&#47;&#47;blog.bittercoder.com&#47;wp-content&#47;uploads&#47;2012&#47;08&#47;DiffReporter.png" alt="" title="DiffReporter" class="alignnone size-full wp-image-83489988" &#47;><&#47;a></p>
+<p>At this point you can:</p>
+<ul>
+<li>Accept all the changes.<&#47;li>
+<li>Fix what's broken and run the test again.<&#47;li><br />
+<&#47;ul></p>
+<p>For this to work well you need to render your JSON with identation enabled - and you need to ensure that however you serialization works, the order of the properties in the output is repeatable.</p>
+<p>The <a href="http:&#47;&#47;msdn.microsoft.com&#47;en-us&#47;library&#47;system.net.http.formatting.jsonmediatypeformatter(v=vs.108).aspx">JsonMediaTypeFormatter<&#47;a> that ships with WebAPI has a property called <a href="http:&#47;&#47;msdn.microsoft.com&#47;en-us&#47;library&#47;system.net.http.formatting.jsonmediatypeformatter.indent(v=vs.108).aspx">Indent<&#47;a> you can force to true for your testing in this case (we also have it wired up for debug builds).</p>
+<p>I think what's great about this approach is:</p>
+<ul>
+<li>It's really easy<&#47;li>
+<li>You catch errors you might miss if just checking parts of your response for consistency<&#47;li>
+<li>You are <u>reading your JSON output<&#47;u> constantly from your application - I find this process extremely helpful - a lot of issues that were not picked up during the initial implementation&#47;design were uncovered just by reviewing how we presented our resources in JSON<&#47;li>
+<li>Did I mention it's really easy?!<&#47;li><br />
+<&#47;ul></p>
+<h2>Authentication<&#47;h2></p>
+<p>The creation of a test request was handled by a few helper methods on the API tests base class.</p>
+<pre>
+protected HttpRequestMessage CreateRequest(string url, string mthv, HttpMethod method, User user = null)<br />
+{<br />
+    var request = new HttpRequestMessage();<br />
+    request.RequestUri = new Uri(_url + url);<br />
+    request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue(mthv));<br />
+    request.Method = method;<br />
+    request.Properties["user"] = (user ?? currentUser);</p>
+<p>    return request;<br />
+}</p>
+<p>protected HttpRequestMessage CreateRequest<T>(string url, string mthv, HttpMethod method, T content, MediaTypeFormatter formatter = null, User user = null) where T : class<br />
+{<br />
+    var request = new HttpRequestMessage();<br />
+    request.RequestUri = new Uri(_url + url);<br />
+    request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue(mthv));<br />
+    request.Method = method;<br />
+    request.Content = new ObjectContent<T>(content, (formatter ?? jsonNetFormatter));<br />
+    request.Properties["user"] = (user ?? currentUser);<br />
+    return request;<br />
+}<br />
+<&#47;pre></p>
+<p>Notice we inject the user in the request's Properties collection, this allowed us to bypass to need to setup basic auth etc. headers and handling the additional overhead of mocking out the authentication of a user.</p>
+<h2>Is that it?<&#47;h2></p>
+<p>Pretty much - we certainly had more traditional Unit tests for supporting parts of the API such as the help generation, view model mapping and filters&#47;delegating handlers - but they were very standard, the actual API testing was all done through the methods describe above...</p>
+<p>And I think that's great news! I've worked with other technologies in the past where you could dedicate a series of posts mocking out different aspects of the underlying framework mechanics - but in the case of the WebAPI there was no need, because it can be easily self-hosted without a whole lot of bother.</p>
+<h2>Next<&#47;h2></p>
+<p><a href="&#47;?p=83489992">Next in part 8 we take a look at the "anatomy of a plugin" - investigating how we implemented support for 3rd party developers to develop API controllers as part of a plugin for Enterprise Tester.<&#47;a></p>

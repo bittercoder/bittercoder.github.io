@@ -1,0 +1,132 @@
+---
+layout: post
+status: publish
+published: true
+title: Part 7 - Switching implementations
+author:
+  display_name: bittercoder
+  login: admin
+  email: alex@devdefined.com
+  url: http://blog.bittercoder.com/
+author_login: admin
+author_email: alex@devdefined.com
+author_url: http://blog.bittercoder.com/
+wordpress_id: 83488763
+wordpress_url: http://blog.bittercoder.com/?p=83488763
+date: '2007-04-17 11:34:46 +0000'
+date_gmt: '2007-04-17 11:34:46 +0000'
+categories:
+- ".Net"
+tags:
+- castle windsor
+- container tutorials
+- IoC
+comments: []
+---
+<p><img src="http:&#47;&#47;blog.bittercoder.com&#47;images&#47;ioc_tutorial_titles&#47;7_switching_implementations.png" &#47;><br &#47;><br />
+So this time we're going to look at how you can not only change configuration for a component at runtime, but actually change which component is doing the work for us... powerful stuff :)<br &#47;><br />
+<br &#47;><br />
+So the "trick" here is to abstract out what features we expect our component to support from it's implementation, and stuff those into an interface... so in this case I have an idea for a simple service which lets us get the "message of the day" - so lets look at my interface:<br &#47;><br />
+<br &#47;></p>
+<pre>
+public interface IMessageOfTheDay<br />
+{<br />
+    string GetMessageOfTheDay();<br />
+}<br />
+<&#47;pre><br &#47;><br />
+Now we have two implementations of this service, one that lets us have a static message set via configuration:<br &#47;><br />
+<br &#47;></p>
+<pre>
+public class StaticMessageOfTheDay : IMessageOfTheDay<br />
+{<br />
+    private string _message;</p>
+<p>    public string Message<br />
+    {<br />
+        set { _message = value; }<br />
+    }</p>
+<p>    public string GetMessageOfTheDay()<br />
+    {<br />
+        return _message;<br />
+    }<br />
+}<br />
+<&#47;pre><br &#47;><br />
+And another, which goes to <a href="http:&#47;&#47;en.wikiquote.org&#47;wiki&#47;Main_Page">wiki quotes<&#47;a> and grabs the quote of the day:<br &#47;><br />
+<br &#47;></p>
+<pre>
+public class WikiQuotesMessageOfTheDay : IMessageOfTheDay<br />
+{<br />
+    public string GetMessageOfTheDay()<br />
+    {<br />
+        WebClient client = new WebClient();<br />
+        string content = client.DownloadString("http:&#47;&#47;en.wikiquote.org&#47;wiki&#47;Main_Page");</p>
+<p>        string toFind = "
+<div style="background: #fff5f5">";<br />
+        int start = content.IndexOf(toFind) + toFind.Length;<br />
+        int length = content.IndexOf("<a", start) - start;</p>
+<p>        return content.Substring(start, length);<br />
+    }<br />
+}<br />
+<&#47;pre><br &#47;><br />
+so - our program is pretty simple:<br &#47;><br />
+<br &#47;></p>
+<pre>
+private static void Main(string[] args)<br />
+{<br />
+    WindsorContainer container = new WindsorContainer(new XmlInterpreter());</p>
+<p>    IMessageOfTheDay motd = container.Resolve<IMessageOfTheDay>();</p>
+<p>    Console.WriteLine("MOTD: {0}", motd.GetMessageOfTheDay());</p>
+<p>    Console.Read();<br />
+}<br />
+<&#47;pre></p>
+<p>
+  <br &#47;><br />
+  And so how do we swap between implementations, well we need to introduce an additional attribute to our components configuration called "service" where we specifiy what service our component implements... in this case it will be "IMessageOfTheDay" - so heres the configuration when using the Static MOTD class:<br &#47;><br />
+  <br &#47;><br />
+<&#47;p></p>
+<pre>
+<configuration></p>
+<p>  <configSections></p>
+<section name="castle"<br />
+        type="Castle.Windsor.Configuration.AppDomain.CastleSectionHandler, Castle.Windsor" &#47;><br />
+  <&#47;configSections></p>
+<p>  <castle><br />
+    <components><br />
+      <component id="motd.service"<br />
+                service="IoC.Tutorials.Part7.IMessageOfTheDay, IoC.Tutorials.Part7"<br />
+                type="IoC.Tutorials.Part7.StaticMessageOfTheDay, IoC.Tutorials.Part7"></p>
+<parameters>
+          <message>Welcome to my container tutorials<&#47;message><br />
+        <&#47;parameters><br />
+      <&#47;component><br />
+    <&#47;components><br />
+  <&#47;castle></p>
+<p><&#47;configuration><br />
+<&#47;pre><br &#47;><br />
+And running the program gives us:<br &#47;><br />
+<br &#47;><br />
+<b>MOTD: Welcome to my container tutorials<&#47;b><br &#47;><br />
+<br &#47;><br />
+But we can now swap to a different component with the same service at run-time, and get a different implementation... here's how that looks:<br &#47;><br />
+<br &#47;></p>
+<pre>
+<configuration></p>
+<p>  <configSections></p>
+<section name="castle"<br />
+        type="Castle.Windsor.Configuration.AppDomain.CastleSectionHandler, Castle.Windsor" &#47;><br />
+  <&#47;configSections></p>
+<p>  <castle></p>
+<p>    <components><br />
+      <component id="motd.service"<br />
+          service="IoC.Tutorials.Part7.IMessageOfTheDay, IoC.Tutorials.Part7"<br />
+          type="IoC.Tutorials.Part7.WikiQuotesMessageOfTheDay, IoC.Tutorials.Part7" &#47;><br />
+    <&#47;components><br />
+  <&#47;castle></p>
+<p><&#47;configuration><br />
+<&#47;pre><br &#47;><br />
+And now running the program gives us:<br &#47;><br />
+<br &#47;><br />
+<b>MOTD: Man is not an end but a beginning. We are at the beginning of the second week. We are children of the eighth day.<&#47;b><br &#47;><br />
+<br &#47;><br />
+A quote from <a href="http:&#47;&#47;en.wikiquote.org&#47;wiki&#47;Thornton_Wilder">Thorton Wilder<&#47;a> - exciting huh, this seperation between interface and implementation is what makes doing so many cool things with an Inversion of control container possible... soak up the idea.<br &#47;><br />
+<br &#47;><br />
+Next time we'll take a look at getting different implementations by using their "key" - have you been wondering what the "id" attribute is for in our component definitions?? Well wonder no more.</p>

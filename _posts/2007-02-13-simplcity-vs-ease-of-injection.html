@@ -1,0 +1,71 @@
+---
+layout: post
+status: publish
+published: true
+title: Simplcity vs Ease of Injection...
+author:
+  display_name: bittercoder
+  login: admin
+  email: alex@devdefined.com
+  url: http://blog.bittercoder.com/
+author_login: admin
+author_email: alex@devdefined.com
+author_url: http://blog.bittercoder.com/
+wordpress_id: 83488773
+wordpress_url: http://blog.bittercoder.com/?p=83488773
+date: '2007-02-13 00:53:57 +0000'
+date_gmt: '2007-02-13 00:53:57 +0000'
+categories:
+- ".Net"
+tags:
+- castle
+- rhinomocks
+comments: []
+---
+<p>Found myself writing a simple class for implanting "trial" logic&nbsp;for a client (as in you have 30 days left of your trial etc.) ...&nbsp;it relies on the current date and time, and so you can never really&nbsp;be assured your tests are robust unless you can control the current&nbsp;date &amp; time within the test fixture (in fact any time you find&nbsp;yourself writing DateTime.Now alarm bells should be going off...&nbsp;even worse is logic based on DateTime.Now where it's evaluated more&nbsp;the once for a single function).</p>
+<p>In the past I've generally Implemented something like an "IClock"&nbsp;interface, which would have a method like "DateTime&nbsp;GetCurrentTime()" or whatever seemed appropriate to the&nbsp;situation... but I decided to go with the lightweight solution of&nbsp;delegates instead in the morning, if only because I was being lazy&nbsp;I didn't see the need for creating an entire interface for such a&nbsp;trivial requirement... so we have:</p>
+<pre>
+private DateTime _trialExpirey;<br />
+private int _maxExecutions;<br />
+private TimeSpan _trialDuration;<br />
+private Func<DateTime> _nowFunction;</p>
+<p>public TrialUpdater(DateTime trialExpirey, int maxExecutions, TimeSpan trialDuration)<br />
+    : this(delegate { return DateTime.Now; }, trialExpirey, maxExecutions, trialDuration)<br />
+{<br />
+}</p>
+<p>public TrialUpdater(Func<DateTime> nowFunction, DateTime trialExpirey, int maxExecutions, TimeSpan trialDuration)<br />
+{<br />
+    if (nowFunction == null) throw new ArgumentNullException("nowFunction");</p>
+<p>    _nowFunction = nowFunction;<br />
+    _trialExpirey = trialExpirey;<br />
+    _maxExecutions = maxExecutions;<br />
+    _trialDuration = trialDuration;<br />
+}<br />
+<&#47;pre></p>
+<p>But I'm starting to wonder if this code doesn't smell a bit if I start using it other places... for instance:</p>
+<ul>
+<li>Could I supply an alternative delegate via the <a href="http:&#47;&#47;wiki.castleproject.org&#47;index.php&#47;Container">castle container<&#47;a>...?<&#47;li>
+<li>Could I mock out the nowFunction parameter easily using something like <a href="http:&#47;&#47;www.ayende.com&#47;projects&#47;rhino-mocks&#47;downloads.aspx">RhinoMocks<&#47;a> and still have it participate in constraints...?<&#47;li><br />
+<&#47;ul><br />
+I'm thinking in the case of mocking it out you would probably need to implement some interfaces which lines up with the generic delegates (Func<Ret,T1,T2...> and Proc<T1,T2...> etc.) - so I would end mocking out an IFuncEvaluator<Ret> interface (or in this case IFuncEvaluator<DateTime>) -which would implement a method "T Evaluate();"... and the pass an anonymous delegate which in turn invokes the mocked IFuncEvaluator<Ret>.</p>
+<p>Though maybe I've missed something and mocking out delegates is doable with the current RhinoMocks..?</p>
+<p>As for being able to inject a value for the nowFunction parameter, I'm thinking a nice solution would be to actually wire it up to a method on another service declaratively i.e.</p>
+<pre>
+<component id="trialUpdater" type="MyLib.TrialUpdater, MyLib" ></p>
+<parameters>
+    <nowFunction><br />
+      <method service="clockService" method="GetCurrentTime" &#47;><br />
+    <&#47;nowFunction><br />
+  <&#47;parameters><br />
+<&#47;component><br />
+<&#47;pre></p>
+<p>Which I believe should be doable using a facility and a type converter... but I'm sure the devil's in the detail :)</p>
+<p>At any rate, just a minor distraction, back to work.</p>
+<p>As an aside the clocks a pretty boring example, but there are times<br />
+when you want to manipulate the time for instance:</p>
+<ul>
+<li>If you want to manipulate the time (return dates as UTC instead of Local)<&#47;li>
+<li>Clamp the current Time so it's limited to a certain level of accuracy... perhaps you have an external expectation that all dates will be recorded at a 10ms level of accuracy (perhaps you want to align database timestamps with timestamps within your application).<&#47;li>
+<li>Perhaps your application uses the clock to work with snapshots of your domain model in the past.<&#47;li><br />
+<&#47;ul><br />
+How many people are actually using anonymous delegates and generic Func<T...> &#47; Proc<T...>'s in their day to day coding for tasks like this?</p>

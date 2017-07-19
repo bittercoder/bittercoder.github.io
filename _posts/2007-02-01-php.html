@@ -1,0 +1,82 @@
+---
+layout: post
+status: publish
+published: true
+title: PHP...
+author:
+  display_name: bittercoder
+  login: admin
+  email: alex@devdefined.com
+  url: http://blog.bittercoder.com/
+author_login: admin
+author_email: alex@devdefined.com
+author_url: http://blog.bittercoder.com/
+wordpress_id: 83488774
+wordpress_url: http://blog.bittercoder.com/?p=83488774
+date: '2007-02-01 10:16:48 +0000'
+date_gmt: '2007-02-01 10:16:48 +0000'
+categories:
+- Tools
+tags:
+- PHP
+comments: []
+---
+<h2>Background<&#47;h2><br &#47;><br />
+As a bit of background, for the last couple of months I've been doing some work for a personal client aside from the work for<br />
+<a href="http:&#47;&#47;www.syzmk.com&#47;">Seismic Technologies<&#47;a> which is on the back burner till we pick up some more investment interest (I'm still the lead dev though) - the project is an add-in for an existing product (COM interop) which be must be deeply-integrated, as well as being capable of being used in stand alone mode...<br &#47;><br />
+<br &#47;><br />
+It's a very advantageous project considering the time frame, but that's part of the fun :) Once the clients moved forward on some marketing I'll post a little more about some of the challenges I've faced along the way.<br &#47;><br />
+<br &#47;><br />
+At any rate - the project's stalled briefly while the clients doing a little business analysis to get the underlying methodology sorted - so they've asked me to switch across to building the license generation &#47; customer portal &#47; license purchasing module for their preexisting CMS system (<a href="http:&#47;&#47;www.cmsmadesimple.org&#47;">CMS made simple - PHP<&#47;a>) ... where are the ruby or Monorail CMS's to wean my clients onto?<br &#47;></p>
+<h2>  PHP... ack<&#47;h2>... So I haven't used PHP in anger for years and years, but the one advantage of dynamic languages is you can generally hit the ground running a lot quicker then their statically compiled competitors...&nbsp; maybe PHP even more so because it's focused on web development.<br &#47;><br />
+<br &#47;><br />
+So far the two things that have bugged&#47;puzzled me are:<br &#47;></p>
+<ul>
+<li>Classes don't call their base classes default constructor implicity - you have to do that yourself.&nbsp; This isn't all  bad, at least you can control when the default constructor is called.<br &#47;><br />
+  <&#47;li></p>
+<li>Methods are instance, static and pseudo-instance all in one...<br &#47;><br />
+  <&#47;li><br />
+<&#47;ul>I think the second one bugs me more because you end up with 2+ potential code paths that should be accounted for in testing, if your exposing an "api" for consumption - or more importantly you should throw an exception for the usages you don't wish to allow (I'm probably missing the "quick and dirty" point here of course ;o) - it's hard to fight years of&nbsp; <b>instance methods != static methods<&#47;b>...<br &#47;><br />
+<br &#47;><br />
+Maybe I'm just old fashioned and there's nothing wrong with this, I should have a flick through <a href="http:&#47;&#47;www.amazon.com&#47;Programming-Language-Pragmatics-Second-Michael&#47;dp&#47;0126339511"> Programming Language Pragmatics<&#47;a> again, there must be some other dynamic languages with similar behavior?<br &#47;><br />
+<br &#47;><br />
+At any rate, the example:<br &#47;><br />
+<br &#47;></p>
+<pre>
+<p>class A<br />
+{<br />
+   function foo()<br />
+   {<br />
+       if (isset($this)) {<br />
+           echo '$this is defined (';<br />
+           echo get_class($this);<br />
+           echo ")n";<br />
+       } else {<br />
+           echo "$this is not defined.n";<br />
+       }<br />
+   }<br />
+}</p>
+<p>class B<br />
+{<br />
+   function bar()<br />
+   {<br />
+       A::foo();<br />
+   }<br />
+}</p>
+<p>$a = new A();<br />
+$a->foo();<br />
+A::foo();<br />
+$b = new B();<br />
+$b->bar();<br />
+B::bar();</p>
+<p><&#47;pre></p>
+<p><br &#47;><br />
+And the output of that little example is shown below, notice how <b>A:foo()<&#47;b> knew it was being called from <b>class<br />
+B<&#47;b>...&nbsp; I wonder what <a href="http:&#47;&#47;www.codeplex.com&#47;Phalanger">phalanger<&#47;a> is doing under the hood to achieve the same thing in the CLR...<br &#47;><br />
+<br &#47;></p>
+<pre>
+<p>$this is defined (a)<br />
+$this is not defined.<br />
+$this is defined (b)<br />
+$this is not defined.</p>
+<p><&#47;pre></p>

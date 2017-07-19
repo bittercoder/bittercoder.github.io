@@ -1,0 +1,57 @@
+---
+layout: post
+status: publish
+published: true
+title: Choice is good - another OAuth library for .Net emerges
+author:
+  display_name: bittercoder
+  login: admin
+  email: alex@devdefined.com
+  url: http://blog.bittercoder.com/
+author_login: admin
+author_email: alex@devdefined.com
+author_url: http://blog.bittercoder.com/
+wordpress_id: 12836
+wordpress_url: http://blog.bittercoder.com/?p=12836
+date: '2008-09-08 10:11:11 +0000'
+date_gmt: '2008-09-08 10:11:11 +0000'
+categories:
+- ".Net"
+- OAuth
+tags:
+- DevDefined.OAuth
+comments:
+- id: 72
+  author: Alex Henderson
+  author_email: bittercoder@gmail.com
+  author_url: http://blog.bittercoder.com/
+  date: '2008-09-09 11:45:07 +0000'
+  date_gmt: '2008-09-09 11:45:07 +0000'
+  content: |-
+    Hi Bruce,
+
+    I'm a IoC evangelist from way back - so it was more an observation then a criticism that Windsor was being used to handle wiring up the various services - I'm certainly using my own library via a container, mostly to wire up the appropriate token&#47;user etc. repositories, and so I can apply cross cutting concerns for logging, instrumentation of OAuth requests etc.
+
+    I suspect seeing as both libraries were built with IoC in mind it probably wouldn't be too hard to build adapters to use services from one library in the other - certainly once abstractions exist to reduce the tight coupling with System.Web mechanics like HttpRequest - so that common points of difference like token and nonce validation schemes etc. could be used with either library.
+---
+<p>You may recall a few months back I released an &nbsp;<a href="http:&#47;&#47;blog.bittercoder.com&#47;PermaLink,guid,a7ec7a4d-1d33-418a-8649-21fe8aa420fe.aspx">OAuth library for .Net<&#47;a> (which can be found <a href="http:&#47;&#47;code.google.com&#47;p&#47;devdefined-tools&#47;wiki&#47;OAuth">here on&nbsp;google code<&#47;a>) - at the time of writing that library the only&nbsp;other OAuth "solution" for .Net developers was a C# file containing&nbsp;some simple helper functions, that didn't even produce valid&nbsp;results in many cases, and the rather basic implementation as part&nbsp;of the restful chess&#47;myspace example.</p>
+<p>Well the guys at <a href="http:&#47;&#47;www.madgex.com&#47;">Madgex<&#47;a> in the&nbsp;UK have now released their own OAuth.Net library.. for more details&nbsp;you can:</p>
+<ul>
+<li>Check out <a href="http:&#47;&#47;siliconbea.ch&#47;technology&#47;dot-net&#47;2008-09-05&#47;bringing-oauth-to-dot-net-developers&#47;">Bruce Boughton's post<&#47;a> on their initial release.<&#47;li>
+<li>Get some more details on the <a href="http:&#47;&#47;lab.madgex.com&#47;oauth-net&#47;">Madgex lab page<&#47;a> here.<&#47;li>
+<li>And of course <a href="http:&#47;&#47;code.google.com&#47;p&#47;oauth-dot-net&#47;">grab the code<&#47;a> from&nbsp;here.<&#47;li><br />
+<&#47;ul><br />
+As for differences between the two implementations... from a&nbsp;50K foot glance.</p>
+<ul>
+<li>There's a dependency on the Windsor container when using the&nbsp;Madgex library (if you want to use it's out the box&nbsp;implementation &#47; configuration examples etc.)<&#47;li>
+<li>The Madgex library includes a http module for making a&nbsp;provider implementation easier when building web apps.<&#47;li>
+<li>The madgex library appears to take a harder dependency on&nbsp;HttpRequest then the DevDefined library (but that's just a hunch,&nbsp;saw it in a few interface definitions, rather then some wrapper&nbsp;equivalent).<&#47;li>
+<li>The madgex library looks a little more polished (i.e. xml&nbsp;docs) and has a configuration section.<&#47;li>
+<li>The Madgex library features some niceities like Sliding&nbsp;window validation support (i.e. they only allow messages to be&nbsp;supplied where the timestamp falls within a certain time window&nbsp;of the server, and keep the list of previous nonces only for the<br />
+period of that window - flushing nonces that are not longer&nbsp;required via a background thread - saving on the volume of nonces&nbsp;to record i.e. for replay attacks).&nbsp; Of course it's an&nbsp;in-memory solution, so not suited to farms, but still cool.<&#47;li></p>
+<li>Slightly less fluent consumer implementation, I prefer my&nbsp;libraries consumer implementation, but of course that's just me&nbsp;:P<&#47;li>
+<li>Both libraries are under the MIT license.<&#47;li><br />
+<&#47;ul><br />
+All said and done it's a very sound effort, great work guys!</p>
+<p>And it's awesome to have some choice emerging in this space.</p>
+<p>&nbsp;</p>

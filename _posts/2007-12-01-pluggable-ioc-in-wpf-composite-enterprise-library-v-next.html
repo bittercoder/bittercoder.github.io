@@ -1,0 +1,112 @@
+---
+layout: post
+status: publish
+published: true
+title: Pluggable IoC in WPF Composite & Enterprise Library v.Next
+author:
+  display_name: bittercoder
+  login: admin
+  email: alex@devdefined.com
+  url: http://blog.bittercoder.com/
+author_login: admin
+author_email: alex@devdefined.com
+author_url: http://blog.bittercoder.com/
+wordpress_id: 83489704
+wordpress_url: http://blog.bittercoder.com/?p=83489704
+date: '2007-12-01 23:08:07 +0000'
+date_gmt: '2007-12-01 23:08:07 +0000'
+categories:
+- ".Net"
+tags: []
+comments:
+- id: 109
+  author: Jan Van Ryswyck
+  author_email: ''
+  author_url: http://vanryswyckjan.blogspot.com/
+  date: '2007-12-02 16:07:04 +0000'
+  date_gmt: '2007-12-02 16:07:04 +0000'
+  content: Why O Why - The Day after
+---
+<p>So a quick observation on the alt.net conference list:<br &#47;><br />
+<br &#47;><br />
+<span style="font-size: 11pt; color: rgb(31, 73, 125);">"You'll be<br />
+happy to know then that in the new WPF Composite work we are doing,<br />
+the DI&#47;IOC mechanism will be decoupled and pluggable. Actually the<br />
+next version of Entlib will be the same. There's a new Dependency<br />
+Injection block that will allow you to plug-in the container of<br />
+your choice."<br &#47;><br />
+<br &#47;><&#47;span>Which was <a href="http:&#47;&#47;tech.groups.yahoo.com&#47;group&#47;altnetconf&#47;message&#47;5215">posted<&#47;a><br />
+on the <a href="http:&#47;&#47;tech.groups.yahoo.com&#47;group&#47;altnetconf&#47;">alt.net conference<br />
+yahoo list<&#47;a> by by <a href="http:&#47;&#47;blogs.msdn.com&#47;gblock&#47;">Glen<br />
+Block<&#47;a> from Microsoft.<br &#47;><br />
+<br &#47;><br />
+I think this is very good news, at least for the WPF composite work<br />
+they're doing - it might make it a great deal more appealing to me<br />
+then the CAB was (I was never a big fan of the CAB because it<br />
+didn't integrate well with the other stacks of technologies that<br />
+made me productive).<br &#47;><br />
+<br &#47;><br />
+I'm fairly ambivalent about the Enterprise Libraries upcoming<br />
+pluggable IoC support however - surely the overlap between it and<br />
+the facilities and services already provided by the IoC container<br />
+you'd be plugging into would be great ... and IoC is only part of<br />
+that story... for a number of common services (i.e. logging,<br />
+transactions etc.) you're going to have create appropriate wrappers<br />
+and sandwich things into the containers "abstracted" view of the<br />
+world, or face tightly coupling your application to the Enterprise<br />
+Library, I'm not sure there is much of a value proposition there...<br />
+though I'm open to being educated if any P&amp;P Microsoft people<br />
+happen to read this.<br &#47;><br />
+<br &#47;><br />
+Interestingly enough <a href="http:&#47;&#47;vanryswyckjan.blogspot.com&#47;"><span class="post-author">Jan<br />
+Van Ryswyck<&#47;span><&#47;a> has picked up on this slip from Glen and<br />
+noted that it also implies Microsoft are writing yet another IoC<br />
+container that will probably ship with EntLib &amp; the WPF<br />
+composite work (in whatever shape it eventually takes) and they ask<br />
+the question "<a href="http:&#47;&#47;vanryswyckjan.blogspot.com&#47;2007&#47;12&#47;why-o-why.html">why oh<br />
+why!<&#47;a>" .<br &#47;><br />
+<br &#47;><br />
+Personally I think it makes good sense to provide an out of the box<br />
+IoC container, with it the product is far more accessible to new<br />
+developers and people reviewing the technology - especially when<br />
+you consider that:<br &#47;></p>
+<ul>
+<li>If support was added into say the Castle Windsor container,<br />
+  it wouldn't see an official release until RC4 was made public -<br />
+  and until then would be in a state of flux as part of the castle<br />
+  trunk.<br />
+  <&#47;li></p>
+<li>People would expect Microsoft to "suggest" an OSS container<br />
+  that works best with their offering - and playing favorites with<br />
+  the .Net OSS community could only do harm to the ecology I feel.<br />
+  <&#47;li></p>
+<li>Microsoft retain consistency with their existing approach of<br />
+  providing an entire stack of technologies for you to get the job<br />
+  done, if that's what your like&#47;want or are told you<br />
+  want.&nbsp;<br &#47;><br />
+  <&#47;li></p>
+<li>They can provide a set of consistent tutorials and training<br />
+  materials for developers to "get up to speed" with for the<br />
+  product, without having to provide umpteen alternative examples<br />
+  for different containers, or explain why the container<br />
+  terminology is slightly different to the product<br />
+  terminology.<br &#47;><br />
+  <&#47;li><br />
+<&#47;ul>So in short, I think it's a positive sign, not a negative one,<br />
+even if another container is introduced into the mix - I'll be<br />
+interested in seeing just how they do it (both the container, and<br />
+the extension points to allow for plugging in a different<br />
+container)... Though it could just be a hack using <a href="http:&#47;&#47;msdn2.microsoft.com&#47;en-us&#47;library&#47;system.iserviceprovider.aspx"><br />
+IServiceProvider<&#47;a>, I wonder if perhaps they may need to go a bit<br />
+further, so they can register services into the plugged in<br />
+container with the appropriate lifestyle and configuration<br />
+etc.<br &#47;><br />
+<br &#47;><br />
+<b>Edit:<&#47;b> I just noticed <a href="http:&#47;&#47;ayende.com&#47;Blog&#47;archive&#47;2007&#47;12&#47;01&#47;Strategy-Provisioning-for-Application-Management-b.aspx"><br />
+Ayende<&#47;a> posted about this as well...&nbsp; he seems pretty well<br />
+aligned with the "why oh why" viewpoint, perhaps I'm missing<br />
+something - but I just don't see it being all that practical in<br />
+some scenarios to provide a product that wont work without the<br />
+developer going through a separate selection process to pick an IoC<br />
+container, if they don't already use one from the OSS<br />
+community.<br &#47;></p>

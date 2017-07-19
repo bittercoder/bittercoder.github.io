@@ -1,0 +1,124 @@
+---
+layout: post
+status: publish
+published: true
+title: OAuth for Beginners
+author:
+  display_name: bittercoder
+  login: admin
+  email: alex@devdefined.com
+  url: http://blog.bittercoder.com/
+author_login: admin
+author_email: alex@devdefined.com
+author_url: http://blog.bittercoder.com/
+wordpress_id: 83488336
+wordpress_url: http://blog.bittercoder.com/?p=83488336
+date: '2008-06-10 21:26:02 +0000'
+date_gmt: '2008-06-10 21:26:02 +0000'
+categories:
+- OAuth
+tags: []
+comments:
+- id: 58
+  author: Alex Henderson
+  author_email: bittercoder@gmail.com
+  author_url: http://blog.bittercoder.com/
+  date: '2008-07-10 19:46:11 +0000'
+  date_gmt: '2008-07-10 19:46:11 +0000'
+  content: Glad it helped Pat :)
+---
+<h2>OAuth for Beginners<&#47;h2><br />
+For those unfamiliar with OAuth, here's a very short&nbsp;run-down... I'm skipping over some of the details but I think this&nbsp;should give you a taste for what it's all about - for a more well rounded introduction, check out this <a href="http:&#47;&#47;oauth.net&#47;documentation&#47;getting-started">article<&#47;a> on the&nbsp;<a href="http:&#47;&#47;oauth.net&#47;">OAuth.Net<&#47;a> website.</p>
+<h3>The participants<&#47;h3><br />
+Consumer - "weitu.googlepages.com" - that application that&nbsp;wants to see protected information the provider has for a&nbsp;user.<br />
+Provider - "google.com" - the keeper of a users protected&nbsp;information.<br />
+User - a user who stores protected information with the provider&nbsp;(say contacts in gmail)</p>
+<h3>The goal<&#47;h3><br />
+To allow the user to give a consumer access to their data on&nbsp;the provider without the user having to disclose their credentials&nbsp;(username &amp; password) and to allow for fine-grained control&nbsp;over access granted to an individual consumer - i.e. putting power&nbsp;in the hands of the user to revoke access when they want to, and&nbsp;having it only affect one consumer.</p>
+<p>A consumer needs to be known to a provider before they can request&nbsp;a token.</p>
+<h3>How it works<&#47;h3><br />
+(For this example we'll use google, for more info on the&nbsp;google implementation see this &nbsp;<a href="http:&#47;&#47;groups.google.com&#47;group&#47;oauth&#47;browse_thread&#47;thread&#47;75ee6d973930c791">thread<&#47;a>)</p>
+<p>The provider publishes 3 Urls for their service and documents them&nbsp;on their site somewhere:</p>
+<ul>
+<li>Request Token Url - <a href="https:&#47;&#47;www.google.com&#47;accounts&#47;OAuthGetRequestToken">https:&#47;&#47;www.google.com&#47;accounts&#47;OAuthGetRequestToken<&#47;a><&#47;li>
+<li>User Authorize Url -&nbsp;<a href="https:&#47;&#47;www.google.com&#47;accounts&#47;accounts&#47;OAuthAuthorizeToken">https:&#47;&#47;www.google.com&#47;accounts&#47;accounts&#47;OAuthAuthorizeToken<&#47;a><&#47;li>
+<li>Access Token Url - <a href="https:&#47;&#47;www.google.com&#47;accounts&#47;OAuthGetAccessToken">https:&#47;&#47;www.google.com&#47;accounts&#47;OAuthGetAccessToken<&#47;a><&#47;li><br />
+<&#47;ul><br />
+The consumer is known to google by it's consumer key (which in&nbsp;the case of a google api is normally a host address, like&nbsp;www.test.com) and this relationship is established in a proprietary&nbsp;manor (i.e. it's not covered by the OAuth spec).</p>
+<h3>Getting a Request Token<&#47;h3><br />
+The start the ball rolling the consumer makes a request to the&nbsp;Request Token Url, they get back some form-encoded parameters in&nbsp;the body of the response which contains the token&nbsp;information.</p>
+<p>As an example, here's an http request to get a new request&nbsp;token:</p>
+<div style="border-style: solid; border-width: 1px;">GET &#47;accounts&#47;OAuthGetRequestToken?<br />
+scope=http%3A%2F%2Fwww.google.com%2Fm8%2Ffeeds&amp;oauth_nonce=759437c3-3edf-4098-ac14-58d4f162b0e6<br />
+&amp;oauth_consumer_key=weitu.googlepages.com<br />
+&amp;oauth_signature_method=RSA-SHA1<br />
+&amp;oauth_timestamp=1213129078<br />
+&amp;oauth_version=1.0<br />
+&amp;oauth_token=</p>
+<p>&amp;oauth_signature=peUZigwq1BLs%2Bb721vcct2vzA3Odk1j...HTTP&#47;1.1</p>
+<p>Host: www.google.com<br />
+Connection: Keep-Alive</p>
+<p><&#47;div><br />
+And here's the response:</p>
+<div style="border-style: solid; border-width: 1px;">HTTP&#47;1.1 200 OK<br />
+Content-Type: text&#47;plain; charset=UTF-8<br />
+Date: Tue, 10 Jun 2008 20:18:01 GMT<br />
+Expires: Tue, 10 Jun 2008 20:18:01 GMT<br />
+Cache-Control: private, max-age=0<br />
+Content-Length: 51<br />
+Server: GFE&#47;1.3oauth_token=CMiJx-LdFxD56bOXAQ&amp;oauth_token_secret=<&#47;div><br />
+Notice the oauth_signature and other oauth_ etc. parameters - as&nbsp;part of the OAuth core specification it requires that requests be&nbsp;"signed" so that a provider can ensure they haven't been tampered&nbsp;with - this is one of the aspects my library will take care of for&nbsp;you (signing and verifying requests).</p>
+<h3>User Authorization<&#47;h3><br />
+At that point the consumer now needs to send the user off to&nbsp;the providers site - this involves using the second of the 3 urls,&nbsp;the User Authorize Url... we just append the scope (required by&nbsp;google, identifies the service you wish to access - not part of&nbsp;OAuth spec itself) and the request token (CMiJx-LdFxD56bOXAQ)</p>
+<p>Note that the User Authorize Url isn't signed like the other&nbsp;requests... this is because this step may be manual i.e. a user&nbsp;typing or copying a link into their browser or some hand held&nbsp;device.</p>
+<div style="border-style: solid; border-width: 1px;">GET &#47;accounts&#47;accounts&#47;OAuthAuthorizeToken?<br />
+scope=http:&#47;&#47;www.google.com&#47;m8&#47;feeds<br />
+&amp;oauth_token=CMiJx-LdFxD56bOXAQHTTP&#47;1.1<&#47;div><br />
+In this case, google takes us to a universal login page:</p>
+<p><img src="http:&#47;&#47;blog.bittercoder.com&#47;images&#47;google_login.jpg" alt="" width="681" height="258" border="1" &#47;></p>
+<p>Once authenticated it then takes us to a page where we can&nbsp;authorize the consumer to have access:</p>
+<p><img src="http:&#47;&#47;blog.bittercoder.com&#47;images&#47;google_authorize.JPG" alt="" &#47;></p>
+<p>By granting access at this point the consumer can then use the last&nbsp;of the 3 Urls, the Access Token Url, to exchange their request&nbsp;token for an access token. Upon granting access a few things should&nbsp;happen:</p>
+<ul>
+<li>An access token should be created.<&#47;li>
+<li>The access token should be related to the request token.<&#47;li>
+<li>The currently logged in user should be associated with the&nbsp;access token.<&#47;li><br />
+<&#47;ul><br />
+The last point is important - because you're passing tokens&nbsp;around, rather than account names, you need to have the provider&nbsp;implementation record the association between the access token and&nbsp;the user granting access - and it should be easy for your API&nbsp;implementation to fetch the associated user when a protected&nbsp;resource is accessed.</p>
+<h3>Exchanging Tokens<&#47;h3><br />
+Once the user has authorized the consumers access request, the&nbsp;consumer can then exchange their request token for an access token&nbsp;- generally a request token can only be used once - so if the&nbsp;request failed for some reason they would need to start the&nbsp;authorization process again from scratch.</p>
+<p>here's the http request for exchanging tokens:</p>
+<div style="border-style: solid; border-width: 1px;">GET &#47;accounts&#47;OAuthGetAccessToken?<br />
+scope=http%3A%2F%2Fwww.google.com%2Fm8%2Ffeeds<br />
+&amp;oauth_token=CMiJx-LdFxD56bOXAQ&amp;oauth_nonce=19fe6f62-8b2c-4a40-b055-210d279ba770<br />
+&amp;oauth_consumer_key=weitu.googlepages.com<br />
+&amp;oauth_signature_method=RSA-SHA1<br />
+&amp;oauth_timestamp=1213129477<br />
+&amp;oauth_version=1.0</p>
+<p>&amp;oauth_signature=hagokrS1W%2BcBXdRwTIlOd84PSO56OT...&nbsp;HTTP&#47;1.1 Host: www.google.com</p>
+<p><&#47;div><br />
+And the corresponding response from the google server:</p>
+<div style="border-style: solid; border-width: 1px;">HTTP&#47;1.1 200 OK<br />
+Content-Type: text&#47;plain; charset=UTF-8<br />
+Date: Tue, 10 Jun 2008 20:24:39 GMT<br />
+Expires: Tue, 10 Jun 2008 20:24:39 GMT<br />
+Cache-Control: private, max-age=0<br />
+Content-Length: 57<br />
+Server: GFE&#47;1.3oauth_token=CNO384n8BRD6pZTT_P____8B&amp;oauth_token_secret=<&#47;div><br />
+&nbsp;</p>
+<h3>Accessing a Protected Resource<&#47;h3><br />
+Now that the consumer has an access token they can then make&nbsp;requests for protected resources - they just need to use the access&nbsp;token, here's an example of doing just that:</p>
+<div style="border-style: solid; border-width: 1px;">GET &#47;m8&#47;feeds&#47;contacts&#47;default&#47;base?<br />
+scope=http%3A%2F%2Fwww.google.com%2Fm8%2Ffeeds<br />
+&amp;oauth_token=CNO384n8BRD6pZTT_P____8B&amp;oauth_nonce=3ae44855-9d27-4b80-8b4f-2f68d1531657<br />
+&amp;oauth_consumer_key=weitu.googlepages.com<br />
+&amp;oauth_signature_method=RSA-SHA1<br />
+&amp;oauth_timestamp=1213129479<br />
+&amp;oauth_version=1.0<br />
+&amp;oauth_signature=kTFRbcD1IKzjPADfgF%2B3...HTTP&#47;1.1 Host: www.google.com</p>
+<p><&#47;div><br />
+Obviously once the request has been validated (i.e. valid&nbsp;signature, valid token, valid timestamp range, nonce is unique&nbsp;etc.) the provider implementation needs to fetch the user&nbsp;associated with the access token, so it can then return the correct&nbsp;data back to the consumer - normally you would want to&nbsp;automatically associate the token's user with the current request &#47;&nbsp;controller &#47; channel so that OAuth is basically transparent (i.e.&nbsp;it's just like getting a request from a user who's authenticated&nbsp;normally).</p>
+<h3>Risks &amp; Issues<&#47;h3><br />
+One obvious risk is that of phishing... if the consumer sends&nbsp;you to a site that looks like googles authentication page, but&nbsp;isn't google then you're in trouble.&nbsp; Of course this kind of&nbsp;phishing is more a general problem, then something isolated to&nbsp;OAuth.</p>
+<p>Another potential risk are that some signature methods are&nbsp;risky&#47;flawed to the <span>consumer<&#47;span> due to implementation&nbsp;i.e. if you have a flickr uploader winforms application, and you<br />
+use RSA-SHA1, the uploader will need to ship with the x509&nbsp;certificate (including the private key) in their application ...&nbsp;this basically invalidates the strength of that certificate,&nbsp;because anyone could extract and use the private key themselves (so&nbsp;it's as bad as a plain text signature) - on the flip side for a&nbsp;website RSA-SHA1 is very strong because the private key is kept&nbsp;private.</p>

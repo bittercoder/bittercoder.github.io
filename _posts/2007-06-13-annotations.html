@@ -1,0 +1,97 @@
+---
+layout: post
+status: publish
+published: true
+title: Annotations...
+author:
+  display_name: bittercoder
+  login: admin
+  email: alex@devdefined.com
+  url: http://blog.bittercoder.com/
+author_login: admin
+author_email: alex@devdefined.com
+author_url: http://blog.bittercoder.com/
+wordpress_id: 83489706
+wordpress_url: http://blog.bittercoder.com/?p=83489706
+date: '2007-06-13 22:32:16 +0000'
+date_gmt: '2007-06-13 22:32:16 +0000'
+categories:
+- ".Net"
+tags: []
+comments:
+- id: 101
+  author: Alex Henderson
+  author_email: bittercoder@gmail.com
+  author_url: http://blog.bittercoder.com/
+  date: '2007-06-14 01:52:02 +0000'
+  date_gmt: '2007-06-14 01:52:02 +0000'
+  content: I will do, just going to tidy it up a bit first.
+---
+<p>
+  So I've been mulling some ideas over after the whole abusing<br />
+  lambdas for Hash table construction (<a href="http:&#47;&#47;blog.bittercoder.com&#47;PermaLink,guid,d1831805-dbf7-4b74-a6fd-2e9ed437c3d9.aspx">here<&#47;a><br />
+  and <a href="http:&#47;&#47;blog.bittercoder.com&#47;PermaLink,guid,206e64d1-29ae-4362-874b-83f5b103727f.aspx">here<&#47;a>) ... and after reading a post on <a href="http:&#47;&#47;evain.net&#47;blog&#47;articles&#47;2007&#47;06&#47;12&#47;annotating-objects">Jb<br />
+  Evain's blog<&#47;a> I decided to create a little bit of code for<br />
+  doing annotations... so given a class say:<br />
+<&#47;p></p>
+<p>
+  public class ClassA<br &#47;><br />
+  {<br &#47;><br />
+  &nbsp;&nbsp;&nbsp; public int Id { get; set; }<br &#47;><br />
+  &nbsp;&nbsp;&nbsp; public string Name { get; set; }<br &#47;><br />
+  }<br />
+<&#47;p></p>
+<p>
+  You can then do this kind of thing (assuming you've added the<br />
+  apropriate namespace where&nbsp;the Annotations static class<br />
+  resides in)<br />
+<&#47;p></p>
+<p>
+  [Test]<br &#47;><br />
+  public void AnnotateClass()<br &#47;><br />
+  {<br &#47;><br />
+  &nbsp;&nbsp;&nbsp; ClassA classA = new ClassA();<br &#47;><br />
+  &nbsp;&nbsp;&nbsp; classA.Annotate(IsValid => false);<br &#47;><br />
+  &nbsp;&nbsp;&nbsp; classA.Annotate(MapsToTable => "TblClassA",<br />
+  Key => "Id");<br &#47;><br />
+  &nbsp;&nbsp;&nbsp; classA.Annotate(Roles => new []<br />
+  {"Administrator", "User"});<br />
+<&#47;p></p>
+<p>
+  &nbsp;&nbsp;&nbsp;<br />
+  Assert.IsFalse(classA.Annotation<bool>("IsValid"));<br &#47;><br />
+  &nbsp;&nbsp;&nbsp; Assert.AreEqual("TblClassA",<br />
+  classA.Annotation<string>("MapsToTable"));<br &#47;><br />
+  &nbsp;&nbsp;&nbsp; Assert.AreEqual("Id",<br />
+  classA.Annotation<string>("Key"));<br &#47;><br />
+  }<br />
+<&#47;p></p>
+<p>
+  Or, perhaps&nbsp;you want to attach some&nbsp;annotations to a<br />
+  specific property... no problem!<br />
+<&#47;p></p>
+<p>
+  [Test]<br &#47;><br />
+  public void AnnotateProperty()<br &#47;><br />
+  {<br &#47;><br />
+  &nbsp;&nbsp;&nbsp; ClassA classA = new ClassA();<br &#47;><br />
+  &nbsp;&nbsp;&nbsp; classA.Annotate(() => classA.Name,<br />
+  CanBeNull => true);<br &#47;><br />
+  &nbsp;&nbsp;&nbsp; bool canBeNull =<br />
+  classA.Annotation<bool>(() => classA.Name,<br />
+  "CanBeNull");<br &#47;><br />
+  &nbsp;&nbsp;&nbsp; Assert.AreEqual(true, canBeNull);<br &#47;><br />
+  }<br />
+<&#47;p></p>
+<p>
+  Under the hood the values are stored against a dictionary where<br />
+  the keys (in this case the instance of classA)&nbsp;are weak<br />
+  referenced... so once classA is garbage collected the entries in<br />
+  the dictionary will also dissapear in time (next time any method<br />
+  touches the dictionary).<br />
+<&#47;p></p>
+<p>
+  The nice thing is obviously you can directly interogate the<br />
+  Annotations static class itself with a query expression to say<br />
+  find all objects with a certain annotation.<br &#47;><br />
+<&#47;p></p>

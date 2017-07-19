@@ -1,0 +1,154 @@
+---
+layout: post
+status: publish
+published: true
+title: source code => "Lambda based DSL"
+author:
+  display_name: bittercoder
+  login: admin
+  email: alex@devdefined.com
+  url: http://blog.bittercoder.com/
+author_login: admin
+author_email: alex@devdefined.com
+author_url: http://blog.bittercoder.com/
+wordpress_id: 83489715
+wordpress_url: http://blog.bittercoder.com/?p=83489715
+date: '2007-07-03 11:01:26 +0000'
+date_gmt: '2007-07-03 11:01:26 +0000'
+categories:
+- ".Net"
+tags: []
+comments:
+- id: 103
+  author: Alex Henderson
+  author_email: bittercoder@gmail.com
+  author_url: http://blog.bittercoder.com/
+  date: '2007-07-04 20:16:30 +0000'
+  date_gmt: '2007-07-04 20:16:30 +0000'
+  content: |-
+    Hi Peter,
+
+    Try doing a checkout for this url:
+
+    http:&#47;&#47;svn.devdefined.com&#47;public&#47;svn&#47;tools.devdefined.com&#47;trunk&#47;Orcas&#47;src&#47;
+
+    If you still have trouble grabbing the source code using TortoiseSVN, then let me know what error it's returning - ie. PROPFIND failure etc.  - the SVN repository is proxied from inside my network, and I'm still tweaking a few things to get it working right.
+---
+<p>
+  So I've tidied up the source for the DSL from my <a href="http:&#47;&#47;blog.bittercoder.com&#47;PermaLink,guid,f962b2b9-38ba-4dec-8305-50501e0e21f0.aspx">last post<&#47;a> a little... though my "test" was to represent a DSL<br />
+  similar to the one <a href="http:&#47;&#47;ayende.com&#47;Blog&#47;Default.aspx">Ayende<&#47;a> displayed in<br />
+  <a href="http:&#47;&#47;ayende.com&#47;Blog&#47;archive&#47;2007&#47;06&#47;30&#47;Brail-DSL-Support-Information.aspx">Brail<&#47;a> - I haven't implemented any monorail view engine<br />
+  integration, there's little point I feel, I was more interested<br />
+  in being able to display a nested DSL-like syntax, and parse the<br />
+  necessary information out of it as required.&nbsp;<br &#47;><br />
+  <br &#47;><br />
+  You can grab it from&nbsp;SVN repository <a href="http:&#47;&#47;svn.devdefined.com&#47;public&#47;svn&#47;tools.devdefined.com&#47;trunk&#47;Orcas&#47;src&#47;"<br />
+  target="_blank">here<&#47;a> (edit: I've now fix the PROPFIND proxy<br />
+  issue, so the link should work)<br &#47;><br />
+  <br &#47;><br />
+  At any rate, probably the most interesting example is the one<br />
+  that takes <a href="http:&#47;&#47;svn.devdefined.com&#47;public&#47;svn&#47;tools.devdefined.com&#47;trunk&#47;Orcas&#47;src&#47;DevDefined.Common.Tests&#47;Dsl&#47;ComponentDslTests.cs">this code<&#47;a>:<br &#47;><br />
+<&#47;p></p>
+<pre>
+var people = new List<Person>()<br />
+{<br />
+    new Person() { FirstName = "Alex", LastName = "Henderson"},<br />
+    new Person() { FirstName = "Joe", LastName = "Bloggs"}<br />
+};</p>
+<p>var compDsl = new ComponentDsl();</p>
+<p>compDsl.Add<br />
+(<br />
+    GridComponent => compDsl.Component<br />
+    (<br />
+        compDsl.Parameters<br />
+        (<br />
+            source => people<br />
+        ),<br />
+        header => compDsl.Section<br />
+        (<br />
+            tr => compDsl.As<br />
+            (<br />
+                th => compDsl.As<br />
+                (<br />
+                    compDsl.Text("Names")<br />
+                )<br />
+            )<br />
+        ),<br />
+        item => compDsl.Section<br />
+        (<br />
+            tr => compDsl.As<br />
+            (<br />
+                td => compDsl.As<br />
+                (<br />
+                    compDsl.Item<Person>(p => p.FirstName + " " + p.LastName)<br />
+                )<br />
+            )<br />
+        )<br />
+    )<br />
+);</p>
+<p>var dsl = new StandardDsl();</p>
+<p>dsl.Add<br />
+(<br />
+    html => dsl.As<br />
+    (<br />
+        body => compDsl<br />
+    )<br />
+);<br />
+<&#47;pre></p>
+<p>
+  And converts it to this xhtml...<br &#47;><br />
+<&#47;p></p>
+<pre>
+<html><br />
+  <body></p>
+<table>
+<tr>
+<th>Names<&#47;th><br />
+      <&#47;tr></p>
+<tr>
+<td>Alex Henderson<&#47;td><br />
+      <&#47;tr></p>
+<tr>
+<td>Joe Bloggs<&#47;td><br />
+      <&#47;tr><br />
+    <&#47;table><br />
+  <&#47;body><br />
+<&#47;html><br />
+<&#47;pre></p>
+<p>
+  You can pretty quickly figure out what's going on by placing a<br />
+  breakpoint on the Execute() method of the <a href="http:&#47;&#47;svn.devdefined.com&#47;public&#47;svn&#47;tools.devdefined.com&#47;trunk&#47;Orcas&#47;src&#47;DevDefined.Common&#47;Dsl&#47;StandardDsl.cs">StandardDsl class<&#47;a> and tracing through all the calls - in<br />
+  essence all the nodes are emitted by calling the top-level Batch<br />
+  delegate which causes a recursive call down the "tree", with the<br />
+  information being emitted as a side-effect to an evaluation<br />
+  scope.<br &#47;><br />
+  <br &#47;><br />
+  Though I used nodes - effectively creating a structure that's<br />
+  easier to parse, there's no reason why you couldn't make<br />
+  immediate calls to some kind of object, avoiding the need for a<br />
+  second round of parsing - the only trick is that you'd still need<br />
+  to use some kind of scoped stack to push&#47;pop the names of the<br />
+  components because in a statement like this:<br &#47;><br />
+<&#47;p></p>
+<pre>
+dsl.As<br />
+(<br />
+    GridComponent => dsl.Component<br />
+    (<br />
+      &#47;&#47; etc. etc.<br />
+    )<br />
+)<br />
+<&#47;pre></p>
+<p>
+  <br &#47;><br />
+  the call to <em>dsl.Component<&#47;em> needs some way to inspect the<br />
+  stack of names and pull <em>"GridComponent<&#47;em>" off the<br />
+  top.<br &#47;><br />
+  <br &#47;><br />
+  I'd love to hear from anyone who could see a use for this kind of<br />
+  thing... it'd be nice to get a more realistic example... I'm<br />
+  struggling to think of anything practical myself.<br />
+<&#47;p><i>[Edit: I Noticed the code formatting was pretty awful, so<br />
+I've tidied it up a little... anyone got a good solution for<br />
+copy&#47;pasting code out of orcas (CopyAsHtml2005 doesn't appear to<br />
+install under Orcas)]<&#47;i><br &#47;></p>

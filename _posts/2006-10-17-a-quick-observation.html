@@ -1,0 +1,205 @@
+---
+layout: post
+status: publish
+published: true
+title: A quick observation...
+author:
+  display_name: bittercoder
+  login: admin
+  email: alex@devdefined.com
+  url: http://blog.bittercoder.com/
+author_login: admin
+author_email: alex@devdefined.com
+author_url: http://blog.bittercoder.com/
+wordpress_id: 83488783
+wordpress_url: http://blog.bittercoder.com/?p=83488783
+date: '2006-10-17 00:28:44 +0000'
+date_gmt: '2006-10-17 00:28:44 +0000'
+categories:
+- ".Net"
+tags:
+- base4
+- castle
+comments:
+- id: 22
+  author: Ivan Porto Carrero
+  author_email: ivan@flanders.co.nz
+  author_url: http://www.flanders.co.nz/blog
+  date: '2006-10-25 20:23:56 +0000'
+  date_gmt: '2006-10-25 20:23:56 +0000'
+  content: |-
+    Hi Alex,
+
+    Could you please email me :)
+    I can't seem to find where to email you.
+
+    Good stuff :D
+---
+<h1>Startable facility and hosting base4<&#47;h1><a href="http:&#47;&#47;www.flanders.co.nz&#47;Blog&#47;">Ivan's<&#47;a> pretty keen :) last week he demonstrated hosting the <a href="http:&#47;&#47;www.flanders.co.nz&#47;Blog&#47;2006&#47;10&#47;12&#47;HostingBase4InsideYourWebApplication.aspx"> base4 service in ASP.Net<&#47;a> ... cool stuff.<br &#47;><br />
+<br &#47;><br />
+Now here he has placed the implementation in the <b>HttpApplication<&#47;b> class, and as a quick observation this would be a good candidate for moving into it's own component... and as luck would have it, Castle has just the thing, via the <a href="http:&#47;&#47;www.castleproject.org&#47;index.php&#47;Facility:Startable">Startable facility<&#47;a>.<br &#47;></p>
+<h2>  Startable... (and the implied, stoppable ;o)<&#47;h2></p>
+<p>Now the startable facility is a very simple beast, basically... you create a class, that implements this interface:<br &#47;><br />
+<br &#47;></p>
+<pre>
+&#47;&#47;&#47;<br />
+<summary>
+&#47;&#47;&#47; Interface for components that wish to be started by the container<br />
+&#47;&#47;&#47; <&#47;summary><br />
+public interface IStartable<br />
+{<br />
+    void Start();<br />
+    void Stop();<br />
+}<br />
+<&#47;pre><br &#47;><br />
+Which lives in the <b>Castle.Core<&#47;b> assembly... though the facility itself lives in the <b>Castle.MicroKernel<&#47;b> assembly... you should already have references to both, otherwise I doubt your container is working at all :P<br &#47;><br />
+<br &#47;><br />
+And you then register the startable facility in the container:<br &#47;><br />
+<br &#47;></p>
+<pre>
+<facility id="startable.facility"<br />
+    type="Castle.Facilities.Startable.StartableFacility, Castle.MicroKernel" &#47;><br />
+<&#47;pre><br &#47;><br />
+And thats it... now whenever you register a component in the container, the startable facility will check it, and if it's found to implement <b>IStartable<&#47;b> it will add it to a list of components "awaiting startup"... once any of these awaiting components has had all it's dependencies satisfied it will be started (so it may be started as soon as the component is registered, if it doesn't have any dependencies - this will be the case for our component)...<br &#47;><br />
+<br &#47;><br />
+Disposing of the container will cause the components to be stopped in turn... perfect for hosting our base4 server...<br &#47;></p>
+<h2>
+  Reworking the hosting code to be a startable component...<br />
+<&#47;h2>...so taking what Ivan's done, we could rework it a little... and be able to host base4 in web apps, as well as say your business logic's test harness... here's my quick 'n dirty reworked implementation as a component that I did this afternoon... my final version probably won't have any dependencies on the <b>HttpContext<&#47;b> as I'll just rely on explicit declaration of all the settings as parameters in the container configuration... I tend to like keeping all the config in the container, one place to look 'n all that.<br &#47;><br />
+<br &#47;></p>
+<pre>
+public class Base4Host : IStartable<br />
+{<br />
+    private const string _machineName = "localhost";<br />
+    private const string _provider = "SQL2005";<br />
+    private string _appName;<br />
+    private int _port;<br />
+    private string _root;<br />
+    private ServerConfiguration _configuration;<br />
+    private IServerProxy _proxy;</p>
+<p>    public ServerConfiguration Configuration<br />
+    {<br />
+        get { return _configuration; }<br />
+    }</p>
+<p>    public IServerProxy ServerProxy<br />
+    {<br />
+        get { return _proxy; }<br />
+    }</p>
+<p>    public Base4Host(string appName, int port)<br />
+    {<br />
+        if (string.IsNullOrEmpty(appName)) throw new ArgumentNullException("appName");<br />
+        if (port <= 1024) throw new ArgumentOutOfRangeException("port", "port should be greater then 1024");<br />
+        _appName = appName;<br />
+        _port = port;<br />
+    }</p>
+<p>    public Base4Host(string appName, int port, string root)<br />
+        : this(appName, port)<br />
+    {<br />
+        if (string.IsNullOrEmpty(root)) throw new ArgumentNullException("root");<br />
+        _root = root;<br />
+    }</p>
+<p>    #region IStartable Members</p>
+<p>    public void Start()<br />
+    {<br />
+        _configuration = CreateConfiguration();<br />
+        _proxy = ServerFactory.StartServer(_configuration, false);<br />
+        string base4Context = string.Format("tcp:&#47;&#47;Server:@localhost:{0}&#47;{1}", _port, _appName);<br />
+        StorageContext.SetDefault(base4Context);<br />
+    }</p>
+<p>    public void Stop()<br />
+    {<br />
+        _proxy.Stop();<br />
+        _proxy = null;<br />
+        _configuration = null;<br />
+    }</p>
+<p>    #endregion</p>
+<p>    #region Support methods</p>
+<p>    private ServerConfiguration CreateConfiguration()<br />
+    {<br />
+        ServerConfiguration configuration = new ServerConfiguration();</p>
+<p>        DiscoverApplicationName();<br />
+        InsertApplicationRoot(configuration);<br />
+        InsertConnectionStrings(configuration);<br />
+        InsertConnectivityInformation(configuration);</p>
+<p>        if (!Directory.Exists(configuration.Store.Root))<br />
+        {<br />
+            Directory.CreateDirectory(configuration.Store.Root);<br />
+        }</p>
+<p>        return configuration;<br />
+    }</p>
+<p>    private void InsertConnectivityInformation(ServerConfiguration configuration)<br />
+    {<br />
+        configuration.Store.Name = _appName;<br />
+        configuration.Store.Provider = _provider;<br />
+        configuration.Store.Port = _port;<br />
+        configuration.Store.MachineName = _machineName;<br />
+    }</p>
+<p>    private void DiscoverApplicationName()<br />
+    {<br />
+        if (string.IsNullOrEmpty(_appName))<br />
+        {<br />
+            if (HttpContext.Current.Application["AppName"] == null)<br />
+            {<br />
+                Assembly assembly = Assembly.GetCallingAssembly();<br />
+                HttpContext.Current.Application["AppName"] = (AssemblyTitleAttribute.GetCustomAttribute(assembly, typeof(AssemblyTitleAttribute)) as AssemblyTitleAttribute).Title;<br />
+            }</p>
+<p>            _appName = HttpContext.Current.Application["AppName"].ToString();<br />
+        }<br />
+    }</p>
+<p>    private void InsertApplicationRoot(ServerConfiguration configuration)<br />
+    {<br />
+        string root = string.IsNullOrEmpty(_root) ? HttpContext.Current.Server.MapPath("~&#47;") : _root;<br />
+        configuration.Store.Root = root.EndsWith("") ? root + "App_DataBase4" : root + "App_DataBase4";<br />
+    }</p>
+<p>    private void InsertConnectionStrings(ServerConfiguration configuration)<br />
+    {<br />
+        string connectionStringName = ConfigurationManager.AppSettings["DefaultConnection"];</p>
+<p>        if (string.IsNullOrEmpty(connectionStringName) &amp;&amp; ConfigurationManager.ConnectionStrings != null<br />
+            &amp;&amp; ConfigurationManager.ConnectionStrings.Count > 0)<br />
+        {<br />
+            connectionStringName = ConfigurationManager.ConnectionStrings[0].Name;<br />
+        }</p>
+<p>        configuration.Store.ConnectionString = string.IsNullOrEmpty(connectionStringName) ? ConfigurationManager.AppSettings["Store.ConnectionString"] :<br />
+            ConfigurationManager.ConnectionStrings[connectionStringName].ConnectionString;</p>
+<p>        SqlConnectionStringBuilder connStrBuilder = new SqlConnectionStringBuilder(configuration.Store.ConnectionString);</p>
+<p>        connStrBuilder.InitialCatalog = "master";<br />
+        configuration.MasterConnectionString = connStrBuilder.ToString();<br />
+    }</p>
+<p>    #endregion<br />
+}<br />
+<&#47;pre><br &#47;><br />
+Notice we don't expose a default constructor... how can the container create it?<br &#47;><br />
+<br &#47;><br />
+Well, it can't unless we supply the parameters it requires... which is just what we'll do:<br &#47;><br />
+<br &#47;></p>
+<pre>
+<component<br />
+    id="base4host.default"<br />
+    type="MyProject.Base4Host, MyProject"></p>
+<parameters>
+        <appName>GoatsAndBoats<&#47;appName></p>
+<port>11888<&#47;port><br />
+    <&#47;parameters><br />
+<&#47;component><br />
+<&#47;pre><br &#47;><br />
+Simple... a couple of useful extensions to our existing base4 facility may well be to:<br &#47;></p>
+<ul>
+<li>Ensure the startable facility is installed... so we can fail-early and with a meaningful error during application<br />
+  startup.<br />
+  <&#47;li></p>
+<li>Add some additional "optional" parameters for configuring the facility, so that it can take care of registering the Base4Host for us.<br />
+  <&#47;li><br />
+<&#47;ul></p>
+<p>
+  For the optional parameters, I'm thinking of doing something like this:<br />
+<&#47;p></p>
+<pre>
+<facility id="base4.storageFacility"<br />
+    type="SomeProject.Core.Base4StorageFacility, SomeProject.Core"<br />
+    host="true"<br />
+    appName="GoatsAndBoats"<br />
+    port="11888"<br />
+    connectionString="local"<br />
+    &#47;><br />
+<&#47;pre><br &#47;><br />
+At which point it's trivial to shift between accessing base4.net as a remote service vs. hosting it in your own app... unlike the remote setup you can skip providing the base4 url (context string) as it'll be implied from the app name and port.</p>
