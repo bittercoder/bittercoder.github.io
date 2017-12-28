@@ -143,7 +143,7 @@ By preempting that decision I can see a lot of benefits:
 * It means you can begin (if you are not already) recording and tracking suitable metrics for monitoring planned vs. unplanned down time on a weekly/monthly basis prior to the change in process, this gives the engineering team a way to communicate what has changed as a result.
 * The process of moving ahead of the business or in tandem with the expectations of the business (and attaching a very real costs+benefits to the shift) pitches this as a "feature" or "capability" the business is gaining, rather then letting assumptions fill that void that it was something the engineering team should have been doing all along, but was not.
 
-I have skirted around some nuances of this discussion (some SaaS platforms lend themselves to more graceful degradation then others in their design, even as a monolith) but even there is likely always some part of the platform which the business is unwilling to tolerate planned downtime for such as identity/authorization.
+I have skirted around some nuances of this discussion (some SaaS platforms lend themselves to more graceful degradation then others in their design, even as a monolith) but even then there is likely always some part of the platform which the business is unwilling to tolerate planned downtime for such as identity/authorization.
 
 There are also some arguments to be made for making the move to no planned downtime before getting your house in order or your engineers on board with the shift.
 
