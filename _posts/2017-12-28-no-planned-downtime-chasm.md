@@ -7,7 +7,7 @@ Often the business knows before engineers do that the organization has passed th
 
 It's not an event in a SaaS companies lifetime that's marked with a lot of fanfare - but as an engineer it's incredibly significant - you know when you've moved past it because suddenly things become a lot more complicated.   Things are HARD.  Lots of your skills to date are not transferable to this new world.
 
-It's often not until you experience severe unexpected down time that the tolerance of the business for such down time is established/tested, often the last time you had significant down-time is the per-cursor to the business making the decision (often at the board level) to no longer tolerate planned down time - even though planned and unplanned are not the same thing, to the business (and it's customers) the impact is much the same.
+It's often not until you experience severe unexpected down time that the tolerance of the business for such down time is established/tested, often the last time you had significant unplanned down-time is the pre-cursor to the business making the decision (often at the board level) to no longer tolerate planned down time - even though planned and unplanned are not the same thing, to the business (and it's customers) the impact is much the same.
 
 Lets look at some real-world examples of how decisions change once planned down time is not an option.
 
