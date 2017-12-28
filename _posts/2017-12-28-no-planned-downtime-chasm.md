@@ -37,7 +37,7 @@ But - once you move to no longer tolerating planned downtime - you are faced wit
 * Removing the job and all it's associated code once the backfill has been completed in production.
 * Dealing with common problems like "thundering herd" issues when the process running the jobs is restarted, perhaps by randomizing the start time of jobs.
 
-Contrasting that process to the relatively simple task of writing a one-off script... you can be looking at a task which might be measured in hours, to something which is measured in days or a couple of weeks depending on infrastructure.
+Contrasting that process to the relatively simple task of writing a one-off script... you can be looking at a task which would have originally taken a few hours but is now something which is measured in days or a couple of weeks depending on infrastructure.
 
 Harder data migrations
 ----------------------------------
@@ -48,7 +48,7 @@ Some migrations however are much more costly - for instance re-creating the clus
 
 This can often happen when starting with a simple design and then not evolving or scaling it soon enough prior to crossing the no-downtime chasm - say for example using a shared 32bit integer key table across an entire database, rather then a 64 bit value, or not clustering a table frequently queried by customer on the composite of a customer key and unique ID.
 
-When you are able to sustain a small amount of downtime this is normally OK, by migrating batches of tables to 64bit primary keys, then finally upgrading the keytable itself.  
+When you are able to sustain a small amount of downtime this is normally OK, by migrating batches of tables to 64bit primary keys, then finally upgrading the keytable itself. 
 
 Depending on the nature of data access strategy/ORM you may be able to do this with only small amounts of down time or degraded performance for the largest tables.
 
