@@ -6,6 +6,8 @@ permalink: /about/
 
 Hi!
 
+My name is Alex Henderson, and I live in Auckland New Zealand.
+
 I'm a software engineer with 18+ years of working experience in the industry.
 
 I provide development services to companies in New Zealand and around the world, generally through long-term consulting engagements with my boutique software consultancy DevDefined Limited.
@@ -14,7 +16,7 @@ I have been consulting with Pushpay limited for over 4 years where I provide my 
 
 ### More Information
 
-I have a love of back end services and distributed systems as well as coaching and growing developers - I always prefer brown-fields to green-fields.
+I have a love of back end services, APIs and distributed systems as well as coaching and growing developers.
 
 My current interests in software engineering are broad and include:
 
@@ -32,12 +34,10 @@ My current interests in software engineering are broad and include:
 
 I enjoy being wrong and having my opinions being challenged because it reminds me of why I love software engineering!
 
+I always prefer brown-fields to green-fields.
+
 I hate meetings without agendas, and weak opinions that are held strongly.
 
 Oh and I'm just a little bitter now and again... but I only use that trait for good.
 
-**This is my personal professional blog, and all opinions held here are my own and do not represent the opinions of the companies I consult with.**
-
-### Contact me
-
-[bittercoder@gmail.com](mailto:bittercoder@gmail.com)
+*This is my professional blog, and all opinions held here are my own and do not represent the opinions of the companies I work with.*
