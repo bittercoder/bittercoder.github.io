@@ -7,6 +7,8 @@ Often the business knows before engineers do that the organization has passed th
 
 In this series of small posts I look at different things that get a lot harder to do when no amount of significant downtime is acceptable to the business.
 
+[Part 1](http://blog.bittercoder.com/no-planned-downtime-chasm-part1/) [Part 2](http://blog.bittercoder.com/no-planned-downtime-chasm-part2/) [Part 3](http://blog.bittercoder.com/no-planned-downtime-chasm-part3/)
+
 Migrating access tokens for 3rd party API's from individual accounts to shared operations accounts
 ------------------------------------------------------------------------------------------------------------------------------------------------
 
