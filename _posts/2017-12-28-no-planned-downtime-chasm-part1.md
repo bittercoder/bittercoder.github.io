@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Crossing the no-downtime chasm
+title: Crossing the no-downtime chasm - part 1 - Migrations
 ---
 
 Often the business knows before engineers do that the organization has passed the point of there being no acceptable amount of planned down time.
@@ -61,6 +61,8 @@ Depending on your domain when faced with these challenges you may even begin con
 Something that might take a couple of days of planning and execution is now a weeks or month long project.
 
 You can easily loose person-weeks of time just discussing the problem in meetings and devising a strategy before you have even begun to execute on it.
+
+
 
 Moving data centers, or migrating to the cloud
 --------------------------------------------------------------------
