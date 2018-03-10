@@ -1,14 +1,17 @@
 ---
 layout: post
 title: Upgrading .net core 1.1 to 2.0 for docker users
+excerpt_separator: <!--more-->
 ---
 
-For my latest project we have been working on a microservice running across 4 docker containers.
+For my latest feature we have been working on a microservice running across 4 docker containers.
 
 All the containers are running on a runtime base image we build for .net core 1.1 - which has 
 been working really well.
 
-We are now starting the process of upgrading to .net core 2.0 (2.0.3)
+We are now starting the process of upgrading to .net core 2.0 (2.0.3)...
+
+<!--more-->
 
 Our current runtime image Dockerfile is using this mechanism for installing the .net core 1.1 runtime:
 

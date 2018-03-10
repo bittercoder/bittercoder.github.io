@@ -1,12 +1,15 @@
 ---
 layout: post
 title: The story so far
+excerpt_separator: <!--more-->
 ---
 Hi!
 
 My Name is Alex Henderson and as I write this I’m a 38 year old software developer, who has been working professionally since 1999. As I begin blogging again I thought this was a good opportunity to report on my personal story as a engineer so far.
 
 So here it is!
+
+<!--more-->
 
 ## Early days
 
