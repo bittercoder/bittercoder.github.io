@@ -10,7 +10,7 @@ In this series of small posts I look at different things that get a lot harder t
 [Part 1](http://blog.bittercoder.com/no-planned-downtime-chasm-part1/) [Part 2](http://blog.bittercoder.com/no-planned-downtime-chasm-part2/) [Part 3](http://blog.bittercoder.com/no-planned-downtime-chasm-part3/)
 
 Migrating access tokens for 3rd party API's from individual accounts to shared operations accounts
-------------------------------------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------
 
 Every other example I've listed so far in part 1 & 2 has been complex - but this is rather simple.
 
@@ -23,7 +23,7 @@ But once you have crossed the no-downtime chasm this becomes intolerable as inev
 There is little opportunity cost associated with fixing these kinds of issues before or after the shift to no down-time, so it's normally a no-brainer to do it before to eliminate risk.
 
 Final thoughts
----------------------
+--------------
 
 *Why did I write this series of posts?*
 
