@@ -3,12 +3,14 @@ layout: post
 title: Engineering "game"
 ---
 
-As an individual contributor have you ever had the feeling that you are living in a feature mill, where you have no time to work on anything else but delivering a constant stream of features one immediately after the other?  Perhaps you raise concerns about it at times with your leaders, but you find their suggestions (if they have any) as ultimately unworkable, or just seem frustrated with you in response, as if it’s something you should address. In this post I look to explore one way to approach this.
+As an individual contributor have you ever had the feeling that you are living in a feature mill, where you have no time to work on anything else but delivering a constant stream of features one immediately after the other?  Perhaps you raise concerns about it at times with your leaders, but you find their suggestions (if they have any) as ultimately unworkable, or just seem frustrated with you in response, as if it’s something you should address. Maybe they even institute a practice like “10% innovation time” but in practice you don’t get any time to leverage that innovation time, because, you know, those features won’t build themselves.
 
-Maybe they even institute a practice like “10% innovation time” but in practice you don’t get any time to leverage that innovation time, because, you know, those features won’t build themselves.
+In this post I look to explore one way to approach this.
 
 What you need is to get some engineering game!
-Estimation
+
+## Estimation
+
 First off you need to get some “game” you need to address your appetite problem.  You have a great plan, at the start of the week you commit to pull a couple of tasks off the backlog.  You estimate that each of those will be done in 2 days, and you smile because you have a whole day left at the end of the week to tackle something other than feature work, maybe it’s guild work, maybe it’s researching something new, perhaps it’s even taking advantage of your training budget.  The world is your oyster.
 
 ![First week before allocations](../images/week_no_allocations.png)
@@ -56,7 +58,7 @@ Consider your answers to the two questions of “who would advocate for this bei
 
 ## Start small
 
-You need to build credibility by regularly achieving outcomes favourable to the business.  Ideally start small and solve unglamorous but valuable problems outside feature work, then tackle more open-ended and challenging problems over time.  In doing so you can move to being more transparent about how you are allocating time in your week, cementing it as part of the work you do each week beyond features.  Being able to work entirely the open is always easier in due course, and allows you to be an agent of change for other engineers who may look up to you within the organisation.
+You need to build credibility by regularly achieving outcomes favourable to the business.  Ideally start small and solve unglamorous but valuable problems outside feature work, then tackle more open-ended and challenging problems over time.  In doing so you can move to being more transparent about how you are allocating time in your week, cementing it as part of the work you do each week beyond features.  Being able to work entirely in the open is always easier in due course, and allows you to be an agent of change for other engineers who may look up to you within the organisation.
 
 ## Some words of warning
 
