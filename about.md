@@ -8,7 +8,7 @@ Hi!
 
 I'm Alex Henderson, and I live in Titirangi, Auckland with my wife Renee and our daughter Ivy.
 
-I've been writing software professionally since I was 17, which means almost 30 years of shipping things, breaking things, and (mostly) learning from the latter. I'm currently a Distinguished Engineer at [Auror](https://www.auror.co/), where I help shape engineering strategy as we keep scaling.
+I've been writing software professionally since I was a teenager, which means almost 30 years of shipping things, breaking things, and (mostly) learning from the latter. I'm currently a Distinguished Engineer at [Auror](https://www.auror.co/), where I help shape engineering strategy as we keep scaling.
 
 Alongside Auror I'm CTO and co-founder of [Worklibrary](https://worklibrary.ai/) (formerly Zoolibrary), and a fractional CTO at [Birdeey](https://birdeey.com/) — both companies I'm genuinely excited about.
 
