@@ -12,7 +12,7 @@ I've been writing software professionally since I was a teenager, which means al
 
 Alongside Auror I'm CTO and co-founder of [Worklibrary](https://worklibrary.ai/) (formerly Zoolibrary), and a fractional CTO at [Birdeey](https://birdeey.com/) — both companies I'm genuinely excited about.
 
-Previously I was VP of Engineering at Pushpay (joining as engineer #5 and helping grow the team ~10x through hyper-growth), CTO at First AML, and have run my boutique consultancy DevDefined Limited along the way.
+Previously I was VP of Engineering at Pushpay (joining as engineer #5 and helping grow the team ~10x through hyper-growth) and CTO at First AML.
 
 ### More information
 
