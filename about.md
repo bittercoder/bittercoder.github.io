@@ -6,7 +6,7 @@ permalink: /about/
 
 Hi!
 
-I'm Alex Henderson, and I live in Titirangi, Auckland with my wife Renee and our 12-year-old daughter Ivy.
+I'm Alex Henderson, and I live in Titirangi, Auckland with my wife Renee and our daughter Ivy.
 
 I've been writing software professionally since I was 17, which means almost 30 years of shipping things, breaking things, and (mostly) learning from the latter. I'm currently a Distinguished Engineer at [Auror](https://www.auror.co/), where I help shape engineering strategy as we keep scaling.
 
